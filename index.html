@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101114">
+  <meta name="description" content="EduTube Ethiopia — learning resources for Grades 9–12.">
+  <title>EduTube Ethiopia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="player-pro.css">
+  <link rel="stylesheet" href="super-controller.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://www.youtube.com">
+  <script src="https://www.youtube.com/iframe_api" async></script>
+  <script src="script.js" defer></script>
+  <script src="admin-advanced.js" defer></script>
+  <script src="upgrade.js" defer></script>
+  <script src="player-pro.js" defer></script>
+  <script src="super-controller.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <button class="brand" data-page="home" aria-label="EduTube home"><span class="brand-mark" aria-hidden="true">E</span><span>EduTube <b>Ethiopia</b></span></button>
+    <nav class="top-links" aria-label="Main navigation">
+      <button data-page="home" data-i18n="navHome">Home</button>
+      <button data-page="library" data-i18n="navLibrary">Video Library</button>
+      <button data-page="exams" data-i18n="navExams">Exam Center</button>
+      <button data-page="notes" data-i18n="navNotes">Notes</button>
+    </nav>
+    <div class="top-actions">
+      <button id="themeButton" class="icon-button text-control" aria-label="Toggle theme" title="Toggle theme" type="button">Theme</button>
+      <button id="languageButton" class="language-button" type="button">አማ</button>
+      <button class="small-button account-shortcut" id="accountShortcut" type="button" data-page="accounts"><span id="accountLabel">Sign in</span></button><button class="icon-button text-control" id="notificationShortcut" type="button" data-page="notifications" aria-label="Notifications">Alerts<span class="notification-dot hidden" id="notificationDot"></span></button>
+      <button id="menuButton" class="icon-button menu-button text-control" aria-label="Open menu" type="button">Menu</button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <p class="side-label" data-i18n="workspace">WORKSPACE</p>
+      <button class="side-link active" data-page="home"><span data-i18n="navHome">Home</span></button>
+      <button class="side-link" data-page="library"><span data-i18n="navLibrary">Video Library</span></button>
+      <button class="side-link" data-page="exams"><span data-i18n="navExams">Exam Center</span></button>
+      <button class="side-link" data-page="notes"><span data-i18n="navNotes">Notes</span></button>
+      <button class="side-link" data-page="favorites"><span data-i18n="navFavorites">Favorites</span></button>
+      <p class="side-label second-label" data-i18n="yourSpace">YOUR SPACE</p>
+      <button class="side-link" data-page="dashboard"><span data-i18n="navDashboard">Dashboard</span></button>
+      <button class="side-link" data-page="studio"><span>🚀</span><span>Study Studio</span></button>
+      <button class="side-link" data-page="accounts"><span>Student account</span></button>
+      <button class="side-link" data-page="notifications"><span>Notifications</span></button>
+      <button class="side-link" data-page="leaderboard"><span>Leaderboard</span></button>
+      <button class="side-link" data-page="certificates"><span>Certificates</span></button>
+      <button class="side-link" data-page="ai"><span>AI study helper</span></button>
+      <button class="side-link" data-page="admin"><span data-i18n="navAdmin">Content Manager</span></button>
+      <div class="sidebar-note"><b data-i18n="keepLearning">Keep learning!</b><p data-i18n="sidebarNote">Small steps every day lead to big results.</p></div>
+    </aside>
+
+    <main class="main-content">
+      <section class="page active" id="page-home">
+        <div class="hero">
+          <div class="hero-copy"><span class="eyebrow" data-i18n="heroEyebrow">YOUR LEARNING SPACE</span>
+            <h1 data-i18n="heroTitle">Learn today.<br><em>Lead tomorrow.</em></h1>
+            <p data-i18n="heroText">A place to learn, practice, and prepare for your next big step.</p>
+            <button class="primary-button" data-page="library"><span data-i18n="exploreLessons">Explore lessons</span></button>
+          </div>
+          </div>
+        <div class="section-heading"><div><span class="eyebrow" data-i18n="overview">OVERVIEW</span><h2 data-i18n="learningSnapshot">Your learning snapshot</h2></div></div>
+        <div class="stats-grid">
+          <article class="stat-card"><div><strong id="homeLessons">0</strong><small data-i18n="lessonsCompleted">Lessons completed</small></div></article>
+          <article class="stat-card"><div><strong id="homeQuizzes">0</strong><small data-i18n="quizzesTaken">Quizzes taken</small></div></article>
+          <article class="stat-card"><div><strong id="homeFavorites">0</strong><small data-i18n="savedLessons">Saved lessons</small></div></article>
+          <article class="stat-card"><div><strong id="homeProgress">0%</strong><small data-i18n="learningProgress">Learning progress</small></div></article>
+        </div>
+        <div class="section-heading"><div><span class="eyebrow" data-i18n="chooseGrade">CHOOSE YOUR LEVEL</span><h2 data-i18n="gradesTitle">Explore by grade</h2></div></div>
+        <div class="grade-grid">
+          <button class="grade-card" data-grade="9"><span>09</span><b data-i18n="grade">Grade</b><small data-i18n="grade9Desc">Build your foundations</small></button>
+          <button class="grade-card" data-grade="10"><span>10</span><b data-i18n="grade">Grade</b><small data-i18n="grade10Desc">Strengthen your skills</small></button>
+          <button class="grade-card" data-grade="11"><span>11</span><b data-i18n="grade">Grade</b><small data-i18n="grade11Desc">Prepare for what is next</small></button>
+          <button class="grade-card" data-grade="12"><span>12</span><b data-i18n="grade">Grade</b><small data-i18n="grade12Desc">Get ready for exams</small></button>
+        </div>
+        <div class="section-heading"><div><span class="eyebrow" data-i18n="quickAccess">QUICK ACCESS</span><h2 data-i18n="jumpBack">Pick up where you left off</h2></div></div>
+        <div class="quick-grid">
+          <button class="quick-card" data-page="library"><b data-i18n="browseVideos">Browse video lessons</b><small data-i18n="browseVideosDesc">Find a topic and start learning</small></button>
+          <button class="quick-card" data-page="exams"><b data-i18n="practiceExams">Practice exams</b><small data-i18n="practiceExamsDesc">Test what you have learned</small></button>
+          <button class="quick-card" data-page="dashboard"><b data-i18n="viewProgress">View your progress</b><small data-i18n="viewProgressDesc">See your learning activity</small></button>
+        </div>
+        <!-- EduTube premium long-scroll home additions: existing routes and features only -->
+        <section class="home-feature-section" aria-labelledby="homeFeaturesTitle">
+          <div class="home-section-intro"><span class="eyebrow" data-i18n="homeWhyEyebrow">WHY EDUTUBE</span><h2 id="homeFeaturesTitle" data-i18n="homeFeaturesTitle">Everything you need to move forward</h2><p data-i18n="homeFeaturesText">A connected learning space for lessons, practice, revision and progress.</p></div>
+          <div class="home-feature-grid">
+            <button class="home-feature-card feature-violet" data-page="library"><span class="home-feature-icon">▶</span><b data-i18n="homeFeatureVideos">Video lessons</b><small data-i18n="homeFeatureVideosDesc">Explore lessons by grade and subject.</small><span class="home-card-arrow">↗</span></button>
+            <button class="home-feature-card feature-blue" data-page="exams"><span class="home-feature-icon">✎</span><b data-i18n="homeFeatureExams">Practice exams</b><small data-i18n="homeFeatureExamsDesc">Check your understanding with quizzes.</small><span class="home-card-arrow">↗</span></button>
+            <button class="home-feature-card feature-orange" data-page="notes"><span class="home-feature-icon">▤</span><b data-i18n="homeFeatureNotes">Study notes</b><small data-i18n="homeFeatureNotesDesc">Review learning materials and notes.</small><span class="home-card-arrow">↗</span></button>
+            <button class="home-feature-card feature-green" data-page="studio"><span class="home-feature-icon">◷</span><b data-i18n="homeFeatureStudio">Study Studio</b><small data-i18n="homeFeatureStudioDesc">Focus timer, tasks and flashcards.</small><span class="home-card-arrow">↗</span></button>
+            <button class="home-feature-card feature-pink" data-page="dashboard"><span class="home-feature-icon">▥</span><b data-i18n="homeFeatureProgress">Progress tracking</b><small data-i18n="homeFeatureProgressDesc">See your completed lessons and activity.</small><span class="home-card-arrow">↗</span></button>
+            <button class="home-feature-card feature-cyan" data-page="favorites"><span class="home-feature-icon">♡</span><b data-i18n="homeFeatureFavorites">Saved favorites</b><small data-i18n="homeFeatureFavoritesDesc">Keep useful lessons close at hand.</small><span class="home-card-arrow">↗</span></button>
+            <button class="home-feature-card feature-gold" data-page="certificates"><span class="home-feature-icon">✧</span><b data-i18n="homeFeatureCertificates">Certificates</b><small data-i18n="homeFeatureCertificatesDesc">View your learning achievements.</small><span class="home-card-arrow">↗</span></button>
+            <button class="home-feature-card feature-indigo" data-page="ai"><span class="home-feature-icon">✦</span><b data-i18n="homeFeatureHelper">AI study helper</b><small data-i18n="homeFeatureHelperDesc">Open the study support workspace.</small><span class="home-card-arrow">↗</span></button>
+          </div>
+        </section>
+
+        <section class="home-pathway-section">
+          <div class="home-section-intro"><span class="eyebrow" data-i18n="homePathEyebrow">YOUR LEARNING PATH</span><h2 data-i18n="homePathTitle">Choose a grade. Build your future.</h2><p data-i18n="homePathText">Jump straight into the learning level that matches you.</p></div>
+          <div class="home-path-grid">
+            <button class="home-path-card" data-grade="9"><span>GRADE 09</span><strong data-i18n="homePath9">Build strong foundations</strong><small data-i18n="homePath9Desc">Start with the essentials.</small><b>Explore →</b></button>
+            <button class="home-path-card" data-grade="10"><span>GRADE 10</span><strong data-i18n="homePath10">Grow your skills</strong><small data-i18n="homePath10Desc">Practice and deepen your knowledge.</small><b>Explore →</b></button>
+            <button class="home-path-card" data-grade="11"><span>GRADE 11</span><strong data-i18n="homePath11">Prepare for what is next</strong><small data-i18n="homePath11Desc">Strengthen subject understanding.</small><b>Explore →</b></button>
+            <button class="home-path-card" data-grade="12"><span>GRADE 12</span><strong data-i18n="homePath12">Get exam ready</strong><small data-i18n="homePath12Desc">Revise and test your knowledge.</small><b>Explore →</b></button>
+          </div>
+        </section>
+
+        <section class="home-study-banner">
+          <div class="home-study-copy"><span class="eyebrow" data-i18n="homeStudioEyebrow">MAKE EVERY MINUTE COUNT</span><h2 data-i18n="homeStudioTitle">Your personal Study Studio</h2><p data-i18n="homeStudioText">Plan your sessions, focus with a timer, build flashcards and keep your study tasks organized.</p><button class="primary-button" data-page="studio" data-i18n="homeStudioButton">Open Study Studio →</button></div>
+          <div class="home-study-orbit" aria-hidden="true"><span>25:00</span><small>FOCUS MODE</small><i>✦</i><b>◷</b></div>
+        </section>
+
+        <section class="home-subject-section">
+          <div class="home-section-intro"><span class="eyebrow" data-i18n="homeSubjectsEyebrow">EXPLORE KNOWLEDGE</span><h2 data-i18n="homeSubjectsTitle">Find your next topic</h2><p data-i18n="homeSubjectsText">Browse the subjects available in the video library.</p></div>
+          <div class="home-subject-chips">
+            <button data-home-subject="Mathematics" data-page="library">∑ Mathematics</button><button data-home-subject="Physics" data-page="library">⚛ Physics</button><button data-home-subject="Chemistry" data-page="library">⚗ Chemistry</button><button data-home-subject="Biology" data-page="library">❋ Biology</button><button data-home-subject="English" data-page="library">A English</button><button data-home-subject="Geography" data-page="library">⌖ Geography</button><button data-home-subject="History" data-page="library">▤ History</button><button data-home-subject="Computer Science" data-page="library">⌘ Computer Science</button>
+          </div>
+        </section>
+
+        <section class="home-final-cta"><div><span class="eyebrow" data-i18n="homeCtaEyebrow">YOUR NEXT STEP STARTS HERE</span><h2 data-i18n="homeCtaTitle">Ready to keep learning?</h2><p data-i18n="homeCtaText">Choose a lesson, practice a question and make progress at your own pace.</p></div><div class="home-cta-actions"><button class="primary-button" data-page="library" data-i18n="homeCtaBrowse">Explore video library →</button><button class="home-secondary-button" data-page="exams" data-i18n="homeCtaExam">Try a practice exam</button></div></section>
+      </section>
+
+      <section class="page" id="page-library">
+        <div class="page-heading"><div><span class="eyebrow" data-i18n="learningResources">LEARNING RESOURCES</span><h1 data-i18n="videoLibrary">Video library</h1><p data-i18n="libraryIntro">Explore lessons organized for your grade and subject.</p></div></div>
+        <div class="filter-bar">
+          <label class="search-box"><input id="videoSearch" type="search" data-i18n-placeholder="searchLessons" placeholder="Search lessons..."></label>
+          <select id="videoGrade" aria-label="Grade"><option value="all" data-i18n="allGrades">All grades</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select>
+          <select id="videoSubject" aria-label="Subject"><option value="all" data-i18n="allSubjects">All subjects</option><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select>
+        </div>
+        <div id="videoGrid" class="video-grid"></div><div id="videoEmpty" class="empty-state hidden" data-i18n="noLessons">No lessons found. Try another search or filter.</div>
+      </section>
+
+      <section class="page" id="page-notes">
+        <div class="page-heading"><div><span class="eyebrow" data-i18n="notesEyebrow">STUDY MATERIALS</span><h1 data-i18n="notesTitle">Notes</h1><p data-i18n="notesIntro">Read notes by grade, subject and unit.</p></div></div>
+        <div id="notesRoot"></div>
+      </section>
+
+      <section class="page" id="page-favorites">
+        <div class="page-heading"><div><span class="eyebrow" data-i18n="yourCollection">YOUR COLLECTION</span><h1 data-i18n="navFavorites">Favorites</h1><p data-i18n="favoritesIntro">Lessons you have saved for later.</p></div></div>
+        <div id="favoriteGrid" class="video-grid"></div><div id="favoriteEmpty" class="empty-state" data-i18n="noFavorites">You have not saved any lessons yet.</div>
+      </section>
+
+      <section class="page" id="page-exams">
+        <div class="page-heading"><div><span class="eyebrow" data-i18n="testYourself">TEST YOURSELF</span><h1 data-i18n="navExams">Exam center</h1><p data-i18n="examIntro">Practice with short sample quizzes.</p></div></div>
+        <div class="filter-bar"><select id="examGrade"><option value="all" data-i18n="allGrades">All grades</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select><select id="examSubject"><option value="all" data-i18n="allSubjects">All subjects</option><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option></select></div>
+        <div id="examGrid" class="exam-grid"></div>
+      </section>
+
+      <section class="page" id="page-quiz">
+        <div class="quiz-top"><button class="text-button" data-page="exams">← <span data-i18n="backToExams">Back to exams</span></button><span id="quizTimer" class="timer">05:00</span></div>
+        <div class="quiz-panel"><div class="quiz-progress"><span id="quizProgress"></span></div><p id="questionCount" class="eyebrow">QUESTION 1</p><h2 id="questionText"></h2><div id="answerList" class="answer-list"></div><div id="quizFeedback" class="quiz-feedback" aria-live="polite"></div><button id="nextQuestion" class="primary-button" disabled><span data-i18n="nextQuestion">Next question</span> →</button></div>
+      </section>
+
+      <section class="page" id="page-results">
+        <div class="results-panel"><span class="eyebrow" data-i18n="quizComplete">QUIZ COMPLETE</span><h1 data-i18n="yourResult">Your result</h1><strong id="resultScore" class="result-score">0%</strong><p id="resultMessage"></p><button class="primary-button" data-page="exams" data-i18n="tryAnother">Try another quiz</button></div>
+      </section>
+
+      <section class="page" id="page-dashboard">
+        <div class="page-heading"><div><span class="eyebrow" data-i18n="yourActivity">YOUR ACTIVITY</span><h1 data-i18n="navDashboard">Dashboard</h1><p data-i18n="dashboardIntro">A simple overview of your learning activity.</p></div></div>
+        <div class="stats-grid dashboard-stats"><article class="stat-card"><div><strong id="dashLessons">0</strong><small data-i18n="lessonsCompleted">Lessons completed</small></div></article><article class="stat-card"><div><strong id="dashQuizzes">0</strong><small data-i18n="quizzesTaken">Quizzes taken</small></div></article><article class="stat-card"><div><strong id="dashFavorites">0</strong><small data-i18n="savedLessons">Saved lessons</small></div></article><article class="stat-card"><div><strong id="dashProgress">0%</strong><small data-i18n="learningProgress">Learning progress</small></div></article></div>
+        <div class="dashboard-panel"><h2 data-i18n="recentActivity">Recent activity</h2><div id="recentActivity" class="activity-list"></div></div>
+      </section>
+
+
+      <section class="page" id="page-accounts">
+        <div class="page-heading"><div><span class="eyebrow">STUDENT PROFILE</span><h1>Student account</h1><p>Create an account to sync learning activity across devices.</p></div></div>
+        <div class="account-card" id="accountSignedOut"><div class="account-tabs"><button class="account-tab active" data-auth-mode="login" type="button">Sign in</button><button class="account-tab" data-auth-mode="signup" type="button">Create account</button></div>
+          <form id="studentAuthForm" class="admin-form"><label>Full name<input id="studentName" type="text" maxlength="60" placeholder="Your name"></label><label>Email<input id="studentEmail" type="email" required autocomplete="email" placeholder="you@example.com"></label><label>Password<input id="studentPassword" type="password" required minlength="8" autocomplete="current-password" placeholder="At least 8 characters"></label><button class="primary-button" id="studentAuthSubmit" type="submit">Sign in</button><p class="admin-hint" id="authHint">Use your student account. Email confirmation may be required.</p></form>
+        </div>
+        <div class="account-card hidden" id="accountSignedIn"><div class="account-avatar" id="studentAvatar">S</div><h2 id="studentDisplayName">Student</h2><p id="studentDisplayEmail" class="muted-text"></p><div class="stats-grid account-stats"><article class="stat-card"><div><strong id="accountCompleted">0</strong><small>Lessons completed</small></div></article><article class="stat-card"><div><strong id="accountAttempts">0</strong><small>Exam attempts</small></div></article></div><button class="small-button" id="studentSignOut" type="button">Sign out</button></div>
+        <p class="admin-hint">Privacy: your personal learning records are private to your account. Do not use a shared device without signing out.</p>
+      </section>
+      <section class="page" id="page-notifications"><div class="page-heading"><div><span class="eyebrow">YOUR UPDATES</span><h1>Notifications</h1><p>Lesson milestones and exam updates.</p></div><button class="small-button" id="clearNotifications" type="button">Clear all</button></div><div class="dashboard-panel"><div id="notificationList" class="activity-list"></div></div></section>
+      <section class="page" id="page-leaderboard"><div class="page-heading"><div><span class="eyebrow">LEARNING COMMUNITY</span><h1>Leaderboard</h1><p>Compare learning activity with other signed-in students.</p></div></div><div class="admin-warning" id="leaderboardStatus">Sign in and complete lessons or exams to appear here. Rankings require the database setup SQL.</div><div class="dashboard-panel"><div id="leaderboardList" class="activity-list"></div></div></section>
+      <section class="page" id="page-certificates"><div class="page-heading"><div><span class="eyebrow">YOUR ACHIEVEMENTS</span><h1>Certificates</h1><p>Print a completion certificate when you meet the course milestone.</p></div></div><div id="certificateList" class="certificate-grid"></div></section>
+      <section class="page" id="page-ai"><div class="page-heading"><div><span class="eyebrow">STUDY SUPPORT</span><h1>AI Learning Assistant</h1><p>Ask for explanations, examples, or a study plan.</p></div></div><div class="admin-warning">This starter assistant runs locally with guided prompts. It is not connected to a generative AI model yet. Never enter passwords or private information here.</div><div class="ai-panel"><div id="aiMessages" class="ai-messages"><div class="ai-message assistant">Hello! Tell me the topic you are studying, and I can help you structure your learning.</div></div><form id="aiForm" class="ai-form"><textarea id="aiPrompt" rows="2" maxlength="1000" placeholder="e.g. Explain Newton's second law with an example..."></textarea><button class="primary-button" type="submit">Send </button></form></div></section>
+
+      <section class="page" id="page-admin">
+        <div class="page-heading"><div><span class="eyebrow">SECURE ADMIN WORKSPACE</span><h1>Content Manager</h1><p>Publish lessons directly to the EduTube Ethiopia database.</p></div><span class="admin-status" id="adminStatus">● Signed out</span></div>
+        <div class="admin-warning" id="adminNotice">Admin access is protected by Supabase Authentication and Row Level Security. Students can continue watching published lessons without signing in.</div>
+        <form id="adminLoginForm" class="admin-form admin-login"><h2> Admin sign in</h2>
+          <label>Email address<input id="adminEmail" type="email" autocomplete="username" required placeholder="admin@example.com"></label>
+          <label>Password<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Your admin password"></label>
+          <button class="primary-button" type="submit">Sign in securely</button>
+          <button class="small-button" id="adminForgotPassword" type="button">Forgot password?</button>
+          <p class="admin-hint">Only trusted Supabase accounts with admin or super_admin app_metadata roles can enter this workspace.</p>
+        </form>
+        <form id="adminRecoveryForm" class="admin-form hidden" novalidate>
+          <h2>Set a new admin password</h2>
+          <label>New password<input id="adminNewPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="At least 8 characters"></label>
+          <label>Confirm new password<input id="adminConfirmPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="Enter it again"></label>
+          <button class="primary-button" type="submit">Save new password</button>
+          <p class="admin-hint">Open this form only after following the password recovery link sent to your admin email.</p>
+        </form>
+        <div id="adminWorkspace" class="hidden">
+          <section class="super-overview" aria-labelledby="superOverviewTitle">
+            <div class="super-section-heading">
+              <div><span class="eyebrow">COMMAND CENTER</span><h2 id="superOverviewTitle">Platform overview</h2><p>Live totals from your connected Supabase tables.</p></div>
+              <button class="small-button" id="refreshSuperOverview" type="button">Refresh overview</button>
+            </div>
+            <div class="super-stat-grid">
+              <article class="super-stat"><span>Total students</span><strong id="superStudents">—</strong><small>Profiles in database</small></article>
+              <article class="super-stat"><span>Video lessons</span><strong id="superLessons">—</strong><small>Published + drafts</small></article>
+              <article class="super-stat"><span>Study notes</span><strong id="superNotes">—</strong><small>All notes</small></article>
+              <article class="super-stat"><span>Exam attempts</span><strong id="superAttempts">—</strong><small>Submitted attempts</small></article>
+              <article class="super-stat"><span>Learning records</span><strong id="superProgress">—</strong><small>Progress rows</small></article>
+              <article class="super-stat"><span>Published lessons</span><strong id="superPublished">—</strong><small>Visible to students</small></article>
+            </div>
+            <div class="super-two-col">
+              <div class="dashboard-panel super-panel">
+                <div class="admin-toolbar"><div><h3>Recent student profiles</h3><p>Read-only directory; account security stays server-managed.</p></div></div>
+                <label class="super-search-label" for="superStudentSearch">Search students</label>
+                <input id="superStudentSearch" type="search" placeholder="Search by display name or ID">
+                <div id="superStudentList" class="super-student-list"><p class="admin-hint">Sign in as an administrator to load records.</p></div>
+              </div>
+              <div class="dashboard-panel super-panel">
+                <div class="admin-toolbar"><div><h3>System health</h3><p>Connection and data access checks.</p></div></div>
+                <div id="superHealthList" class="super-health-list"><p class="admin-hint">Waiting for administrator sign-in.</p></div>
+                <p class="admin-hint">Account creation, deletion and role assignment must run through a trusted server function. Never place a Supabase service-role key in this browser app.</p>
+              </div>
+            </div>
+          </section>
+          <div class="admin-toolbar"><div><h2> Lesson publishing studio</h2><p>Create, publish, unpublish, and remove lessons.</p></div><button class="small-button" id="adminSignOut" type="button">Sign out</button></div>
+          <form id="lessonForm" class="admin-form">
+            <label>Lesson title<input id="lessonTitle" required maxlength="100" placeholder="e.g. Introduction to algebra"></label>
+            <div class="form-row"><label>Grade<select id="lessonGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label><label>Subject<select id="lessonSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label></div>
+            <label>YouTube video URL<input id="lessonUrl" type="url" required placeholder="https://www.youtube.com/watch?v=..."></label>
+            <label>Thumbnail URL (optional)<input id="lessonThumbnail" type="url" placeholder="https://img.youtube.com/vi/VIDEO_ID/hqdefault.jpg"></label>
+            <label>Description<textarea id="lessonDescription" rows="3" maxlength="500" placeholder="What will students learn?"></textarea></label>
+            <label class="publish-check"><input id="lessonPublish" type="checkbox" checked> Publish immediately (visible to everyone)</label>
+            <button class="primary-button" type="submit"> Save lesson to Supabase</button>
+          </form>
+          <div class="dashboard-panel"><div class="admin-toolbar"><h2>All database lessons</h2><button class="small-button" id="refreshAdmin" type="button">Refresh</button></div><div id="adminLessonList" class="activity-list"></div></div>
+
+          <div class="admin-toolbar"><div><h2>Notes publishing studio</h2><p>Add notes for Notes → Type → Grade → Subject → Unit.</p></div></div>
+          <form id="noteForm" class="admin-form">
+            <div class="form-row"><label>Note type<select id="noteType" required><option value="video">Video Notes</option><option value="competency">Competency Based Notes</option></select></label><label>Grade<select id="noteGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label></div>
+            <div class="form-row"><label>Subject<select id="noteSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label><label>Unit<input id="noteUnit" required maxlength="40" placeholder="e.g. Unit 1"></label></div>
+            <label>Note title<input id="noteTitle" required maxlength="120" placeholder="e.g. Physical Quantities and Measurement"></label>
+            <label>Video URL (optional)<input id="noteVideoUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></label>
+            <label>Note content (leave a blank line between paragraphs)<textarea id="noteContent" rows="8" required placeholder="Write the note here..."></textarea></label>
+            <label class="publish-check"><input id="notePublish" type="checkbox" checked> Publish immediately (visible to everyone)</label>
+            <button class="primary-button" type="submit">Save note to Supabase</button>
+            <p class="admin-hint" id="noteAdminMsg"></p>
+          </form>
+          <div class="dashboard-panel"><div class="admin-toolbar"><h2>All database notes</h2><button class="small-button" id="refreshAdminNotes" type="button">Refresh</button></div><div id="adminNoteList" class="activity-list"></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-studio">
+        <div class="page-heading"><div><span class="eyebrow">POWERED LEARNING</span><h1>🚀 Study Studio</h1><p>Your personal command center: focus, plan, revise, and keep your progress safe.</p></div></div>
+        <div class="studio-welcome" id="studioQuote">Small steps every day create extraordinary results.</div>
+        <div class="studio-stats">
+          <article class="studio-stat"><span>🔥 Current streak</span><strong id="studioStreak">0 days</strong></article>
+          <article class="studio-stat"><span>🎯 Today's goal</span><strong id="studioGoalValue">0 / 60 min</strong></article>
+          <article class="studio-stat"><span>⏱️ Focus sessions</span><strong id="studioSessions">0</strong></article>
+          <article class="studio-stat"><span>✅ Tasks done</span><strong id="studioTasksDone">0</strong></article>
+        </div>
+        <div class="studio-grid">
+          <article class="studio-card"><div class="studio-card-head"><div><span class="eyebrow">01 · DEEP WORK</span><h2>Pomodoro focus timer</h2></div><span>🍅</span></div><div class="pomodoro-display" id="pomoDisplay">25:00</div><div class="pomo-presets"><button data-pomo="25">Focus 25</button><button data-pomo="5">Short break 5</button><button data-pomo="15">Long break 15</button></div><div class="studio-actions"><button class="primary-button" id="pomoStart">Start</button><button class="small-button" id="pomoReset">Reset</button></div><p class="studio-hint" id="pomoStatus">A completed focus session adds 25 minutes to your daily goal.</p></article>
+          <article class="studio-card"><div class="studio-card-head"><div><span class="eyebrow">02 · DAILY TARGET</span><h2>Study goal</h2></div><span>🎯</span></div><label class="studio-label">Daily goal in minutes<input id="goalInput" type="number" min="10" max="600" step="5" value="60"></label><div class="goal-track"><span id="goalBar"></span></div><p id="goalMessage" class="studio-hint">Set a target and build a streak.</p><button class="small-button" id="saveGoal">Save daily goal</button></article>
+          <article class="studio-card"><div class="studio-card-head"><div><span class="eyebrow">03 · GET ORGANIZED</span><h2>Study task list</h2></div><span>🗂️</span></div><form id="taskForm" class="studio-inline-form"><input id="taskInput" maxlength="100" placeholder="e.g. Revise quadratic equations" required><button class="primary-button" type="submit">Add</button></form><div id="taskList" class="studio-task-list"></div></article>
+          <article class="studio-card"><div class="studio-card-head"><div><span class="eyebrow">04 · QUICK REVISION</span><h2>Flashcards</h2></div><span>🧠</span></div><div class="flashcard" id="flashcard" role="button" tabindex="0"><small id="flashcardSide">QUESTION · TAP TO FLIP</small><strong id="flashcardText">What is the formula for speed?</strong></div><div class="studio-actions"><button class="small-button" id="flashPrev">← Previous</button><button class="small-button" id="flashFlip">Flip card</button><button class="small-button" id="flashNext">Next →</button></div><form id="flashForm" class="studio-inline-form"><input id="flashQ" placeholder="New question" maxlength="120" required><input id="flashA" placeholder="Answer" maxlength="180" required><button class="small-button" type="submit">＋</button></form></article>
+          <article class="studio-card studio-wide"><div class="studio-card-head"><div><span class="eyebrow">05 · YOUR BRAIN DUMP</span><h2>Smart study notes</h2></div><span>📝</span></div><textarea id="studioNotes" class="studio-notes" rows="6" placeholder="Write ideas, formulas, reminders... Your notes save automatically on this device."></textarea><div class="studio-actions"><span class="studio-hint" id="notesSaved">Auto-save is on</span><button class="small-button" id="downloadNotes">Download notes</button><button class="small-button" id="clearNotes">Clear notes</button></div></article>
+          <article class="studio-card"><div class="studio-card-head"><div><span class="eyebrow">06 · DISTRACTION FREE</span><h2>Focus mode</h2></div><span>🧘</span></div><p class="studio-hint">Hide the navigation and dim distractions while you work.</p><button class="primary-button" id="focusToggle">Enter focus mode</button><p class="studio-hint">Press Escape to leave focus mode.</p></article>
+          <article class="studio-card"><div class="studio-card-head"><div><span class="eyebrow">07 · FIND IT FAST</span><h2>Quick lesson finder</h2></div><span>🔎</span></div><input id="quickLessonSearch" class="studio-full-input" placeholder="Search lessons, subjects..." type="search"><button class="small-button" id="quickSearchGo">Search video library →</button></article>
+          <article class="studio-card"><div class="studio-card-head"><div><span class="eyebrow">08 · YOUR DATA</span><h2>Backup & restore</h2></div><span>🛡️</span></div><p class="studio-hint">Export your local study activity or restore a previous backup.</p><div class="studio-actions"><button class="small-button" id="exportBackup">Export backup</button><label class="small-button upload-backup">Import backup<input id="importBackup" type="file" accept="application/json" hidden></label></div><p class="studio-hint" id="backupStatus">Your data stays in this browser unless you export it.</p></article>
+          <article class="studio-card"><div class="studio-card-head"><div><span class="eyebrow">09 · DAILY INSPIRATION</span><h2>Motivation generator</h2></div><span>✨</span></div><p class="motivation-text" id="motivationText">You don't have to be perfect. Just keep showing up.</p><button class="small-button" id="newMotivation">Give me another boost</button></article>
+          <article class="studio-card"><div class="studio-card-head"><div><span class="eyebrow">10 · MINI CHALLENGE</span><h2>Random study challenge</h2></div><span>🏆</span></div><p class="motivation-text" id="challengeText">Explain one concept you learned today without looking at your notes.</p><button class="small-button" id="newChallenge">New challenge</button></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="mobile-nav"><button data-page="home"><small data-i18n="navHome">Home</small></button><button data-page="library"><small data-i18n="navLibrary">Videos</small></button><button data-page="exams"><small data-i18n="navExams">Exams</small></button><button data-page="notes"><small data-i18n="navNotes">Notes</small></button><button data-page="dashboard"><small data-i18n="navDashboard">Progress</small></button><button data-page="studio"><small>🚀 Studio</small></button><button data-page="accounts"><small>Account</small></button></nav>
+
+
+    <!-- ===== YouTube-style WATCH PAGE (አሮጌውን #videoModal ብክ ሙሉ ተካው) ===== -->
+<div class="modal hidden" id="videoModal">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-content watch-content">
+
+    <!-- 1) Player: ላይኛው ጥ ላይ የተጣበቀ -->
+    <div class="watch-top">
+      <div class="player advanced-player" id="videoFrame" aria-label="Advanced video player">
+        <div id="ytHost"></div>
+        <button class="poster" id="poster" type="button" aria-label="Play video">
+          <img id="posterImg" alt="" draggable="false"><span class="poster-title" id="posterTitle"></span>
+          <span class="poster-center-play">▶</span>
+        </button>
+        <button class="fb-full" id="fbFull" type="button" aria-label="Full screen">⛶</button>
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+          <symbol id="pi-back" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></symbol>
+          <symbol id="pi-cc" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.5 10a2 2 0 1 0 0 4M16.5 10a2 2 0 1 0 0 4"/></symbol>
+          <symbol id="pi-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+          <symbol id="pi-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+          <symbol id="pi-prev" viewBox="0 0 24 24"><path d="M19 5 9 12l10 7zM5 5v14"/></symbol>
+          <symbol id="pi-next" viewBox="0 0 24 24"><path d="m5 5 10 7-10 7zM19 5v14"/></symbol>
+          <symbol id="pi-rew" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></symbol>
+          <symbol id="pi-fwd" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></symbol>
+          <symbol id="pi-save" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></symbol>
+          <symbol id="pi-share" viewBox="0 0 24 24"><path d="M4 12v7h16v-7M12 3v12M7 8l5-5 5 5"/></symbol>
+          <symbol id="pi-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+          <symbol id="pi-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+          <symbol id="pi-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+          <symbol id="pi-quality" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9zM2 9h20M12 21 8 9l4-6 4 6z"/></symbol>
+          <symbol id="pi-speed" viewBox="0 0 24 24"><path d="m12 14 4-4M3.3 18a10 10 0 1 1 17.4 0"/></symbol>
+          <symbol id="pi-audio" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+          <symbol id="pi-layout" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8"/></symbol>
+          <symbol id="pi-sliders" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+        </defs></svg>
+        <div class="pp-ui pp-top">
+          <div class="pp-title"><span class="pp-thumb" id="ppThumb"></span><div class="pp-ttext"><b id="ppTitle"></b><small id="ppMeta"></small></div><span class="pp-badge hidden" id="ppBadge">HD</span></div>
+          <div class="pp-actions">
+            <button class="pp-circle" id="ppCC" type="button" aria-label="Subtitles / CC" aria-pressed="false"><svg class="pp-i"><use href="#pi-cc"/></svg></button>
+            <button class="pp-circle" id="ppSettings" type="button" aria-label="Settings" aria-haspopup="true" aria-expanded="false"><svg class="pp-i"><use href="#pi-gear"/></svg></button>
+            <button class="pp-circle" id="btnFull" type="button" aria-label="Fullscreen" data-ico="full"></button>
+            <button class="pp-circle" id="ppClose" type="button" aria-label="Close player"><svg class="pp-i"><use href="#pi-close"/></svg></button>
+          </div>
+        </div>
+        <div class="wm" id="wm" aria-hidden="true"></div>
+        <button class="watch-back" id="watchBack" type="button" aria-label="Back"><svg class="pp-i"><use href="#pi-back"/></svg></button>
+        <div class="tap-layer" id="tapLayer"></div>
+        <div class="skip-fx" id="skipFx"></div><div class="speed-chip" id="speedChip"></div><div class="hold-fx" id="holdFx">2×</div>
+        <div class="pp-ui pp-mid">
+          <button class="pp-circle pp-skip" id="btnBack" type="button" aria-label="Back 10 seconds" title="Back 10 seconds"><svg class="pp-i"><use href="#pi-rew"/></svg><span>10</span></button>
+          <button class="pp-circle pp-bigplay" id="btnPlay" type="button" aria-label="Play/Pause" title="Play/Pause" data-ico="play">▶</button>
+          <button class="pp-circle pp-skip" id="btnFwd" type="button" aria-label="Forward 10 seconds" title="Forward 10 seconds"><svg class="pp-i"><use href="#pi-fwd"/></svg><span>10</span></button>
+        </div>
+        <div class="pp-ui pp-bottom">
+          <div class="pp-row"><span class="pp-time" id="timeLabel">0:00 / 0:00</span><span class="spacer"></span>
+            <button class="pp-pill" id="ppSpeed" type="button" aria-label="Playback speed">1×</button>
+            <button class="pp-circle sm" id="btnMute" type="button" aria-label="Mute" title="Mute" data-ico="vol"></button>
+            <input id="avVolume" class="pp-vol" type="range" min="0" max="100" value="100" aria-label="Volume">
+          </div>
+          <div class="pp-seek"><input type="range" id="seek" min="0" max="1000" value="0" aria-label="Seek video"></div>
+          <div class="pp-dock">
+            <button class="pp-next" id="ppUpNext" type="button" aria-label="Play next lesson"><span class="pp-nthumb" id="ppNThumb"></span><span class="pp-ntext"><small id="ppUpLabel">Up Next</small><b id="ppNTitle"></b><em id="ppNMeta"></em></span><svg class="pp-i"><use href="#pi-chev"/></svg></button>
+            <div class="pp-transport">
+              <button class="pp-circle" id="ppPrev" type="button" aria-label="Previous lesson"><svg class="pp-i"><use href="#pi-prev"/></svg></button>
+              <button class="pp-circle pp-play2" id="ppPlay2" type="button" aria-label="Play/Pause" data-ico="play"></button>
+              <button class="pp-circle" id="ppNext" type="button" aria-label="Next lesson"><svg class="pp-i"><use href="#pi-next"/></svg></button>
+            </div>
+            <div class="pp-chips">
+              <button class="pp-chip" id="ppSave" type="button" aria-pressed="false"><svg class="pp-i"><use href="#pi-save"/></svg><span id="ppSaveLabel">Save</span></button>
+              <button class="pp-chip" id="ppShare" type="button"><svg class="pp-i"><use href="#pi-share"/></svg><span id="ppShareLabel">Share</span></button>
+              <button class="pp-chip" id="ppMore" type="button" aria-haspopup="true" aria-expanded="false"><svg class="pp-i"><use href="#pi-more"/></svg><span id="ppMoreLabel">More</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="pp-panel hidden" id="ppPanel" role="dialog" aria-label="Player settings"></div>
+        <div class="pp-menu hidden" id="ppMenu" role="menu"></div>
+                <div class="next-overlay hidden" id="nextOverlay"><div class="next-box"><b id="nextCount">5</b><span>ቀጣዩ ትምህርት ጀምራል...</span><div><button class="small-button" id="nextCancel" type="button">ተወው</button><button class="small-button watch" id="nextNow" type="button">አሁን</button></div></div></div>
+      </div>
+    </div>
+
+    <!-- 3) ከplayer በታች የሚሸረተት ቦታ -->
+    <div class="watch-scroll">
+      <div class="watch-head">
+        <h2 id="modalTitle">Lesson</h2>
+        <button class="icon-button text-control" id="closePlayer" aria-label="Close">Close</button>
+      </div>
+
+      <section id="superCtrl" aria-label="Super Advanced Controller"></section>
+      <div class="player-tools sc-legacy" hidden aria-hidden="true">
+        <div class="speed-menu-wrap">
+          <button class="speed-menu-button" id="speedMenuButton" aria-expanded="false">
+            
+            <span data-i18n="playbackSpeed">Playback speed</span>
+            <b id="currentSpeedLabel">1×</b>
+            <span class="speed-chevron">›</span>
+          </button>
+          <div class="speed-menu hidden" id="speedMenu">
+            <div class="speed-menu-title" data-i18n="playbackSpeed">Playback speed</div>
+            <button class="speed-btn" data-speed="0.25">0.25×</button>
+            <button class="speed-btn" data-speed="0.5">0.5×</button>
+            <button class="speed-btn" data-speed="0.75">0.75×</button>
+            <button class="speed-btn" data-speed="1">Normal (1×)</button>
+            <button class="speed-btn" data-speed="1.25">1.25×</button>
+            <button class="speed-btn" data-speed="1.5">1.5×</button>
+            <button class="speed-btn" data-speed="1.75">1.75×</button>
+            <button class="speed-btn" data-speed="2">2×</button>
+          </div>
+        </div>
+        <button class="small-button" id="nextLesson"> Next</button>
+      </div>
+
+      <div class="modal-footer">
+        <button class="primary-button" id="completeLesson" data-i18n="markComplete">Mark as completed</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <footer class="site-footer"><span>© <span id="year"></span> EduTube Ethiopia</span><span data-i18n="footerText">Learn at your pace. Build your future.</span></footer>
+</body>
+</html>
