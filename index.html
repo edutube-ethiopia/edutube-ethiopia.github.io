@@ -9,13 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">\n  <link rel="stylesheet" href="pdf-contact.css">
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="player-pro.css">
   <link rel="stylesheet" href="super-controller.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://www.youtube.com">
   <script src="https://www.youtube.com/iframe_api" async></script>
-  <script src="script.js" defer></script>\n  <script src="pdf-contact.js" defer></script>
+  <script src="script.js" defer></script>
   <script src="admin-advanced.js" defer></script>
   <script src="upgrade.js" defer></script>
   <script src="player-pro.js" defer></script>
@@ -29,6 +29,7 @@
       <button data-page="library" data-i18n="navLibrary">Video Library</button>
       <button data-page="exams" data-i18n="navExams">Exam Center</button>
       <button data-page="notes" data-i18n="navNotes">Notes</button>
+      <button data-page="contact">Contact</button>
     </nav>
     <div class="top-actions">
       <button id="themeButton" class="icon-button text-control" aria-label="Toggle theme" title="Toggle theme" type="button">Theme</button>
@@ -45,6 +46,7 @@
       <button class="side-link" data-page="library"><span data-i18n="navLibrary">Video Library</span></button>
       <button class="side-link" data-page="exams"><span data-i18n="navExams">Exam Center</span></button>
       <button class="side-link" data-page="notes"><span data-i18n="navNotes">Notes</span></button>
+      <button class="side-link" data-page="contact"><span>Contact & Support</span></button>
       <button class="side-link" data-page="favorites"><span data-i18n="navFavorites">Favorites</span></button>
       <p class="side-label second-label" data-i18n="yourSpace">YOUR SPACE</p>
       <button class="side-link" data-page="dashboard"><span data-i18n="navDashboard">Dashboard</span></button>
@@ -54,8 +56,7 @@
       <button class="side-link" data-page="leaderboard"><span>Leaderboard</span></button>
       <button class="side-link" data-page="certificates"><span>Certificates</span></button>
       <button class="side-link" data-page="ai"><span>AI study helper</span></button>
-      <button class="side-link hidden" data-page="admin"><span data-i18n="navAdmin">Content Manager</span></button>
-      <button class="side-link" data-page="contact"><span>Contact & Support</span></button>
+      <button class="side-link" data-page="admin"><span data-i18n="navAdmin">Content Manager</span></button>
       <div class="sidebar-note"><b data-i18n="keepLearning">Keep learning!</b><p data-i18n="sidebarNote">Small steps every day lead to big results.</p></div>
     </aside>
 
@@ -138,22 +139,6 @@
         <div id="videoGrid" class="video-grid"></div><div id="videoEmpty" class="empty-state hidden" data-i18n="noLessons">No lessons found. Try another search or filter.</div>
       </section>
 
-      <section class="page" id="page-contact">
-        <div class="page-heading"><div><span class="eyebrow">EDUTUBE SUPPORT</span><h1>Contact & Support</h1><p>Questions about lessons, accounts, accessibility or partnerships? Reach the EduTube team.</p></div></div>
-        <div class="contact-hero"><div><span class="eyebrow">WE’RE HERE TO HELP</span><h2>Learn with confidence.<br><em>We’ll help you get unstuck.</em></h2><p>Send a clear message and include your grade, subject and a short description of the issue. Never share your password.</p></div><div class="contact-orbit" aria-hidden="true">✦</div></div>
-        <div class="contact-grid">
-          <article class="contact-card"><span>✉</span><h2>Email support</h2><p>For account, content and technical questions.</p><a href="mailto:support.edutubeethiopia@gmail.com">support.edutubeethiopia@gmail.com</a></article>
-          <article class="contact-card"><span>◷</span><h2>Response guidance</h2><p>Include enough detail for the team to reproduce the issue. Avoid sending private credentials.</p><small>Support requests are handled by the EduTube team.</small></article>
-          <article class="contact-card"><span>♧</span><h2>Schools & partnerships</h2><p>For school access, educational partnerships and content contributions.</p><a href="mailto:support.edutubeethiopia@gmail.com?subject=EduTube%20Partnership">Partnership enquiries</a></article>
-        </div>
-        <form class="contact-form" id="contactForm"><div><span class="eyebrow">SEND A MESSAGE</span><h2>How can we help?</h2></div>
-          <div class="form-row"><label>Your name<input id="contactName" maxlength="80" required placeholder="Full name"></label><label>Email address<input id="contactEmail" type="email" maxlength="160" required placeholder="you@example.com"></label></div>
-          <div class="form-row"><label>Topic<select id="contactTopic"><option>Technical support</option><option>Student account</option><option>Study materials</option><option>School partnership</option><option>Other</option></select></label><label>Grade (optional)<select id="contactGrade"><option value="">Not applicable</option><option>9</option><option>10</option><option>11</option><option>12</option></select></label></div>
-          <label>Message<textarea id="contactMessage" rows="6" maxlength="4000" required placeholder="Describe how we can help…"></textarea></label>
-          <button class="primary-button" type="submit">Prepare support email ↗</button><p class="admin-hint" id="contactStatus">Your email app will open with the message. Support requests are addressed to support.edutubeethiopia@gmail.com.</p>
-        </form>
-      </section>
-
       <section class="page" id="page-notes">
         <div class="page-heading"><div><span class="eyebrow" data-i18n="notesEyebrow">STUDY MATERIALS</span><h1 data-i18n="notesTitle">Notes</h1><p data-i18n="notesIntro">Read notes by grade, subject and unit.</p></div></div>
         <div id="notesRoot"></div>
@@ -199,6 +184,16 @@
       <section class="page" id="page-certificates"><div class="page-heading"><div><span class="eyebrow">YOUR ACHIEVEMENTS</span><h1>Certificates</h1><p>Print a completion certificate when you meet the course milestone.</p></div></div><div id="certificateList" class="certificate-grid"></div></section>
       <section class="page" id="page-ai"><div class="page-heading"><div><span class="eyebrow">STUDY SUPPORT</span><h1>AI Learning Assistant</h1><p>Ask for explanations, examples, or a study plan.</p></div></div><div class="admin-warning">This starter assistant runs locally with guided prompts. It is not connected to a generative AI model yet. Never enter passwords or private information here.</div><div class="ai-panel"><div id="aiMessages" class="ai-messages"><div class="ai-message assistant">Hello! Tell me the topic you are studying, and I can help you structure your learning.</div></div><form id="aiForm" class="ai-form"><textarea id="aiPrompt" rows="2" maxlength="1000" placeholder="e.g. Explain Newton's second law with an example..."></textarea><button class="primary-button" type="submit">Send </button></form></div></section>
 
+      <section class="page" id="page-contact">
+        <div class="page-heading"><div><span class="eyebrow">WE ARE HERE TO HELP</span><h1>Contact EduTube Ethiopia</h1><p>Questions, feedback, corrections, or partnership enquiries — reach our support team.</p></div></div>
+        <div class="contact-grid">
+          <article class="contact-card"><span class="contact-kicker">EMAIL SUPPORT</span><h2>Talk to our team</h2><p>For account help, learning content corrections, technical issues, or general enquiries.</p><a class="primary-button contact-link" href="mailto:support.edutubeethiopia@gmail.com">support.edutubeethiopia@gmail.com</a></article>
+          <article class="contact-card"><span class="contact-kicker">YOUTUBE COMMUNITY</span><h2>Learn with us</h2><p>Follow EduTube Ethiopia for educational videos and learning updates.</p><a class="small-button contact-link" href="https://www.youtube.com/@EduTubeEthiopia" target="_blank" rel="noopener noreferrer">Visit our YouTube channel ↗</a></article>
+          <article class="contact-card contact-form-card"><span class="contact-kicker">SEND A MESSAGE</span><h2>Contact form</h2><form id="contactForm" class="admin-form"><label>Your name<input id="contactName" maxlength="80" required placeholder="Full name"></label><label>Your email<input id="contactEmail" type="email" maxlength="120" required placeholder="you@example.com"></label><label>Subject<input id="contactSubject" maxlength="120" required placeholder="How can we help?"></label><label>Message<textarea id="contactMessage" rows="5" maxlength="3000" required placeholder="Write your message..."></textarea></label><button class="primary-button" type="submit">Prepare email message</button><p class="admin-hint" id="contactStatus">Your email app will open with your message ready to send.</p></form></article>
+          <article class="contact-card"><span class="contact-kicker">CONTENT & SAFETY</span><h2>Report a problem</h2><p>Tell us if a PDF is incorrect, a link is broken, or content needs review. Include the grade, subject, and unit in your email.</p><a class="small-button contact-link" href="mailto:support.edutubeethiopia@gmail.com?subject=EduTube%20Content%20Report">Report content issue</a></article>
+        </div>
+        <p class="contact-disclaimer">EduTube Ethiopia provides educational materials for learning support. Content may require review and may be updated. Students should follow their school curriculum and teachers’ guidance.</p>
+      </section>
       <section class="page" id="page-admin">
         <div class="page-heading"><div><span class="eyebrow">SECURE ADMIN WORKSPACE</span><h1>Content Manager</h1><p>Publish lessons directly to the EduTube Ethiopia database.</p></div><span class="admin-status" id="adminStatus">● Signed out</span></div>
         <div class="admin-warning" id="adminNotice">Admin access is protected by Supabase Authentication and Row Level Security. Students can continue watching published lessons without signing in.</div>
@@ -256,19 +251,19 @@
           </form>
           <div class="dashboard-panel"><div class="admin-toolbar"><h2>All database lessons</h2><button class="small-button" id="refreshAdmin" type="button">Refresh</button></div><div id="adminLessonList" class="activity-list"></div></div>
 
-          <div class="admin-toolbar"><div><h2>Notes publishing studio</h2><p>Add notes for Notes → Type → Grade → Subject → Unit.</p></div></div>
-          <form id="noteForm" class="admin-form">
+          <div class="admin-toolbar"><div><h2>PDF Notes Publishing Studio</h2><p>Upload official PDF learning materials. Students can view published notes only.</p></div></div>
+          <form id="noteForm" class="admin-form" enctype="multipart/form-data">
             <div class="form-row"><label>Note type<select id="noteType" required><option value="video">Video Notes</option><option value="competency">Competency Based Notes</option></select></label><label>Grade<select id="noteGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label></div>
-            <div class="form-row"><label>Subject<select id="noteSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label><label>Unit<input id="noteUnit" required maxlength="40" placeholder="e.g. Unit 1"></label></div>
-            <label>Note title<input id="noteTitle" required maxlength="120" placeholder="e.g. Physical Quantities and Measurement"></label>
-            <label>Video URL (optional)<input id="noteVideoUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></label>
-            <label>Note content (leave a blank line between paragraphs)<textarea id="noteContent" rows="8" placeholder="Write the note here..."></textarea></label>
-            <label>PDF study material (optional)<input id="notePdfFile" type="file" accept="application/pdf,.pdf"><small class="admin-hint">PDF only · max 20 MB. Students can view published PDFs; file download links are not displayed.</small></label>
-            <label class="publish-check"><input id="notePublish" type="checkbox" checked> Publish immediately (visible to everyone)</label>
-            <button class="primary-button" type="submit">Save note to Supabase</button>
-            <p class="admin-hint" id="noteAdminMsg"></p>
+            <div class="form-row"><label>Subject<select id="noteSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label><label>Unit<input id="noteUnit" required maxlength="60" placeholder="e.g. Unit 1"></label></div>
+            <label>PDF title<input id="noteTitle" required maxlength="120" placeholder="e.g. Physical Quantities and Measurement"></label>
+            <label>Related video URL (optional)<input id="noteVideoUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></label>
+            <label class="pdf-file-label">PDF file<input id="notePdfFile" type="file" accept="application/pdf,.pdf" required><small>PDF only · maximum 20 MB</small></label>
+            <label class="publish-check"><input id="notePublish" type="checkbox" checked> Publish immediately</label>
+            <label class="publish-check"><input id="noteAllowDownload" type="checkbox"> Allow student download (off by default)</label>
+            <button class="primary-button" type="submit">Upload PDF Note</button>
+            <p class="admin-hint" id="noteAdminMsg" aria-live="polite"></p>
           </form>
-          <div class="dashboard-panel"><div class="admin-toolbar"><h2>All database notes</h2><button class="small-button" id="refreshAdminNotes" type="button">Refresh</button></div><div id="adminNoteList" class="activity-list"></div></div>
+          <div class="dashboard-panel"><div class="admin-toolbar"><h2>PDF Notes Library</h2><button class="small-button" id="refreshAdminNotes" type="button">Refresh</button></div><div id="adminNoteList" class="activity-list"></div></div>
         </div>
       </section>
 

@@ -614,7 +614,6 @@ function isEdutubeAdmin(user){return Boolean(user&&user.app_metadata&&['admin','
 function isEdutubeSuperAdmin(user){return Boolean(user&&user.app_metadata&&user.app_metadata.role==='super_admin');}
 function updateAdminView(user){
   edutubeAdminUser=isEdutubeAdmin(user)?user:null;
-  document.querySelectorAll('[data-page="admin"]').forEach(el=>el.classList.toggle("hidden",!edutubeAdminUser));
   $('adminLoginForm')?.classList.toggle('hidden',!!edutubeAdminUser);
   $('adminWorkspace')?.classList.toggle('hidden',!edutubeAdminUser);
   if($('adminStatus'))$('adminStatus').textContent=edutubeAdminUser?(isEdutubeSuperAdmin(user)?'● Super Admin':'● Admin'):'● Signed out';
@@ -910,491 +909,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-/* EduTube Ethiopia — Notes
-   Flow: Notes → Video Notes / Competency Based Notes → Grade → Subject → Unit → Note
-   Loads from Supabase table "notes" when available; otherwise uses the sample data below. */
+/* EduTube Ethiopia — Secure PDF Notes module
+   Students: published read-only viewer. Admin: PDF upload and publication controls.
+   Storage bucket: edutube-notes (PRIVATE). */
 (function () {
   "use strict";
-
-  // ---- translations (merged into the existing translations object) ----
-  Object.assign(translations.en, {
-    navNotes: "Notes", notesEyebrow: "STUDY MATERIALS", notesTitle: "Notes",
-    notesIntro: "Read notes by grade, subject and unit.",
-    noteVideo: "Video Notes", noteVideoDesc: "Notes that go with the video lessons",
-    noteCompetency: "Competency Based Notes", noteCompetencyDesc: "Notes organized by competency",
-    pickType: "Choose a note type", pickGrade: "Choose your grade", pickSubject: "Choose a subject",
-    pickUnit: "Choose a unit", pickNote: "Choose a note", noNotes: "No notes have been added here yet.",
-    notesBack: "Back", watchVideo: "Watch video ↗", unitsCount: "{n} unit(s)"
-  });
-  Object.assign(translations.am, {
-    navNotes: "ማስታወሻ", notesEyebrow: "የጥናት ቁሳቁሶች", notesTitle: "ማስታወሻዎች",
-    notesIntro: "በክፍል፣ በትምህርትና በምዕራፍ ማስታወሻዎችን ያንብቡ።",
-    noteVideo: "የቪዲዮ ማስታወሻ", noteVideoDesc: "ከቪዲዮ ትምህርቶች ጋር የሚሄዱ ማስታወሻዎች",
-    noteCompetency: "በብቃት ላይ የተመሠረተ ማስታወሻ", noteCompetencyDesc: "በብቃት የተደራጁ ማስታወሻዎች",
-    pickType: "የማስታወሻ አይነት ይምረጡ", pickGrade: "ክፍልዎን ይምረጡ", pickSubject: "ትምህርት ይምረጡ",
-    pickUnit: "ምዕራፍ ይምረጡ", pickNote: "ማስታወሻ ይምረጡ", noNotes: "እዚህ እስካሁን ምንም ማስታወሻ አልተጨመረም።",
-    notesBack: "ተመለስ", watchVideo: "ቪዲዮውን ይመልከቱ ↗", unitsCount: "{n} ምዕራፍ"
-  });
-
+  const BUCKET = "edutube-notes";
+  const MAX_PDF_BYTES = 20 * 1024 * 1024;
   const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Biology", "English", "Geography", "History", "Economics", "Computer Science", "SAT"];
   const GRADES = ["9", "10", "11", "12"];
-
-  // type: "video" | "competency"
-  let notes = [
-    { id: "s1", type: "video", grade: "11", subject: "Physics", unit: "Unit 1", title: "Physical Quantities and Measurement",
-      content: "Physical quantities are things we can measure, such as length, mass and time.\n\nFundamental quantities cannot be defined using other quantities. Derived quantities are formed by combining fundamental ones, for example speed = distance ÷ time.",
-      video_url: "" },
-    { id: "s2", type: "competency", grade: "11", subject: "Physics", unit: "Unit 1", title: "Competency: Measuring and Using Units",
-      content: "By the end of this unit you should be able to:\n\n• Name the SI base units.\n• Convert between units correctly.\n• Choose a suitable instrument for a measurement.",
-      video_url: "" }
-  ];
-
+  let notes = [];
   const state = { type: null, grade: null, subject: null, unit: null, note: null };
-  const root = () => document.getElementById("notesRoot");
-  const typeLabel = (ty) => t(ty === "competency" ? "noteCompetency" : "noteVideo");
-  const gradeLabel = (g) => t("grade") + " " + g;
-  const natural = (a, b) => a.localeCompare(b, undefined, { numeric: true });
-
-  function h(tag, cls, text) {
-    const e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text != null) e.textContent = text;
-    return e;
+  const $ = id => document.getElementById(id);
+  const client = () => typeof supabaseClient !== "undefined" ? supabaseClient : null;
+  const isAdmin = () => { try { return typeof isEdutubeAdmin === "function" && isEdutubeAdmin(window.__edutubeSessionUser); } catch (_) { return false; } };
+  function h(tag, cls, value) { const e=document.createElement(tag); if(cls)e.className=cls; if(value!=null)e.textContent=value; return e; }
+  function msg(value, error=false) { const m=$("noteAdminMsg"); if(m){m.textContent=value;m.classList.toggle("admin-error",error);} }
+  function t(key) { try { return typeof window.t === "function" ? window.t(key) : key; } catch (_) { return key; } }
+  function typeName(v){return v==="competency"?"Competency Based Notes":"Video Notes";}
+  function filtered(){return notes.filter(n=>n.note_type===state.type&&String(n.grade)===state.grade&&n.subject===state.subject);}
+  function render(){
+    const root=$("notesRoot"); if(!root)return; root.replaceChildren();
+    const crumb=h("div","notes-crumbs"); const levels=[{v:"Notes",reset:()=>Object.assign(state,{type:null,grade:null,subject:null,unit:null,note:null})}];
+    if(state.type)levels.push({v:typeName(state.type),reset:()=>Object.assign(state,{grade:null,subject:null,unit:null,note:null})});
+    if(state.grade)levels.push({v:"Grade "+state.grade,reset:()=>Object.assign(state,{subject:null,unit:null,note:null})});
+    if(state.subject)levels.push({v:state.subject,reset:()=>Object.assign(state,{unit:null,note:null})});
+    if(state.unit)levels.push({v:state.unit,reset:()=>state.note=null});
+    levels.forEach((x,i)=>{if(i)crumb.append(" › ");if(i===levels.length-1)crumb.append(h("span","current",x.v));else{const b=h("button","",x.v);b.type="button";b.onclick=()=>{x.reset();render();};crumb.append(b);}}); root.append(crumb);
+    if(state.note){
+      const n=state.note, panel=h("article","note-article"); panel.append(h("span","eyebrow",`${typeName(n.note_type)} · Grade ${n.grade} · ${n.subject} · ${n.unit}`),h("h2","",n.title));
+      const status=h("p","pdf-viewer-status","Preparing secure PDF viewer…");panel.append(status);const frame=h("iframe","pdf-viewer");frame.title=n.title+" PDF";frame.loading="lazy";frame.setAttribute("referrerpolicy","no-referrer");panel.append(frame);
+      const actions=h("div","pdf-view-actions");if(n.video_url&&/^https:\/\//i.test(n.video_url)){const a=h("a","small-button","Related video ↗");a.href=n.video_url;a.target="_blank";a.rel="noopener noreferrer";actions.append(a);}panel.append(actions);root.append(panel);loadPdfForViewer(n,frame,status,actions);
+    } else if(!state.type){root.append(h("h2","notes-step-title","Choose note collection"));const g=h("div","notes-grid wide");[["video","Video Notes","Notes linked to video lessons"],["competency","Competency Based Notes","Curriculum-aligned competency notes"]].forEach(([v,a,b])=>g.append(makeCard(a,b,()=>{state.type=v;render();})));root.append(g);
+    } else if(!state.grade){root.append(h("h2","notes-step-title","Choose grade"));const g=h("div","notes-grid");GRADES.forEach(v=>g.append(makeCard("Grade "+v,"",()=>{state.grade=v;render();})));root.append(g);
+    } else if(!state.subject){root.append(h("h2","notes-step-title","Choose subject"));const g=h("div","notes-grid");SUBJECTS.forEach(v=>{const count=new Set(notes.filter(n=>n.note_type===state.type&&String(n.grade)===state.grade&&n.subject===v).map(n=>n.unit)).size;g.append(makeCard(v,count+" unit(s)",()=>{state.subject=v;render();}));});root.append(g);
+    } else if(!state.unit){root.append(h("h2","notes-step-title","Choose unit"));const units=[...new Set(filtered().map(n=>n.unit))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));if(!units.length)root.append(h("div","empty-state","No published PDF notes are available in this section yet."));const g=h("div","notes-grid");units.forEach(v=>g.append(makeCard(v,"",()=>{state.unit=v;render();})));root.append(g);
+    } else {root.append(h("h2","notes-step-title","Available PDF notes"));const g=h("div","notes-grid wide");filtered().filter(n=>n.unit===state.unit).forEach(n=>g.append(makeCard("▤  "+n.title,"PDF learning material",()=>{state.note=n;render();})));root.append(g);}
+    if(state.type){const back=h("button","small-button notes-back","← Back");back.type="button";back.onclick=()=>{if(state.note)state.note=null;else if(state.unit)state.unit=null;else if(state.subject)state.subject=null;else if(state.grade)state.grade=null;else state.type=null;render();};root.append(back);}
   }
-
-  function card(big, title, desc, onClick) {
-    const b = h("button", "notes-card");
-    b.type = "button";
-    if (big) b.append(h("span", "big", big));
-    b.append(h("b", null, title));
-    if (desc) b.append(h("small", null, desc));
-    b.addEventListener("click", onClick);
-    return b;
+  function makeCard(title,desc,fn){const b=h("button","notes-card");b.type="button";b.append(h("b","",title));if(desc)b.append(h("small","",desc));b.onclick=fn;return b;}
+  async function loadPdfForViewer(note,frame,status,actions){
+    const c=client();if(!c){status.textContent="PDF service is not configured. Please contact support.";return;}
+    const {data,error}=await c.storage.from(note.pdf_bucket||BUCKET).createSignedUrl(note.pdf_path,120);
+    if(error||!data?.signedUrl){status.textContent="This PDF is temporarily unavailable. Please try again later.";return;}
+    frame.src=data.signedUrl;status.textContent="Secure PDF viewer · Read-only";
+    if(note.allow_download){const a=h("a","small-button","Download PDF");a.href=data.signedUrl;a.download=(note.title||"EduTube-Note")+".pdf";a.rel="noopener noreferrer";actions.append(a);}
   }
-
-  const current = () => notes.filter(n =>
-    n.type === state.type && n.grade === state.grade && n.subject === state.subject);
-  const unitsOf = () => [...new Set(current().map(n => n.unit))].sort(natural);
-  const notesOfUnit = () => current().filter(n => n.unit === state.unit);
-
-  function crumbs() {
-    const items = [{ label: t("navNotes"), reset: () => Object.assign(state, { type: null, grade: null, subject: null, unit: null, note: null }) }];
-    if (state.type) items.push({ label: typeLabel(state.type), reset: () => Object.assign(state, { grade: null, subject: null, unit: null, note: null }) });
-    if (state.grade) items.push({ label: gradeLabel(state.grade), reset: () => Object.assign(state, { subject: null, unit: null, note: null }) });
-    if (state.subject) items.push({ label: state.subject, reset: () => Object.assign(state, { unit: null, note: null }) });
-    if (state.unit) items.push({ label: state.unit, reset: () => Object.assign(state, { note: null }) });
-    const bar = h("div", "notes-crumbs");
-    items.forEach((it, i) => {
-      if (i) bar.append(h("span", null, "›"));
-      if (i === items.length - 1) bar.append(h("span", "current", it.label));
-      else {
-        const b = h("button", null, it.label);
-        b.type = "button";
-        b.addEventListener("click", () => { it.reset(); render(); });
-        bar.append(b);
-      }
-    });
-    return bar;
+  async function loadPublicNotes(){const c=client();if(!c)return;const {data,error}=await c.from("notes").select("id,note_type,grade,subject,unit,title,video_url,is_published,pdf_path,pdf_bucket,allow_download").eq("is_published",true).not("pdf_path","is",null).order("created_at",{ascending:false});if(error){console.warn("PDF notes could not load",error.message);return;}notes=(data||[]);render();}
+  async function requireAdmin(){const c=client();if(!c?.auth)return null;const {data}=await c.auth.getSession();const user=data?.session?.user;return user&&typeof isEdutubeAdmin==="function"&&isEdutubeAdmin(user)?user:null;}
+  async function savePdf(event){event.preventDefault();const c=client();if(!c){msg("Supabase is unavailable.",true);return;}const user=await requireAdmin();if(!user){msg("Admin sign-in required. Students cannot upload or edit notes.",true);return;}
+    const file=$("notePdfFile")?.files?.[0];if(!file){msg("Choose a PDF file first.",true);return;}if(file.type!=="application/pdf"&&!file.name.toLowerCase().endsWith(".pdf")){msg("Only PDF files are accepted.",true);return;}if(file.size>MAX_PDF_BYTES){msg("PDF is larger than the 20 MB limit.",true);return;}
+    const title=$("noteTitle").value.trim(),unit=$("noteUnit").value.trim();if(!title||!unit){msg("Enter the PDF title and unit.",true);return;}
+    const btn=event.submitter;if(btn){btn.disabled=true;btn.textContent="Uploading PDF…";}
+    const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");const path=`${user.id}/${Date.now()}-${safeName}`;
+    try{const up=await c.storage.from(BUCKET).upload(path,file,{contentType:"application/pdf",upsert:false});if(up.error)throw up.error;
+      const payload={note_type:$("noteType").value,grade:Number($("noteGrade").value),subject:$("noteSubject").value,unit,title,video_url:$("noteVideoUrl").value.trim()||null,content:"",pdf_path:path,pdf_bucket:BUCKET,allow_download:$("noteAllowDownload").checked,is_published:$("notePublish").checked,created_by:user.id};
+      const ins=await c.from("notes").insert(payload);if(ins.error){await c.storage.from(BUCKET).remove([path]);throw ins.error;}
+      $("noteForm").reset();msg(payload.is_published?"PDF uploaded and published successfully.":"PDF uploaded as a draft.");await loadAdminNotes();await loadPublicNotes();
+    }catch(e){msg("Upload failed: "+(e.message||"Unknown error"),true);}finally{if(btn){btn.disabled=false;btn.textContent="Upload PDF Note";}}
   }
-
-  function goBack() {
-    if (state.note) { const single = notesOfUnit().length === 1; state.note = null; if (single) state.unit = null; }
-    else if (state.unit) state.unit = null;
-    else if (state.subject) state.subject = null;
-    else if (state.grade) state.grade = null;
-    else if (state.type) state.type = null;
-    render();
+  async function loadAdminNotes(){const list=$("adminNoteList");if(!list)return;const user=await requireAdmin();if(!user){list.textContent="Sign in with an administrator account to manage PDF notes.";return;}const c=client();list.textContent="Loading PDF library…";const {data,error}=await c.from("notes").select("id,title,note_type,grade,subject,unit,is_published,allow_download,pdf_path").not("pdf_path","is",null).order("created_at",{ascending:false});if(error){list.textContent="Could not load notes: "+error.message;return;}list.replaceChildren();if(!data?.length){list.textContent="No PDF notes uploaded yet.";return;}
+    data.forEach(row=>{const item=h("div","admin-lesson-row"),info=h("div");info.append(h("strong","",row.title),h("small","",`${typeName(row.note_type)} · Grade ${row.grade} · ${row.subject} · ${row.unit} · ${row.is_published?"Published":"Draft"} · Downloads ${row.allow_download?"On":"Off"}`));const actions=h("div","admin-row-actions");const pub=h("button","small-button",row.is_published?"Unpublish":"Publish");pub.type="button";pub.onclick=async()=>{const r=await c.from("notes").update({is_published:!row.is_published}).eq("id",row.id);if(r.error){msg(r.error.message,true);return;}await loadAdminNotes();await loadPublicNotes();};const dl=h("button","small-button",row.allow_download?"Disable download":"Allow download");dl.type="button";dl.onclick=async()=>{const r=await c.from("notes").update({allow_download:!row.allow_download}).eq("id",row.id);if(r.error){msg(r.error.message,true);return;}loadAdminNotes();};const del=h("button","small-button delete-button","Delete");del.type="button";del.onclick=async()=>{if(!confirm(`Delete PDF note “${row.title}”?`))return;const r=await c.from("notes").delete().eq("id",row.id);if(r.error){msg(r.error.message,true);return;}const rm=await c.storage.from(BUCKET).remove([row.pdf_path]);if(rm.error)msg("Record deleted, but stored PDF cleanup failed: "+rm.error.message,true);await loadAdminNotes();await loadPublicNotes();};actions.append(pub,dl,del);item.append(info,actions);list.append(item);});
   }
-
-  function openNote(n) { state.note = n; render(); }
-
-  function render() {
-    const el = root();
-    if (!el) return;
-    el.replaceChildren(crumbs());
-
-    if (state.note) {
-      const n = state.note;
-      const art = h("article", "note-article");
-      art.append(h("span", "eyebrow", typeLabel(n.type) + " · " + gradeLabel(n.grade) + " · " + n.subject + " · " + n.unit));
-      art.append(h("h2", null, n.title));
-      if (/^https?:\/\//i.test(n.video_url || "")) {
-        const a = h("a", "small-button watch note-video", t("watchVideo"));
-        a.href = n.video_url; a.target = "_blank"; a.rel = "noopener noreferrer";
-        art.append(a);
-      }
-      String(n.content || "").split(/\n{2,}/).forEach(p => { if (p.trim()) art.append(h("p", null, p.trim())); });
-      if (n.pdf_url) {
-        const pdf = document.createElement("iframe"); pdf.className = "note-pdf-viewer";
-        pdf.title = "PDF study material: " + n.title; pdf.src = n.pdf_url + "#toolbar=0&navpanes=0&scrollbar=1";
-        pdf.setAttribute("loading", "lazy"); art.append(pdf);
-        art.append(h("p", "pdf-readonly-hint", "PDF preview · Student access is read-only"));
-      }
-      el.append(art);
-    } else if (!state.type) {
-      el.append(h("h2", "notes-step-title", t("pickType")));
-      const g = h("div", "notes-grid wide");
-      ["video", "competency"].forEach(ty =>
-        g.append(card("", typeLabel(ty), t(ty === "competency" ? "noteCompetencyDesc" : "noteVideoDesc"), () => { state.type = ty; render(); })));
-      el.append(g);
-    } else if (!state.grade) {
-      el.append(h("h2", "notes-step-title", t("pickGrade")));
-      const g = h("div", "notes-grid");
-      GRADES.forEach(gr => g.append(card(gr.padStart(2, "0"), gradeLabel(gr), "", () => { state.grade = gr; render(); })));
-      el.append(g);
-    } else if (!state.subject) {
-      el.append(h("h2", "notes-step-title", t("pickSubject")));
-      const g = h("div", "notes-grid");
-      SUBJECTS.forEach(s => {
-        const count = [...new Set(notes.filter(n => n.type === state.type && n.grade === state.grade && n.subject === s).map(n => n.unit))].length;
-        g.append(card("", s, t("unitsCount", { n: count }), () => { state.subject = s; render(); }));
-      });
-      el.append(g);
-    } else if (!state.unit) {
-      el.append(h("h2", "notes-step-title", t("pickUnit")));
-      const units = unitsOf();
-      if (!units.length) el.append(h("div", "empty-state", t("noNotes")));
-      else {
-        const g = h("div", "notes-grid");
-        units.forEach(u => g.append(card("", u, "", () => {
-          state.unit = u;
-          const list = notesOfUnit();
-          if (list.length === 1) state.note = list[0];
-          render();
-        })));
-        el.append(g);
-      }
-    } else {
-      el.append(h("h2", "notes-step-title", t("pickNote")));
-      const g = h("div", "notes-grid wide");
-      notesOfUnit().forEach(n => g.append(card("", n.title, "", () => openNote(n))));
-      el.append(g);
-    }
-
-    if (state.type) {
-      const back = h("button", "small-button notes-back", "← " + t("notesBack"));
-      back.type = "button";
-      back.addEventListener("click", goBack);
-      el.append(back);
-    }
-  }
-
-  async function loadRemote() {
-    try {
-      if (typeof supabaseClient === "undefined" || !supabaseClient) return;
-      const { data, error } = await supabaseClient.from("notes").select("*").eq("is_published", true);
-      if (error || !data || !data.length) return;
-      notes = await Promise.all(data.map(async r => {
-        let pdf_url = "";
-        if (r.pdf_path && supabaseClient.storage) {
-          const signed = await supabaseClient.storage.from("study-notes").createSignedUrl(r.pdf_path, 3600, { download: false });
-          if (!signed.error) pdf_url = signed.data.signedUrl;
-        }
-        return { id: "db" + r.id, type: r.note_type === "competency" ? "competency" : "video", grade: String(r.grade),
-          subject: r.subject, unit: r.unit, title: r.title, content: r.content || "", video_url: r.video_url || "", pdf_url };
-      }));
-      render();
-    } catch (e) { console.warn("Notes: using local sample data.", e); }
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll('[data-page="notes"]').forEach(b => b.addEventListener("click", () => {
-      Object.assign(state, { type: null, grade: null, subject: null, unit: null, note: null });
-      render();
-    }));
-    const lang = document.getElementById("languageButton");
-    if (lang) lang.addEventListener("click", render);
-    render();
-    loadRemote();
-  });
-})();
-
-
-
-
-
-
-
-/* EduTube Ethiopia — Notes
-   Flow: Notes → Video Notes / Competency Based Notes → Grade → Subject → Unit → Note
-   Loads from Supabase table "notes" when available; otherwise uses the sample data below. */
-(function () {
-  "use strict";
-
-  // ---- translations (merged into the existing translations object) ----
-  Object.assign(translations.en, {
-    navNotes: "Notes", notesEyebrow: "STUDY MATERIALS", notesTitle: "Notes",
-    notesIntro: "Read notes by grade, subject and unit.",
-    noteVideo: "Video Notes", noteVideoDesc: "Notes that go with the video lessons",
-    noteCompetency: "Competency Based Notes", noteCompetencyDesc: "Notes organized by competency",
-    pickType: "Choose a note type", pickGrade: "Choose your grade", pickSubject: "Choose a subject",
-    pickUnit: "Choose a unit", pickNote: "Choose a note", noNotes: "No notes have been added here yet.",
-    notesBack: "Back", watchVideo: "Watch video ↗", unitsCount: "{n} unit(s)"
-  });
-  Object.assign(translations.am, {
-    navNotes: "ማስታወሻ", notesEyebrow: "የጥናት ቁሳቁሶች", notesTitle: "ማስታወሻዎች",
-    notesIntro: "በክፍል፣ በትምህርትና በምዕራፍ ማስታወሻዎችን ያንብቡ።",
-    noteVideo: "የቪዲዮ ማስታወሻ", noteVideoDesc: "ከቪዲዮ ትምህርቶች ጋር የሚሄዱ ማስታወሻዎች",
-    noteCompetency: "በብቃት ላይ የተመሠረተ ማስታወሻ", noteCompetencyDesc: "በብቃት የተደራጁ ማስታወሻዎች",
-    pickType: "የማስታወሻ አይነት ይምረጡ", pickGrade: "ክፍልዎን ይምረጡ", pickSubject: "ትምህርት ይምረጡ",
-    pickUnit: "ምዕራፍ ይምረጡ", pickNote: "ማስታወሻ ይምረጡ", noNotes: "እዚህ እስካሁን ምንም ማስታወሻ አልተጨመረም።",
-    notesBack: "ተመለስ", watchVideo: "ቪዲዮውን ይመልከቱ ↗", unitsCount: "{n} ምዕራፍ"
-  });
-
-  const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Biology", "English", "Geography", "History", "Economics", "Computer Science", "SAT"];
-  const GRADES = ["9", "10", "11", "12"];
-
-  // type: "video" | "competency"
-  let notes = [
-    { id: "s1", type: "video", grade: "11", subject: "Physics", unit: "Unit 1", title: "Physical Quantities and Measurement",
-      content: "Physical quantities are things we can measure, such as length, mass and time.\n\nFundamental quantities cannot be defined using other quantities. Derived quantities are formed by combining fundamental ones, for example speed = distance ÷ time.",
-      video_url: "" },
-    { id: "s2", type: "competency", grade: "11", subject: "Physics", unit: "Unit 1", title: "Competency: Measuring and Using Units",
-      content: "By the end of this unit you should be able to:\n\n• Name the SI base units.\n• Convert between units correctly.\n• Choose a suitable instrument for a measurement.",
-      video_url: "" }
-  ];
-
-  const state = { type: null, grade: null, subject: null, unit: null, note: null };
-  const root = () => document.getElementById("notesRoot");
-  const typeLabel = (ty) => t(ty === "competency" ? "noteCompetency" : "noteVideo");
-  const gradeLabel = (g) => t("grade") + " " + g;
-  const natural = (a, b) => a.localeCompare(b, undefined, { numeric: true });
-
-  function h(tag, cls, text) {
-    const e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text != null) e.textContent = text;
-    return e;
-  }
-
-  function card(big, title, desc, onClick) {
-    const b = h("button", "notes-card");
-    b.type = "button";
-    if (big) b.append(h("span", "big", big));
-    b.append(h("b", null, title));
-    if (desc) b.append(h("small", null, desc));
-    b.addEventListener("click", onClick);
-    return b;
-  }
-
-  const current = () => notes.filter(n =>
-    n.type === state.type && n.grade === state.grade && n.subject === state.subject);
-  const unitsOf = () => [...new Set(current().map(n => n.unit))].sort(natural);
-  const notesOfUnit = () => current().filter(n => n.unit === state.unit);
-
-  function crumbs() {
-    const items = [{ label: t("navNotes"), reset: () => Object.assign(state, { type: null, grade: null, subject: null, unit: null, note: null }) }];
-    if (state.type) items.push({ label: typeLabel(state.type), reset: () => Object.assign(state, { grade: null, subject: null, unit: null, note: null }) });
-    if (state.grade) items.push({ label: gradeLabel(state.grade), reset: () => Object.assign(state, { subject: null, unit: null, note: null }) });
-    if (state.subject) items.push({ label: state.subject, reset: () => Object.assign(state, { unit: null, note: null }) });
-    if (state.unit) items.push({ label: state.unit, reset: () => Object.assign(state, { note: null }) });
-    const bar = h("div", "notes-crumbs");
-    items.forEach((it, i) => {
-      if (i) bar.append(h("span", null, "›"));
-      if (i === items.length - 1) bar.append(h("span", "current", it.label));
-      else {
-        const b = h("button", null, it.label);
-        b.type = "button";
-        b.addEventListener("click", () => { it.reset(); render(); });
-        bar.append(b);
-      }
-    });
-    return bar;
-  }
-
-  function goBack() {
-    if (state.note) { const single = notesOfUnit().length === 1; state.note = null; if (single) state.unit = null; }
-    else if (state.unit) state.unit = null;
-    else if (state.subject) state.subject = null;
-    else if (state.grade) state.grade = null;
-    else if (state.type) state.type = null;
-    render();
-  }
-
-  function openNote(n) { state.note = n; render(); }
-
-  function render() {
-    const el = root();
-    if (!el) return;
-    el.replaceChildren(crumbs());
-
-    if (state.note) {
-      const n = state.note;
-      const art = h("article", "note-article");
-      art.append(h("span", "eyebrow", typeLabel(n.type) + " · " + gradeLabel(n.grade) + " · " + n.subject + " · " + n.unit));
-      art.append(h("h2", null, n.title));
-      if (/^https?:\/\//i.test(n.video_url || "")) {
-        const a = h("a", "small-button watch note-video", t("watchVideo"));
-        a.href = n.video_url; a.target = "_blank"; a.rel = "noopener noreferrer";
-        art.append(a);
-      }
-      String(n.content || "").split(/\n{2,}/).forEach(p => { if (p.trim()) art.append(h("p", null, p.trim())); });
-      if (n.pdf_url) {
-        const pdf = document.createElement("iframe"); pdf.className = "note-pdf-viewer";
-        pdf.title = "PDF study material: " + n.title; pdf.src = n.pdf_url + "#toolbar=0&navpanes=0&scrollbar=1";
-        pdf.setAttribute("loading", "lazy"); art.append(pdf);
-        art.append(h("p", "pdf-readonly-hint", "PDF preview · Student access is read-only"));
-      }
-      el.append(art);
-    } else if (!state.type) {
-      el.append(h("h2", "notes-step-title", t("pickType")));
-      const g = h("div", "notes-grid wide");
-      ["video", "competency"].forEach(ty =>
-        g.append(card("", typeLabel(ty), t(ty === "competency" ? "noteCompetencyDesc" : "noteVideoDesc"), () => { state.type = ty; render(); })));
-      el.append(g);
-    } else if (!state.grade) {
-      el.append(h("h2", "notes-step-title", t("pickGrade")));
-      const g = h("div", "notes-grid");
-      GRADES.forEach(gr => g.append(card(gr.padStart(2, "0"), gradeLabel(gr), "", () => { state.grade = gr; render(); })));
-      el.append(g);
-    } else if (!state.subject) {
-      el.append(h("h2", "notes-step-title", t("pickSubject")));
-      const g = h("div", "notes-grid");
-      SUBJECTS.forEach(s => {
-        const count = [...new Set(notes.filter(n => n.type === state.type && n.grade === state.grade && n.subject === s).map(n => n.unit))].length;
-        g.append(card("", s, t("unitsCount", { n: count }), () => { state.subject = s; render(); }));
-      });
-      el.append(g);
-    } else if (!state.unit) {
-      el.append(h("h2", "notes-step-title", t("pickUnit")));
-      const units = unitsOf();
-      if (!units.length) el.append(h("div", "empty-state", t("noNotes")));
-      else {
-        const g = h("div", "notes-grid");
-        units.forEach(u => g.append(card("", u, "", () => {
-          state.unit = u;
-          const list = notesOfUnit();
-          if (list.length === 1) state.note = list[0];
-          render();
-        })));
-        el.append(g);
-      }
-    } else {
-      el.append(h("h2", "notes-step-title", t("pickNote")));
-      const g = h("div", "notes-grid wide");
-      notesOfUnit().forEach(n => g.append(card("", n.title, "", () => openNote(n))));
-      el.append(g);
-    }
-
-    if (state.type) {
-      const back = h("button", "small-button notes-back", "← " + t("notesBack"));
-      back.type = "button";
-      back.addEventListener("click", goBack);
-      el.append(back);
-    }
-  }
-
-  async function loadRemote() {
-    try {
-      if (typeof supabaseClient === "undefined" || !supabaseClient) return;
-      const { data, error } = await supabaseClient.from("notes").select("*").eq("is_published", true);
-      if (error || !data) return;
-      notes = await Promise.all(data.map(async r => {
-        let pdf_url = "";
-        if (r.pdf_path && supabaseClient.storage) {
-          const signed = await supabaseClient.storage.from("study-notes").createSignedUrl(r.pdf_path, 3600, { download: false });
-          if (!signed.error) pdf_url = signed.data.signedUrl;
-        }
-        return { id: "db" + r.id, type: r.note_type === "competency" ? "competency" : "video", grade: String(r.grade),
-          subject: r.subject, unit: r.unit, title: r.title, content: r.content || "", video_url: r.video_url || "", pdf_url };
-      }));
-      render();
-    } catch (e) { console.warn("Notes: using local sample data.", e); }
-  }
-
-
-  // ================= Admin: Notes publishing studio =================
-  const $a = (id) => document.getElementById(id);
-  function noteMsg(text, isErr) {
-    const m = $a("noteAdminMsg");
-    if (!m) return;
-    m.textContent = text;
-    m.classList.toggle("admin-error", !!isErr);
-  }
-
-  async function loadAdminNotes() {
-    const list = $a("adminNoteList");
-    if (!list || typeof supabaseClient === "undefined" || !supabaseClient) return;
-    list.textContent = "Loading notes…";
-    const { data, error } = await supabaseClient.from("notes").select("*").order("created_at", { ascending: false });
-    if (error) { list.textContent = error.message; return; }
-    list.replaceChildren();
-    if (!data.length) { list.textContent = "No notes yet. Add your first note above."; return; }
-    data.forEach(row => {
-      const item = h("div", "admin-lesson-row");
-      const info = h("div");
-      info.append(h("strong", null, row.title));
-      info.append(h("small", null, (row.note_type === "competency" ? "Competency" : "Video") + " · Grade " + row.grade + " · " + row.subject + " · " + row.unit + " · " + (row.is_published ? "Published" : "Draft")));
-      const actions = h("div", "admin-row-actions");
-      const toggle = h("button", "small-button", row.is_published ? "Unpublish" : "Publish");
-      toggle.type = "button";
-      toggle.addEventListener("click", async () => {
-        const { error: e } = await supabaseClient.from("notes").update({ is_published: !row.is_published }).eq("id", row.id);
-        if (e) { noteMsg("Update failed: " + e.message, true); return; }
-        await loadAdminNotes(); await loadRemote();
-      });
-      const del = h("button", "small-button delete-button", "Delete");
-      del.type = "button";
-      del.addEventListener("click", async () => {
-        if (!confirm("Permanently delete “" + row.title + "”?")) return;
-        const { error: e } = await supabaseClient.from("notes").delete().eq("id", row.id);
-        if (e) { noteMsg("Delete failed: " + e.message, true); return; }
-        await loadAdminNotes(); await loadRemote();
-      });
-      actions.append(toggle, del);
-      item.append(info, actions);
-      list.append(item);
-    });
-  }
-
-  async function saveNote(event) {
-    event.preventDefault();
-    if (!supabaseClient?.auth) { noteMsg("Supabase is unavailable.", true); return; }
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!isEdutubeAdmin(session?.user)) { noteMsg("Admin permission required.", true); return; }
-    const file = $a("notePdfFile")?.files?.[0] || null;
-    if (file && (file.type !== "application/pdf" || file.size > 20 * 1024 * 1024)) { noteMsg("Choose a PDF file smaller than 20 MB.", true); return; }
-    const payload = { note_type: $a("noteType").value, grade: Number($a("noteGrade").value), subject: $a("noteSubject").value,
-      unit: $a("noteUnit").value.trim(), title: $a("noteTitle").value.trim(), video_url: $a("noteVideoUrl").value.trim(),
-      content: $a("noteContent").value.trim(), is_published: $a("notePublish").checked };
-    const btn = event.submitter;
-    if (btn) { btn.disabled = true; btn.textContent = "Uploading & saving…"; }
-    try {
-      if (file) {
-        const cleanName = file.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g, "-").slice(-100);
-        const path = `${payload.grade}/${Date.now()}-${cleanName}`;
-        const { error: uploadError } = await supabaseClient.storage.from("study-notes").upload(path, file, { contentType: "application/pdf", upsert: false });
-        if (uploadError) throw uploadError;
-        payload.pdf_path = path;
-      }
-      const { error } = await supabaseClient.from("notes").insert(payload);
-      if (error) throw error;
-      $a("noteTitle").value = ""; $a("noteContent").value = ""; $a("noteVideoUrl").value = "";
-      if ($a("notePdfFile")) $a("notePdfFile").value = "";
-      noteMsg(payload.is_published ? "Note saved and published." : "Note saved as a draft.");
-      await loadAdminNotes(); await loadRemote();
-    } catch (e) { noteMsg("Could not save note: " + (e.message || "Unknown error"), true); }
-    finally { if (btn) { btn.disabled = false; btn.textContent = "Save note to Supabase"; } }
-  }
-
-  async function initAdminNotes() {
-    $a("noteForm")?.addEventListener("submit", saveNote);
-    $a("refreshAdminNotes")?.addEventListener("click", loadAdminNotes);
-    if (typeof supabaseClient === "undefined" || !supabaseClient || !supabaseClient.auth) return;
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (isEdutubeAdmin(session?.user)) loadAdminNotes();
-    supabaseClient.auth.onAuthStateChange((_e, s) => { if (isEdutubeAdmin(s?.user)) loadAdminNotes(); });
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll('[data-page="notes"]').forEach(b => b.addEventListener("click", () => {
-      Object.assign(state, { type: null, grade: null, subject: null, unit: null, note: null });
-      render();
-    }));
-    const lang = document.getElementById("languageButton");
-    if (lang) lang.addEventListener("click", render);
-    render();
-    loadRemote();
-    initAdminNotes();
+  function setupContact(){const f=$("contactForm");if(!f)return;f.addEventListener("submit",e=>{e.preventDefault();const name=$("contactName").value.trim(),email=$("contactEmail").value.trim(),subject=$("contactSubject").value.trim(),body=$("contactMessage").value.trim();const mailto="mailto:support.edutubeethiopia@gmail.com?subject="+encodeURIComponent("EduTube: "+subject)+"&body="+encodeURIComponent(`Name: ${name}\nReply email: ${email}\n\n${body}`);const status=$("contactStatus");status.textContent="Opening your email application…";window.location.href=mailto;});}
+  document.addEventListener("DOMContentLoaded",()=>{
+    document.querySelectorAll('[data-page="notes"]').forEach(b=>b.addEventListener("click",()=>{Object.assign(state,{type:null,grade:null,subject:null,unit:null,note:null});render();}));
+    $("noteForm")?.addEventListener("submit",savePdf);$("refreshAdminNotes")?.addEventListener("click",loadAdminNotes);setupContact();render();loadPublicNotes();loadAdminNotes();
+    const c=client();if(c?.auth)c.auth.onAuthStateChange(()=>{loadAdminNotes();});
   });
 })();
