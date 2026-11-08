@@ -614,6 +614,7 @@ function isEdutubeAdmin(user){return Boolean(user&&user.app_metadata&&['admin','
 function isEdutubeSuperAdmin(user){return Boolean(user&&user.app_metadata&&user.app_metadata.role==='super_admin');}
 function updateAdminView(user){
   edutubeAdminUser=isEdutubeAdmin(user)?user:null;
+  document.querySelectorAll('[data-page="admin"]').forEach(el=>el.classList.toggle("hidden",!edutubeAdminUser));
   $('adminLoginForm')?.classList.toggle('hidden',!!edutubeAdminUser);
   $('adminWorkspace')?.classList.toggle('hidden',!edutubeAdminUser);
   if($('adminStatus'))$('adminStatus').textContent=edutubeAdminUser?(isEdutubeSuperAdmin(user)?'● Super Admin':'● Admin'):'● Signed out';
@@ -1023,6 +1024,12 @@ document.addEventListener("DOMContentLoaded", () => {
         art.append(a);
       }
       String(n.content || "").split(/\n{2,}/).forEach(p => { if (p.trim()) art.append(h("p", null, p.trim())); });
+      if (n.pdf_url) {
+        const pdf = document.createElement("iframe"); pdf.className = "note-pdf-viewer";
+        pdf.title = "PDF study material: " + n.title; pdf.src = n.pdf_url + "#toolbar=0&navpanes=0&scrollbar=1";
+        pdf.setAttribute("loading", "lazy"); art.append(pdf);
+        art.append(h("p", "pdf-readonly-hint", "PDF preview · Student access is read-only"));
+      }
       el.append(art);
     } else if (!state.type) {
       el.append(h("h2", "notes-step-title", t("pickType")));
@@ -1077,11 +1084,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof supabaseClient === "undefined" || !supabaseClient) return;
       const { data, error } = await supabaseClient.from("notes").select("*").eq("is_published", true);
       if (error || !data || !data.length) return;
-      notes = data.map(r => ({
-        id: "db" + r.id,
-        type: r.note_type === "competency" ? "competency" : "video",
-        grade: String(r.grade), subject: r.subject, unit: r.unit,
-        title: r.title, content: r.content || "", video_url: r.video_url || ""
+      notes = await Promise.all(data.map(async r => {
+        let pdf_url = "";
+        if (r.pdf_path && supabaseClient.storage) {
+          const signed = await supabaseClient.storage.from("study-notes").createSignedUrl(r.pdf_path, 3600, { download: false });
+          if (!signed.error) pdf_url = signed.data.signedUrl;
+        }
+        return { id: "db" + r.id, type: r.note_type === "competency" ? "competency" : "video", grade: String(r.grade),
+          subject: r.subject, unit: r.unit, title: r.title, content: r.content || "", video_url: r.video_url || "", pdf_url };
       }));
       render();
     } catch (e) { console.warn("Notes: using local sample data.", e); }
@@ -1219,6 +1229,12 @@ document.addEventListener("DOMContentLoaded", () => {
         art.append(a);
       }
       String(n.content || "").split(/\n{2,}/).forEach(p => { if (p.trim()) art.append(h("p", null, p.trim())); });
+      if (n.pdf_url) {
+        const pdf = document.createElement("iframe"); pdf.className = "note-pdf-viewer";
+        pdf.title = "PDF study material: " + n.title; pdf.src = n.pdf_url + "#toolbar=0&navpanes=0&scrollbar=1";
+        pdf.setAttribute("loading", "lazy"); art.append(pdf);
+        art.append(h("p", "pdf-readonly-hint", "PDF preview · Student access is read-only"));
+      }
       el.append(art);
     } else if (!state.type) {
       el.append(h("h2", "notes-step-title", t("pickType")));
@@ -1273,11 +1289,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof supabaseClient === "undefined" || !supabaseClient) return;
       const { data, error } = await supabaseClient.from("notes").select("*").eq("is_published", true);
       if (error || !data) return;
-      notes = data.map(r => ({
-        id: "db" + r.id,
-        type: r.note_type === "competency" ? "competency" : "video",
-        grade: String(r.grade), subject: r.subject, unit: r.unit,
-        title: r.title, content: r.content || "", video_url: r.video_url || ""
+      notes = await Promise.all(data.map(async r => {
+        let pdf_url = "";
+        if (r.pdf_path && supabaseClient.storage) {
+          const signed = await supabaseClient.storage.from("study-notes").createSignedUrl(r.pdf_path, 3600, { download: false });
+          if (!signed.error) pdf_url = signed.data.signedUrl;
+        }
+        return { id: "db" + r.id, type: r.note_type === "competency" ? "competency" : "video", grade: String(r.grade),
+          subject: r.subject, unit: r.unit, title: r.title, content: r.content || "", video_url: r.video_url || "", pdf_url };
       }));
       render();
     } catch (e) { console.warn("Notes: using local sample data.", e); }
@@ -1330,25 +1349,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function saveNote(event) {
     event.preventDefault();
-    if (typeof supabaseClient === "undefined" || !supabaseClient) { noteMsg("Supabase is unavailable.", true); return; }
-    const payload = {
-      note_type: $a("noteType").value,
-      grade: Number($a("noteGrade").value),
-      subject: $a("noteSubject").value,
-      unit: $a("noteUnit").value.trim(),
-      title: $a("noteTitle").value.trim(),
-      video_url: $a("noteVideoUrl").value.trim(),
-      content: $a("noteContent").value.trim(),
-      is_published: $a("notePublish").checked
-    };
+    if (!supabaseClient?.auth) { noteMsg("Supabase is unavailable.", true); return; }
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!isEdutubeAdmin(session?.user)) { noteMsg("Admin permission required.", true); return; }
+    const file = $a("notePdfFile")?.files?.[0] || null;
+    if (file && (file.type !== "application/pdf" || file.size > 20 * 1024 * 1024)) { noteMsg("Choose a PDF file smaller than 20 MB.", true); return; }
+    const payload = { note_type: $a("noteType").value, grade: Number($a("noteGrade").value), subject: $a("noteSubject").value,
+      unit: $a("noteUnit").value.trim(), title: $a("noteTitle").value.trim(), video_url: $a("noteVideoUrl").value.trim(),
+      content: $a("noteContent").value.trim(), is_published: $a("notePublish").checked };
     const btn = event.submitter;
-    if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
-    const { error } = await supabaseClient.from("notes").insert(payload);
-    if (btn) { btn.disabled = false; btn.textContent = "Save note to Supabase"; }
-    if (error) { noteMsg("Could not save note: " + error.message, true); return; }
-    $a("noteTitle").value = ""; $a("noteContent").value = ""; $a("noteVideoUrl").value = "";
-    noteMsg(payload.is_published ? "Note saved and published." : "Note saved as a draft.");
-    await loadAdminNotes(); await loadRemote();
+    if (btn) { btn.disabled = true; btn.textContent = "Uploading & saving…"; }
+    try {
+      if (file) {
+        const cleanName = file.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g, "-").slice(-100);
+        const path = `${payload.grade}/${Date.now()}-${cleanName}`;
+        const { error: uploadError } = await supabaseClient.storage.from("study-notes").upload(path, file, { contentType: "application/pdf", upsert: false });
+        if (uploadError) throw uploadError;
+        payload.pdf_path = path;
+      }
+      const { error } = await supabaseClient.from("notes").insert(payload);
+      if (error) throw error;
+      $a("noteTitle").value = ""; $a("noteContent").value = ""; $a("noteVideoUrl").value = "";
+      if ($a("notePdfFile")) $a("notePdfFile").value = "";
+      noteMsg(payload.is_published ? "Note saved and published." : "Note saved as a draft.");
+      await loadAdminNotes(); await loadRemote();
+    } catch (e) { noteMsg("Could not save note: " + (e.message || "Unknown error"), true); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = "Save note to Supabase"; } }
   }
 
   async function initAdminNotes() {
