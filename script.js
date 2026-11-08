@@ -569,7 +569,7 @@ document.addEventListener("contextmenu",e=>{
 document.addEventListener("dragstart",e=>{if(e.target.closest("#videoModal"))e.preventDefault()});
 document.addEventListener("copy",e=>{if(e.target.closest("#videoModal"))e.preventDefault()});
 document.addEventListener("keydown",e=>{
-  const k=e.key.toLowerCase();
+  const k=(e.key||"").toLowerCase();
   if(e.key==="PrintScreen"){e.preventDefault();privacyFlash();return}
   if((e.ctrlKey||e.metaKey)&&["s","p","u"].includes(k)){e.preventDefault();notify("ይህ ተግባር ተከልክሏል።")}
   if((e.ctrlKey||e.metaKey)&&e.shiftKey&&["i","j","c"].includes(k)){e.preventDefault();notify("DevTools መክፈት ተከልክሏል።")}
