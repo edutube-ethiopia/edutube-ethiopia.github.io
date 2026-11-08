@@ -949,11 +949,32 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function makeCard(title,desc,fn){const b=h("button","notes-card");b.type="button";b.append(h("b","",title));if(desc)b.append(h("small","",desc));b.onclick=fn;return b;}
   async function loadPdfForViewer(note,frame,status,actions){
-    const c=client();if(!c){status.textContent="PDF service is not configured. Please contact support.";return;}
-    const {data,error}=await c.storage.from(note.pdf_bucket||BUCKET).createSignedUrl(note.pdf_path,120);
-    if(error||!data?.signedUrl){status.textContent="This PDF is temporarily unavailable. Please try again later.";return;}
-    frame.src=data.signedUrl;status.textContent="Secure PDF viewer · Read-only";
-    if(note.allow_download){const a=h("a","small-button","Download PDF");a.href=data.signedUrl;a.download=(note.title||"EduTube-Note")+".pdf";a.rel="noopener noreferrer";actions.append(a);}
+    const c=client();
+    if(!c){status.textContent="PDF service is not configured. Check the Supabase CDN and project settings.";return;}
+    try{
+      // Private Storage signed URLs require an authenticated student session and a matching Storage SELECT policy.
+      const {data:sessionData,error:sessionError}=await c.auth.getSession();
+      if(sessionError) throw sessionError;
+      if(!sessionData?.session){
+        status.textContent="Please sign in with your student account to read this PDF. Then return to Notes and open it again.";
+        return;
+      }
+      if(!note.pdf_path){status.textContent="This note has no PDF file path. Ask an administrator to upload the PDF again.";return;}
+      // A longer expiry prevents the link expiring while a mobile browser is opening the document.
+      const {data,error}=await c.storage.from(note.pdf_bucket||BUCKET).createSignedUrl(note.pdf_path,3600);
+      if(error) throw error;
+      if(!data?.signedUrl) throw new Error("Supabase did not return a signed PDF URL.");
+      const open=h("a","small-button","Open PDF in browser ↗");
+      open.href=data.signedUrl;open.target="_blank";open.rel="noopener noreferrer";
+      actions.prepend(open);
+      frame.src=data.signedUrl;
+      status.textContent="PDF ready · Read-only viewer. If this area stays blank on your phone, use Open PDF in browser.";
+      if(note.allow_download){const a=h("a","small-button","Download PDF");a.href=data.signedUrl;a.download=(note.title||"EduTube-Note")+".pdf";a.rel="noopener noreferrer";actions.append(a);}
+    }catch(error){
+      console.error("EduTube PDF viewer error:",error);
+      const reason=String(error?.message||error||"Unknown error");
+      status.textContent="PDF unavailable: "+reason+". Check student sign-in, Storage bucket name, file path, and Storage SELECT policy.";
+    }
   }
   async function loadPublicNotes(){const c=client();if(!c)return;const {data,error}=await c.from("notes").select("id,note_type,grade,subject,unit,title,video_url,is_published,pdf_path,pdf_bucket,allow_download").eq("is_published",true).not("pdf_path","is",null).order("created_at",{ascending:false});if(error){console.warn("PDF notes could not load",error.message);return;}notes=(data||[]);render();}
   async function requireAdmin(){const c=client();if(!c?.auth)return null;const {data}=await c.auth.getSession();const user=data?.session?.user;return user&&typeof isEdutubeAdmin==="function"&&isEdutubeAdmin(user)?user:null;}
