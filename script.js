@@ -349,7 +349,7 @@ $("tapLayer").addEventListener("click",e=>{
 });
 document.addEventListener("keydown",e=>{
   if($("videoModal").classList.contains("hidden")||!yt)return;
-  const k=e.key.toLowerCase();
+  const k=String(e.key||"").toLowerCase();
   if(k===" "||k==="k"){e.preventDefault();togglePlay()}
   else if(k==="arrowleft"||k==="j")skip(-10);
   else if(k==="arrowright"||k==="l")skip(10);
@@ -569,7 +569,7 @@ document.addEventListener("contextmenu",e=>{
 document.addEventListener("dragstart",e=>{if(e.target.closest("#videoModal"))e.preventDefault()});
 document.addEventListener("copy",e=>{if(e.target.closest("#videoModal"))e.preventDefault()});
 document.addEventListener("keydown",e=>{
-  const k=e.key.toLowerCase();
+  const k=String(e.key||"").toLowerCase();
   if(e.key==="PrintScreen"){e.preventDefault();privacyFlash();return}
   if((e.ctrlKey||e.metaKey)&&["s","p","u"].includes(k)){e.preventDefault();notify("ይህ ተግባር ተከልክሏል።")}
   if((e.ctrlKey||e.metaKey)&&e.shiftKey&&["i","j","c"].includes(k)){e.preventDefault();notify("DevTools መክፈት ተከልክሏል።")}
@@ -820,9 +820,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function setAuthMode(mode){authMode=mode;document.querySelectorAll('[data-auth-mode]').forEach(b=>b.classList.toggle('active',b.dataset.authMode===mode));el('studentName').closest('label').classList.toggle('hidden',mode!=='signup');el('studentAuthSubmit').textContent=mode==='signup'?'Create account':'Sign in';el('authHint').textContent=mode==='signup'?'A confirmation email may be sent before you can sign in.':'Use your student account. Email confirmation may be required.';}
   function updateStudentView(session){
-    studentSession=session;const user=session?.user||null;el('accountSignedOut')?.classList.toggle('hidden',!!user);el('accountSignedIn')?.classList.toggle('hidden',!user);
-    el('accountLabel').textContent=user?(user.user_metadata?.full_name||user.email?.split('@')[0]||'Account'):'Sign in';
-    if(user){const name=user.user_metadata?.full_name||user.email?.split('@')[0]||'Student';el('studentDisplayName').textContent=name;el('studentDisplayEmail').textContent=user.email||'';el('studentAvatar').textContent=name.charAt(0).toUpperCase();el('accountCompleted').textContent=completed.length;el('accountAttempts').textContent=attempts.length;syncLocalActivity();loadRemoteNotifications();}
+    studentSession=session;const user=session?.user||null;const adminUser=!!(user&&typeof isEdutubeAdmin==="function"&&isEdutubeAdmin(user));el('accountSignedOut')?.classList.toggle('hidden',!!user);el('accountSignedIn')?.classList.toggle('hidden',!user);
+    const displayName=adminUser?(user.app_metadata?.role==="super_admin"?"Super Admin":"Admin"):(user?.user_metadata?.full_name||user?.email?.split('@')[0]||'Account');
+    el('accountLabel').textContent=user?displayName:'Sign in';el('accountShortcut')?.setAttribute('aria-label',user?(adminUser?'Administrator account':'Student account'):'Sign in');
+    if(user){const name=displayName;el('studentDisplayName').textContent=name;el('studentDisplayEmail').textContent=(adminUser?'Administrator account · ':'')+(user.email||'');el('studentAvatar').textContent=adminUser?'A':name.charAt(0).toUpperCase();el('accountSignedIn')?.classList.toggle('admin-account-view',adminUser);el('accountCompleted').textContent=completed.length;el('accountAttempts').textContent=attempts.length;syncLocalActivity();loadRemoteNotifications();}
   }
   async function syncCompletedLessons(){
     if(!studentSession||!supabaseClient)return;
@@ -947,7 +948,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(state.note){
       const n=state.note, panel=h("article","note-article"); panel.append(h("span","eyebrow",`${typeName(n.note_type)} · Grade ${n.grade} · ${n.subject} · ${n.unit}`),h("h2","",n.title));
       const status=h("p","pdf-viewer-status","Preparing secure in-page PDF reader…");panel.append(status);
-      const reader=h("section","eu-pdf-reader");reader.innerHTML=`<div class="eu-pdf-toolbar"><button type="button" data-pdf="prev">←</button><label>Page <input data-pdf="page" type="number" min="1" value="1"> <span data-pdf="total">/ —</span></label><button type="button" data-pdf="next">→</button><i></i><button type="button" data-pdf="minus">−</button><span data-pdf="zoom">100%</span><button type="button" data-pdf="plus">＋</button><button type="button" data-pdf="fit">Fit width</button><button type="button" data-pdf="rotate">↻</button><button type="button" data-pdf="fullscreen">⛶</button></div><div class="eu-pdf-search"><input data-pdf="find" type="search" placeholder="Find text in this PDF"><button type="button" data-pdf="search">Find</button><span data-pdf="searchstatus" aria-live="polite"></span></div><div class="eu-pdf-stage"><canvas data-pdf="canvas"></canvas></div><div class="eu-pdf-footer"><span data-pdf="progress">Reading progress: 0%</span><button type="button" data-pdf="print">Print current page</button></div>`;
+      const reader=h("section","eu-pdf-reader");reader.innerHTML=`<div class="eu-pdf-toolbar"><button type="button" data-pdf="close" aria-label="Close reader">✕ Exit</button><button type="button" data-pdf="prev">←</button><label>Page <input data-pdf="page" type="number" min="1" value="1"> <span data-pdf="total">/ —</span></label><button type="button" data-pdf="next">→</button><i></i><button type="button" data-pdf="minus">−</button><span data-pdf="zoom">100%</span><button type="button" data-pdf="plus">＋</button><button type="button" data-pdf="fit">Fit width</button><button type="button" data-pdf="rotate">↻</button><button type="button" data-pdf="fullscreen">⛶</button></div><div class="eu-pdf-search"><input data-pdf="find" type="search" placeholder="Find text in this PDF"><button type="button" data-pdf="search">Find</button><span data-pdf="searchstatus" aria-live="polite"></span></div><div class="eu-pdf-stage"><canvas data-pdf="canvas"></canvas></div><div class="eu-pdf-footer"><span data-pdf="progress">Reading progress: 0%</span><button type="button" data-pdf="print">Print current page</button></div>`;
       panel.append(reader);const actions=h("div","pdf-view-actions");if(n.video_url&&/^https:\/\//i.test(n.video_url)){const a=h("a","small-button","Related video ↗");a.href=n.video_url;a.target="_blank";a.rel="noopener noreferrer";actions.append(a);}panel.append(actions);root.append(panel);loadPdfForViewer(n,reader,status,actions);
     } else if(!state.type){root.append(h("h2","notes-step-title","Choose note collection"));const g=h("div","notes-grid wide");[["video","Video Notes","Notes linked to video lessons"],["competency","Competency Based Notes","Curriculum-aligned competency notes"]].forEach(([v,a,b])=>g.append(makeCard(a,b,()=>{state.type=v;render();})));root.append(g);
     } else if(!state.grade){root.append(h("h2","notes-step-title","Choose grade"));const g=h("div","notes-grid");GRADES.forEach(v=>g.append(makeCard("Grade "+v,"",()=>{state.grade=v;render();})));root.append(g);
@@ -969,6 +970,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const pdfjs=window.pdfjsLib;pdfjs.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
       const pdf=await pdfjs.getDocument({url:data.signedUrl}).promise;
       const $p=k=>reader.querySelector(`[data-pdf="${k}"]`),canvas=$p("canvas"),ctx=canvas.getContext("2d");
+       $p("close").onclick=()=>{document.body.classList.remove("notes-reading-mode");state.note=null;render();};
       let page=1,scale=1,rotation=0,renderTask=null,fit=true;
       const saved=Number(localStorage.getItem("edutube_pdf_page_"+note.id));if(saved>0&&saved<=pdf.numPages)page=saved;
       $p("total").textContent="/ "+pdf.numPages;$p("page").max=pdf.numPages;
