@@ -354,3 +354,11 @@ body:not(.scroll-locked) {
 .contact-form-card{grid-column:1/-1;}.contact-form-card .admin-form{max-width:760px;}
 .contact-disclaimer{padding:16px 18px;border-left:3px solid #f59b35;background:rgba(245,155,53,.07);border-radius:8px;color:var(--muted,#9aa0aa);line-height:1.7;}
 @media(max-width:700px){.contact-grid{grid-template-columns:1fr;}.contact-form-card{grid-column:auto;}.contact-card{padding:19px;}.pdf-viewer{min-height:420px;height:70vh;}}
+
+/* EduTube reader + management improvements */
+.eu-pdf-reader{border:1px solid var(--border-color,rgba(255,255,255,.14));border-radius:16px;overflow:hidden;background:#171a24;margin:14px 0;color:#fff}
+.eu-pdf-toolbar,.eu-pdf-search,.eu-pdf-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;background:#202432;border-bottom:1px solid rgba(255,255,255,.1)}
+.eu-pdf-toolbar button,.eu-pdf-search button,.eu-pdf-footer button{border:1px solid rgba(255,255,255,.16);background:#30384b;color:#fff;border-radius:8px;padding:7px 11px;cursor:pointer}
+.eu-pdf-toolbar button:hover,.eu-pdf-search button:hover,.eu-pdf-footer button:hover{background:#45516b}
+.eu-pdf-toolbar i{flex:1}.eu-pdf-toolbar label{display:flex;align-items:center;gap:6px;font-size:12px}.eu-pdf-toolbar input{width:54px;padding:6px;border-radius:7px;border:1px solid #566078;background:#111722;color:#fff}.eu-pdf-stage{height:min(76vh,900px);min-height:430px;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:16px;background:#353b49}.eu-pdf-stage canvas{display:block;max-width:none;box-shadow:0 5px 24px rgba(0,0,0,.4);background:#fff}.eu-pdf-search input{flex:1;min-width:130px;padding:8px 10px;border:1px solid #566078;border-radius:8px;background:#111722;color:#fff}.eu-pdf-search span,.eu-pdf-footer span{font-size:12px;color:#c5ccda}.eu-pdf-footer{justify-content:space-between;border:0}.eu-pdf-reader:fullscreen{height:100vh;border-radius:0;display:flex;flex-direction:column}.eu-pdf-reader:fullscreen .eu-pdf-stage{flex:1;height:auto}
+@media(max-width:600px){.eu-pdf-toolbar{gap:5px;padding:8px}.eu-pdf-toolbar button{padding:7px 8px;font-size:12px}.eu-pdf-stage{min-height:360px;height:68vh;padding:8px}.eu-pdf-search{padding:8px}.eu-pdf-footer{gap:8px}}

@@ -810,11 +810,19 @@ document.addEventListener("DOMContentLoaded", () => {
     items.forEach(item=>{const row=document.createElement('div');row.className='activity-item';const text=document.createElement('span');const strong=document.createElement('strong');strong.textContent=item.title;const small=document.createElement('small');small.textContent=' · '+item.body+' · '+new Date(item.created_at).toLocaleString();text.append(strong,small);row.append(text);list.append(row)});
     saveNotes(items.map(x=>({...x,read:true})));el('notificationDot')?.classList.add('hidden');
   }
+  async function loadRemoteNotifications(){
+    if(!studentSession||!supabaseClient)return;
+    const {data,error}=await supabaseClient.from('notifications').select('id,title,body,created_at').eq('user_id',studentSession.user.id).order('created_at',{ascending:false}).limit(50);
+    if(error){console.warn('Student notifications could not load:',error.message);return;}
+    const local=localNotes(),remote=(data||[]).map(x=>({...x,read:false}));
+    const merged=[...remote,...local.filter(x=>!remote.some(r=>r.title===x.title&&r.body===x.body))].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+    saveNotes(merged);renderNotifications();
+  }
   function setAuthMode(mode){authMode=mode;document.querySelectorAll('[data-auth-mode]').forEach(b=>b.classList.toggle('active',b.dataset.authMode===mode));el('studentName').closest('label').classList.toggle('hidden',mode!=='signup');el('studentAuthSubmit').textContent=mode==='signup'?'Create account':'Sign in';el('authHint').textContent=mode==='signup'?'A confirmation email may be sent before you can sign in.':'Use your student account. Email confirmation may be required.';}
   function updateStudentView(session){
     studentSession=session;const user=session?.user||null;el('accountSignedOut')?.classList.toggle('hidden',!!user);el('accountSignedIn')?.classList.toggle('hidden',!user);
     el('accountLabel').textContent=user?(user.user_metadata?.full_name||user.email?.split('@')[0]||'Account'):'Sign in';
-    if(user){const name=user.user_metadata?.full_name||user.email?.split('@')[0]||'Student';el('studentDisplayName').textContent=name;el('studentDisplayEmail').textContent=user.email||'';el('studentAvatar').textContent=name.charAt(0).toUpperCase();el('accountCompleted').textContent=completed.length;el('accountAttempts').textContent=attempts.length;syncLocalActivity();}
+    if(user){const name=user.user_metadata?.full_name||user.email?.split('@')[0]||'Student';el('studentDisplayName').textContent=name;el('studentDisplayEmail').textContent=user.email||'';el('studentAvatar').textContent=name.charAt(0).toUpperCase();el('accountCompleted').textContent=completed.length;el('accountAttempts').textContent=attempts.length;syncLocalActivity();loadRemoteNotifications();}
   }
   async function syncCompletedLessons(){
     if(!studentSession||!supabaseClient)return;
@@ -938,8 +946,9 @@ document.addEventListener("DOMContentLoaded", () => {
     levels.forEach((x,i)=>{if(i)crumb.append(" › ");if(i===levels.length-1)crumb.append(h("span","current",x.v));else{const b=h("button","",x.v);b.type="button";b.onclick=()=>{x.reset();render();};crumb.append(b);}}); root.append(crumb);
     if(state.note){
       const n=state.note, panel=h("article","note-article"); panel.append(h("span","eyebrow",`${typeName(n.note_type)} · Grade ${n.grade} · ${n.subject} · ${n.unit}`),h("h2","",n.title));
-      const status=h("p","pdf-viewer-status","Preparing secure PDF viewer…");panel.append(status);const frame=h("iframe","pdf-viewer");frame.title=n.title+" PDF";frame.loading="lazy";frame.setAttribute("referrerpolicy","no-referrer");panel.append(frame);
-      const actions=h("div","pdf-view-actions");if(n.video_url&&/^https:\/\//i.test(n.video_url)){const a=h("a","small-button","Related video ↗");a.href=n.video_url;a.target="_blank";a.rel="noopener noreferrer";actions.append(a);}panel.append(actions);root.append(panel);loadPdfForViewer(n,frame,status,actions);
+      const status=h("p","pdf-viewer-status","Preparing secure in-page PDF reader…");panel.append(status);
+      const reader=h("section","eu-pdf-reader");reader.innerHTML=`<div class="eu-pdf-toolbar"><button type="button" data-pdf="prev">←</button><label>Page <input data-pdf="page" type="number" min="1" value="1"> <span data-pdf="total">/ —</span></label><button type="button" data-pdf="next">→</button><i></i><button type="button" data-pdf="minus">−</button><span data-pdf="zoom">100%</span><button type="button" data-pdf="plus">＋</button><button type="button" data-pdf="fit">Fit width</button><button type="button" data-pdf="rotate">↻</button><button type="button" data-pdf="fullscreen">⛶</button></div><div class="eu-pdf-search"><input data-pdf="find" type="search" placeholder="Find text in this PDF"><button type="button" data-pdf="search">Find</button><span data-pdf="searchstatus" aria-live="polite"></span></div><div class="eu-pdf-stage"><canvas data-pdf="canvas"></canvas></div><div class="eu-pdf-footer"><span data-pdf="progress">Reading progress: 0%</span><button type="button" data-pdf="print">Print current page</button></div>`;
+      panel.append(reader);const actions=h("div","pdf-view-actions");if(n.video_url&&/^https:\/\//i.test(n.video_url)){const a=h("a","small-button","Related video ↗");a.href=n.video_url;a.target="_blank";a.rel="noopener noreferrer";actions.append(a);}panel.append(actions);root.append(panel);loadPdfForViewer(n,reader,status,actions);
     } else if(!state.type){root.append(h("h2","notes-step-title","Choose note collection"));const g=h("div","notes-grid wide");[["video","Video Notes","Notes linked to video lessons"],["competency","Competency Based Notes","Curriculum-aligned competency notes"]].forEach(([v,a,b])=>g.append(makeCard(a,b,()=>{state.type=v;render();})));root.append(g);
     } else if(!state.grade){root.append(h("h2","notes-step-title","Choose grade"));const g=h("div","notes-grid");GRADES.forEach(v=>g.append(makeCard("Grade "+v,"",()=>{state.grade=v;render();})));root.append(g);
     } else if(!state.subject){root.append(h("h2","notes-step-title","Choose subject"));const g=h("div","notes-grid");SUBJECTS.forEach(v=>{const count=new Set(notes.filter(n=>n.note_type===state.type&&String(n.grade)===state.grade&&n.subject===v).map(n=>n.unit)).size;g.append(makeCard(v,count+" unit(s)",()=>{state.subject=v;render();}));});root.append(g);
@@ -948,30 +957,45 @@ document.addEventListener("DOMContentLoaded", () => {
     if(state.type){const back=h("button","small-button notes-back","← Back");back.type="button";back.onclick=()=>{if(state.note)state.note=null;else if(state.unit)state.unit=null;else if(state.subject)state.subject=null;else if(state.grade)state.grade=null;else state.type=null;render();};root.append(back);}
   }
   function makeCard(title,desc,fn){const b=h("button","notes-card");b.type="button";b.append(h("b","",title));if(desc)b.append(h("small","",desc));b.onclick=fn;return b;}
-  async function loadPdfForViewer(note,frame,status,actions){
-    const c=client();
-    if(!c){status.textContent="PDF service is not configured. Check the Supabase CDN and project settings.";return;}
+  async function loadPdfForViewer(note,reader,status,actions){
+    const c=client();if(!c){status.textContent="PDF service is not configured.";return;}
     try{
-      // Private Storage signed URLs require an authenticated student session and a matching Storage SELECT policy.
-      const {data:sessionData,error:sessionError}=await c.auth.getSession();
-      if(sessionError) throw sessionError;
-      if(!sessionData?.session){
-        status.textContent="Please sign in with your student account to read this PDF. Then return to Notes and open it again.";
-        return;
+      const {data:sessionData,error:sessionError}=await c.auth.getSession();if(sessionError)throw sessionError;
+      if(!sessionData?.session){status.textContent="Please sign in with your student account to read this PDF.";return;}
+      if(!note.pdf_path){status.textContent="This note has no PDF file path. Ask an administrator to upload it again.";return;}
+      const {data,error}=await c.storage.from(note.pdf_bucket||BUCKET).createSignedUrl(note.pdf_path,3600);if(error)throw error;
+      if(!data?.signedUrl)throw new Error("Supabase did not return a signed PDF URL.");
+      if(!window.pdfjsLib){await new Promise((resolve,reject)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";s.onload=resolve;s.onerror=()=>reject(new Error("PDF reader library could not load"));document.head.append(s);});}
+      const pdfjs=window.pdfjsLib;pdfjs.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      const pdf=await pdfjs.getDocument({url:data.signedUrl}).promise;
+      const $p=k=>reader.querySelector(`[data-pdf="${k}"]`),canvas=$p("canvas"),ctx=canvas.getContext("2d");
+      let page=1,scale=1,rotation=0,renderTask=null,fit=true;
+      const saved=Number(localStorage.getItem("edutube_pdf_page_"+note.id));if(saved>0&&saved<=pdf.numPages)page=saved;
+      $p("total").textContent="/ "+pdf.numPages;$p("page").max=pdf.numPages;
+      async function draw(){
+        if(renderTask){try{renderTask.cancel()}catch(_){}}
+        const pg=await pdf.getPage(page),stage=reader.querySelector(".eu-pdf-stage"),base=pg.getViewport({scale:1,rotation});
+        if(fit)scale=Math.max(.45,Math.min(2.5,(stage.clientWidth-28)/base.width));
+        const vp=pg.getViewport({scale,rotation});const dpr=Math.min(window.devicePixelRatio||1,2);
+        canvas.width=Math.floor(vp.width*dpr);canvas.height=Math.floor(vp.height*dpr);canvas.style.width=vp.width+"px";canvas.style.height=vp.height+"px";
+        renderTask=pg.render({canvasContext:ctx,viewport:vp,transform:dpr!==1?[dpr,0,0,dpr,0,0]:null});await renderTask.promise;
+        $p("page").value=page;$p("zoom").textContent=Math.round(scale*100)+"%";$p("progress").textContent="Reading progress: "+Math.round(page/pdf.numPages*100)+"%";
+        localStorage.setItem("edutube_pdf_page_"+note.id,String(page));
       }
-      if(!note.pdf_path){status.textContent="This note has no PDF file path. Ask an administrator to upload the PDF again.";return;}
-      // A longer expiry prevents the link expiring while a mobile browser is opening the document.
-      const {data,error}=await c.storage.from(note.pdf_bucket||BUCKET).createSignedUrl(note.pdf_path,3600);
-      if(error) throw error;
-      if(!data?.signedUrl) throw new Error("Supabase did not return a signed PDF URL.");
-      frame.src=data.signedUrl;
-      status.textContent="PDF ready · Read-only viewer. If this area stays blank on your phone, use Open PDF in browser.";
+      const safeDraw=()=>draw().catch(e=>{if(e?.name!=="RenderingCancelledException")status.textContent="Unable to render this page: "+e.message;});
+      $p("prev").onclick=()=>{if(page>1){page--;safeDraw()}};$p("next").onclick=()=>{if(page<pdf.numPages){page++;safeDraw()}};
+      $p("page").onchange=()=>{page=Math.max(1,Math.min(pdf.numPages,Number($p("page").value)||1));safeDraw()};
+      $p("minus").onclick=()=>{fit=false;scale=Math.max(.4,scale-.15);safeDraw()};$p("plus").onclick=()=>{fit=false;scale=Math.min(3,scale+.15);safeDraw()};
+      $p("fit").onclick=()=>{fit=true;safeDraw()};$p("rotate").onclick=()=>{rotation=(rotation+90)%360;safeDraw()};
+      $p("fullscreen").onclick=()=>{if(!document.fullscreenElement)reader.requestFullscreen?.();else document.exitFullscreen?.()};
+      $p("search").onclick=async()=>{const q=$p("find").value.trim().toLowerCase();if(!q)return;const out=$p("searchstatus");out.textContent="Searching…";for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i),txt=await pg.getTextContent(),all=txt.items.map(x=>x.str).join(" ").toLowerCase();if(all.includes(q)){page=i;out.textContent="Found on page "+i;safeDraw();return;}}out.textContent="No match found.";};
+      $p("find").addEventListener("keydown",e=>{if(e.key==="Enter")$p("search").click()});
+      $p("print").onclick=()=>{const w=window.open("","_blank");if(!w){status.textContent="Allow pop-ups to print this page.";return;}w.document.write(`<title>${String(note.title).replace(/[<>]/g,"")}</title><img style="width:100%" src="${canvas.toDataURL("image/png")}">`);w.document.close();w.onload=()=>w.print();};
+      window.addEventListener("resize",safeDraw,{passive:true});
       if(note.allow_download){const a=h("a","small-button","Download PDF");a.href=data.signedUrl;a.download=(note.title||"EduTube-Note")+".pdf";a.rel="noopener noreferrer";actions.append(a);}
-    }catch(error){
-      console.error("EduTube PDF viewer error:",error);
-      const reason=String(error?.message||error||"Unknown error");
-      status.textContent="PDF unavailable: "+reason+". Check student sign-in, Storage bucket name, file path, and Storage SELECT policy.";
-    }
+      status.textContent=`PDF ready · ${pdf.numPages} pages · Secure in-page reader. Your last page is saved on this device.`;
+      await draw();
+    }catch(error){console.error("EduTube PDF viewer error:",error);status.textContent="PDF unavailable: "+String(error?.message||error)+". Check sign-in, Storage bucket and Storage SELECT policy.";}
   }
   async function loadPublicNotes(){const c=client();if(!c)return;const {data,error}=await c.from("notes").select("id,note_type,grade,subject,unit,title,video_url,is_published,pdf_path,pdf_bucket,allow_download").eq("is_published",true).not("pdf_path","is",null).order("created_at",{ascending:false});if(error){console.warn("PDF notes could not load",error.message);return;}notes=(data||[]);render();}
   async function requireAdmin(){const c=client();if(!c?.auth)return null;const {data}=await c.auth.getSession();const user=data?.session?.user;return user&&typeof isEdutubeAdmin==="function"&&isEdutubeAdmin(user)?user:null;}

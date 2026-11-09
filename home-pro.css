@@ -40,7 +40,7 @@ body.light .hp{--hp-gold:#e8a600;--hp-blue:#1f6fe0}
 .hp-stage{position:relative;display:grid;place-items:center;min-height:360px}
 .hp-stage:before{content:"";position:absolute;width:78%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(43,140,255,.55),rgba(43,140,255,0) 68%);filter:blur(10px)}
 .hp-ring-line{position:absolute;width:96%;aspect-ratio:1;border-radius:50%;border:1px dashed rgba(124,196,255,.35)}
-.hp-logo{position:relative;width:min(78%,360px);height:auto;aspect-ratio:1/1;object-fit:cover;border-radius:50%;box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.12),0 0 70px rgba(43,140,255,.45);animation:hp-rise .9s cubic-bezier(.2,.8,.2,1) both}
+.hp-logo{position:relative;width:min(78%,360px);height:auto;aspect-ratio:1/1;object-fit:cover;border-radius:14%;box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.12),0 0 70px rgba(43,140,255,.45);animation:hp-rise .9s cubic-bezier(.2,.8,.2,1) both}
 .hp-badge{position:absolute;display:grid;place-items:center;width:54px;height:54px;border-radius:16px;background:rgba(10,33,96,.85);border:1px solid rgba(124,196,255,.4);color:var(--hp-sky);font-size:24px;backdrop-filter:blur(6px);box-shadow:0 10px 30px rgba(0,0,0,.35);animation:hp-pop .6s cubic-bezier(.2,.9,.3,1.3) both}
 .hp-badge:nth-of-type(1){top:6%;left:10%;animation-delay:.55s}
 .hp-badge:nth-of-type(2){top:16%;right:2%;animation-delay:.7s;color:var(--hp-gold)}
@@ -141,7 +141,7 @@ body:not(.light) .hp-grade b{color:var(--hp-sky)}
 .hp-final .hp-actions{margin:0}
 
 /* ---------- Brand + nav icons (additive) ---------- */
-.brand-logo{width:38px;height:38px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px rgba(124,196,255,.3),0 4px 14px rgba(43,140,255,.35);display:block}
+.brand-logo{width:38px;height:38px;border-radius:11px;box-shadow:0 0 0 1px rgba(124,196,255,.3),0 4px 14px rgba(43,140,255,.35);display:block}
 .hp-nav-ic{width:1.25em;height:1.25em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .side-link .hp-nav-ic{font-size:18px;margin-right:12px}
 .mobile-nav button .hp-nav-ic{font-size:21px}

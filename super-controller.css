@@ -52,8 +52,3 @@
 .sc-kgrid kbd{background:var(--bg);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font:600 11px Inter,monospace;color:var(--text);margin-right:5px}
 @media(max-width:520px){.sc-kgrid{grid-template-columns:1fr}}
 .sc-legacy{display:none!important}
-/* Advanced content tables and pagination */
-.aa-pagination{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 4px;color:var(--muted,#9ca3af);font-size:12px}.aa-pagination button:disabled{opacity:.4;cursor:not-allowed}.aa-row>div{min-width:0;flex:1}.aa-row>button{flex-shrink:0}.aa-filters input{min-width:150px}
-/* The paginated command-center inventories replace the old endless legacy lists; upload forms stay visible. */
-#adminLessonList,#adminNoteList{display:none!important}
-#adminLessonList:empty,#adminNoteList:empty{display:none!important}

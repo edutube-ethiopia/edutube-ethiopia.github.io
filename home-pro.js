@@ -165,7 +165,7 @@
       if (left <= 0) left = total;
       tick = setInterval(function () {
         left -= 1; paint();
-        if (left <= 0) { stop(); if (typeof window.notify === "function") window.notify(lang() === "am" ? "የትኩረት ክፍለ ጊዜ ተጠናቋል!" : "Focus session complete!"); if (typeof window.edutubeTimerComplete === "function") window.edutubeTimerComplete("Focus session"); }
+        if (left <= 0) { stop(); if (typeof window.notify === "function") window.notify(lang() === "am" ? "የትኩረት ክፍለ ጊዜ ተጠናቋል!" : "Focus session complete!"); }
       }, 1000);
       setTimerLabel();
     });
