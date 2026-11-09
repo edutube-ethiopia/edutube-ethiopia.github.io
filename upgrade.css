@@ -11,7 +11,8 @@
   .topbar{position:fixed!important;inset:0 0 auto 0;height:76px;z-index:100}
   .app-layout{padding-top:76px;min-height:100vh}
   .sidebar{position:fixed;top:76px;bottom:0;left:0;width:230px;overflow-y:auto;overscroll-behavior:contain;z-index:40}
-  .main-content{margin-left:230px;width:calc(100% - 230px);max-width:none}
+  .app-layout{display:block!important}
+  .main-content{margin-left:230px;width:calc(100% - 230px);max-width:none};min-width:0
 }
 @media (max-width:760px){
   .topbar{position:fixed!important;top:0;left:0;right:0;z-index:100}

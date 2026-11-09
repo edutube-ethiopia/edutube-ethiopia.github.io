@@ -11,7 +11,8 @@
   async function forceSignOut(reason) {
     if (signingOut || !sb()?.auth) return;
     signingOut = true;
-    try { await sb().auth.signOut(); } catch(e) { console.warn("Automatic sign out:",e); }
+    try { await sb().auth.signOut({scope:"local"}); } catch(e) { console.warn("Automatic sign out:",e); }
+    window.__edutubeSessionUser=null; syncAccountLabel();
     localStorage.removeItem("edutube_student_signed_at");
     localStorage.removeItem("edutube_admin_last_activity");
     if (typeof window.notify === "function") window.notify(reason);
@@ -34,19 +35,26 @@
     localStorage.setItem("edutube_admin_last_activity",String(Date.now()));
     adminTimer=setTimeout(()=>forceSignOut("Admin signed out after 1 minute of inactivity."),ADMIN_IDLE);
   }
+  function syncAccountLabel(){
+    const label=$("accountLabel"); if(!label) return;
+    const user=window.__edutubeSessionUser;
+    if(!user){label.textContent="Sign in";$("accountShortcut")?.setAttribute("aria-label","Sign in");}
+  }
   function applySession(session){
     stopTimers();
     const user=session?.user||null;
     window.__edutubeSessionUser=user;
+    syncAccountLabel();
     if(!user){localStorage.removeItem("edutube_student_signed_at");localStorage.removeItem("edutube_admin_last_activity");return;}
     if(isAdminUser(user)){
-      const last=Number(localStorage.getItem("edutube_admin_last_activity"))||Date.now();
+      const last=Number(localStorage.getItem("edutube_admin_last_activity"))||0;
       if(Date.now()-last>=ADMIN_IDLE){setTimeout(()=>forceSignOut("Admin session expired after 1 minute of inactivity."),0);return;}
       resetAdminIdle();
     } else startStudentTimer();
   }
   function initSecurity(){
     if(!sb()?.auth)return;
+    ["adminLoginForm","studentAuthForm"].forEach(id=>$(id)?.addEventListener("submit",()=>localStorage.setItem("edutube_admin_last_activity",String(Date.now())),true));
     sb().auth.getSession().then(({data})=>applySession(data?.session)).catch(console.warn);
     sb().auth.onAuthStateChange((_event,session)=>applySession(session));
     ["pointerdown","keydown","touchstart","mousemove","scroll","click"].forEach(ev=>
