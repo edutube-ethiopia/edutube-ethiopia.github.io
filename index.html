@@ -9,9 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="assets/favicon-64.png">
+  <link rel="apple-touch-icon" href="assets/logo-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="player-pro.css">
   <link rel="stylesheet" href="super-controller.css">
+  <link rel="stylesheet" href="home-pro.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://www.youtube.com">
   <script src="https://www.youtube.com/iframe_api" async></script>
@@ -20,10 +24,12 @@
   <script src="upgrade.js" defer></script>
   <script src="player-pro.js" defer></script>
   <script src="super-controller.js" defer></script>
+  <script src="home-pro.js" defer></script>
+  <script src="security-reader-upgrade.js" defer></script>
 </head>
 <body>
   <header class="topbar">
-    <button class="brand" data-page="home" aria-label="EduTube home"><span class="brand-mark" aria-hidden="true">E</span><span>EduTube <b>Ethiopia</b></span></button>
+    <button class="brand" data-page="home" aria-label="EduTube home"><img class="brand-logo" src="assets/logo-192.png" width="38" height="38" alt=""><span>EduTube <b>Ethiopia</b></span></button>
     <nav class="top-links" aria-label="Main navigation">
       <button data-page="home" data-i18n="navHome">Home</button>
       <button data-page="library" data-i18n="navLibrary">Video Library</button>
@@ -62,71 +68,122 @@
 
     <main class="main-content">
       <section class="page active" id="page-home">
-        <div class="hero">
-          <div class="hero-copy"><span class="eyebrow" data-i18n="heroEyebrow">YOUR LEARNING SPACE</span>
-            <h1 data-i18n="heroTitle">Learn today.<br><em>Lead tomorrow.</em></h1>
-            <p data-i18n="heroText">A place to learn, practice, and prepare for your next big step.</p>
-            <button class="primary-button" data-page="library"><span data-i18n="exploreLessons">Explore lessons</span></button>
-          </div>
-          </div>
-        <div class="section-heading"><div><span class="eyebrow" data-i18n="overview">OVERVIEW</span><h2 data-i18n="learningSnapshot">Your learning snapshot</h2></div></div>
-        <div class="stats-grid">
-          <article class="stat-card"><div><strong id="homeLessons">0</strong><small data-i18n="lessonsCompleted">Lessons completed</small></div></article>
-          <article class="stat-card"><div><strong id="homeQuizzes">0</strong><small data-i18n="quizzesTaken">Quizzes taken</small></div></article>
-          <article class="stat-card"><div><strong id="homeFavorites">0</strong><small data-i18n="savedLessons">Saved lessons</small></div></article>
-          <article class="stat-card"><div><strong id="homeProgress">0%</strong><small data-i18n="learningProgress">Learning progress</small></div></article>
+        <!-- EduTube Home Pro: new home page. Hooks kept for existing scripts: data-page, data-grade, data-home-subject, #homeLessons #homeQuizzes #homeFavorites #homeProgress -->
+        <div class="hp">
+          <header class="hp-hero">
+            <div class="hp-hero-copy">
+              <p class="hp-chip"><svg class="ic" aria-hidden="true"><use href="#i-cap"/></svg><span data-hp="heroChip">Free learning for Grades 9–12</span></p>
+              <h1><span class="hp-h1a" data-hp="h1a">Learn today.</span><span class="hp-h1b" data-hp="h1b">Lead tomorrow.</span></h1>
+              <p class="hp-hero-text" data-hp="heroText">Watch video lessons, practice with exams, read notes and track your progress, all in one place.</p>
+              <form class="hp-search" id="hpSearch" role="search">
+                <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+                <input id="hpSearchInput" type="search" autocomplete="off" data-hp-ph="searchPh" placeholder="Search lessons, e.g. Newton's laws" aria-label="Search lessons">
+                <button class="hp-btn hp-btn-gold" type="submit" data-hp="searchBtn">Search</button>
+              </form>
+              <div class="hp-jump"><span data-hp="jumpTo">Jump to</span>
+                <button type="button" data-grade="9"><span data-hp="grade">Grade</span> 9</button><button type="button" data-grade="10"><span data-hp="grade">Grade</span> 10</button><button type="button" data-grade="11"><span data-hp="grade">Grade</span> 11</button><button type="button" data-grade="12"><span data-hp="grade">Grade</span> 12</button>
+              </div>
+              <div class="hp-actions">
+                <button class="hp-btn hp-btn-ghost" type="button" data-page="exams"><svg class="ic" aria-hidden="true"><use href="#i-exam"/></svg><span data-hp="ctaExam">Try a practice exam</span></button>
+                <button class="hp-btn hp-btn-ghost" type="button" data-page="studio"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg><span data-hp="ctaStudio">Study Studio</span></button>
+              </div>
+            </div>
+            <div class="hp-stage" aria-hidden="true">
+              <div class="hp-ring-line"></div>
+              <img class="hp-logo" src="assets/logo-512.png" width="512" height="512" alt="">
+              <span class="hp-badge"><svg class="ic"><use href="#i-math"/></svg></span>
+              <span class="hp-badge"><svg class="ic"><use href="#i-atom"/></svg></span>
+              <span class="hp-badge"><svg class="ic"><use href="#i-bio"/></svg></span>
+              <span class="hp-badge"><svg class="ic"><use href="#i-flask"/></svg></span>
+            </div>
+            <div class="hp-flag" aria-hidden="true"><i></i><i></i><i></i></div>
+          </header>
+
+          <section class="hp-snap" aria-labelledby="hpSnapTitle">
+            <div class="hp-ringwrap" role="img" aria-label="Overall progress">
+              <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="hpGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b8cff"/><stop offset="1" stop-color="#ffc21a"/></linearGradient></defs><circle class="bg" cx="60" cy="60" r="52"/><circle class="fg" id="hpRingFg" cx="60" cy="60" r="52"/></svg>
+              <b id="homeProgress">0%</b>
+            </div>
+            <div>
+              <h2 id="hpSnapTitle" data-hp="snapTitle">Your learning snapshot</h2>
+              <p class="hp-snap-note" data-hp="snapHint">Complete a lesson to see this fill up.</p>
+              <div class="hp-stats">
+                <div class="hp-stat"><svg class="ic" aria-hidden="true"><use href="#i-video"/></svg><div><strong id="homeLessons">0</strong><small data-hp="statLessons">Lessons completed</small></div></div>
+                <div class="hp-stat"><svg class="ic" aria-hidden="true"><use href="#i-exam"/></svg><div><strong id="homeQuizzes">0</strong><small data-hp="statQuizzes">Quizzes taken</small></div></div>
+                <div class="hp-stat"><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg><div><strong id="homeFavorites">0</strong><small data-hp="statSaved">Saved lessons</small></div></div>
+              </div>
+            </div>
+          </section>
+
+          <section aria-labelledby="hpGradesTitle">
+            <div class="hp-head"><div><h2 id="hpGradesTitle" data-hp="gradesTitle">Choose your grade</h2><p data-hp="gradesText">Lessons, notes and exams matched to your level.</p></div></div>
+            <div class="hp-grades">
+              <button class="hp-grade" type="button" data-grade="9"><small><span data-hp="grade">Grade</span> 9</small><strong data-hp="g9">Build strong foundations</strong><b><span data-hp="openLessons">Open lessons</span><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></b><em aria-hidden="true">9</em></button>
+              <button class="hp-grade" type="button" data-grade="10"><small><span data-hp="grade">Grade</span> 10</small><strong data-hp="g10">Grow your skills</strong><b><span data-hp="openLessons">Open lessons</span><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></b><em aria-hidden="true">10</em></button>
+              <button class="hp-grade" type="button" data-grade="11"><small><span data-hp="grade">Grade</span> 11</small><strong data-hp="g11">Prepare for what is next</strong><b><span data-hp="openLessons">Open lessons</span><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></b><em aria-hidden="true">11</em></button>
+              <button class="hp-grade" type="button" data-grade="12"><small><span data-hp="grade">Grade</span> 12</small><strong data-hp="g12">Get exam ready</strong><b><span data-hp="openLessons">Open lessons</span><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></b><em aria-hidden="true">12</em></button>
+            </div>
+          </section>
+
+          <section aria-labelledby="hpFeatTitle">
+            <div class="hp-head"><div><h2 id="hpFeatTitle" data-hp="featTitle">Everything in one study space</h2><p data-hp="featText">Lessons, practice, revision and progress, connected.</p></div></div>
+            <div class="hp-bento">
+              <button class="hp-feat hp-feat-big" type="button" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-video"/></svg><h3 data-hp="fVideos">Video lessons</h3><p data-hp="fVideosD">Explore lessons by grade and subject, with a player built for studying.</p></button>
+              <button class="hp-feat" type="button" data-page="exams"><svg class="ic" aria-hidden="true"><use href="#i-exam"/></svg><h3 data-hp="fExams">Practice exams</h3><p data-hp="fExamsD">Check your understanding with timed quizzes.</p></button>
+              <button class="hp-feat" type="button" data-page="notes"><svg class="ic" aria-hidden="true"><use href="#i-notes"/></svg><h3 data-hp="fNotes">Study notes</h3><p data-hp="fNotesD">Read notes by grade, subject and unit.</p></button>
+              <button class="hp-feat" type="button" data-page="studio"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg><h3 data-hp="fStudio">Study Studio</h3><p data-hp="fStudioD">Focus timer, tasks and flashcards.</p></button>
+              <button class="hp-feat" type="button" data-page="dashboard"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg><h3 data-hp="fProgress">Progress tracking</h3><p data-hp="fProgressD">See completed lessons and activity.</p></button>
+              <button class="hp-feat" type="button" data-page="favorites"><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg><h3 data-hp="fFav">Saved favorites</h3><p data-hp="fFavD">Keep useful lessons close at hand.</p></button>
+              <button class="hp-feat" type="button" data-page="certificates"><svg class="ic" aria-hidden="true"><use href="#i-award"/></svg><h3 data-hp="fCert">Certificates</h3><p data-hp="fCertD">Print proof of what you completed.</p></button>
+              <button class="hp-feat" type="button" data-page="ai"><svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg><h3 data-hp="fAi">AI study helper</h3><p data-hp="fAiD">Ask for explanations and study plans.</p></button>
+              <button class="hp-feat" type="button" data-page="leaderboard"><svg class="ic" aria-hidden="true"><use href="#i-trophy"/></svg><h3 data-hp="fBoard">Leaderboard</h3><p data-hp="fBoardD">See how your activity compares.</p></button>
+            </div>
+          </section>
+
+          <section aria-labelledby="hpHowTitle">
+            <div class="hp-head"><div><h2 id="hpHowTitle" data-hp="howTitle">How it works</h2></div></div>
+            <div class="hp-steps">
+              <div class="hp-step"><span>1</span><h3 data-hp="s1">Watch</h3><p data-hp="s1d">Pick a lesson by grade and subject.</p></div>
+              <div class="hp-step"><span>2</span><h3 data-hp="s2">Practice</h3><p data-hp="s2d">Test yourself with exam questions.</p></div>
+              <div class="hp-step"><span>3</span><h3 data-hp="s3">Review</h3><p data-hp="s3d">Read notes and save your favorites.</p></div>
+              <div class="hp-step"><span>4</span><h3 data-hp="s4">Track</h3><p data-hp="s4d">Watch your progress grow and earn certificates.</p></div>
+            </div>
+          </section>
+
+          <section aria-labelledby="hpSubjTitle">
+            <div class="hp-head"><div><h2 id="hpSubjTitle" data-hp="subjTitle">Find your next topic</h2><p data-hp="subjText">Open the video library already filtered by subject.</p></div></div>
+            <div class="hp-subjects">
+              <button type="button" data-home-subject="Mathematics" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-math"/></svg>Mathematics</button>
+              <button type="button" data-home-subject="Physics" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-atom"/></svg>Physics</button>
+              <button type="button" data-home-subject="Chemistry" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-flask"/></svg>Chemistry</button>
+              <button type="button" data-home-subject="Biology" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-bio"/></svg>Biology</button>
+              <button type="button" data-home-subject="English" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-text"/></svg>English</button>
+              <button type="button" data-home-subject="Geography" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg>Geography</button>
+              <button type="button" data-home-subject="History" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-landmark"/></svg>History</button>
+              <button type="button" data-home-subject="Economics" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-trend"/></svg>Economics</button>
+              <button type="button" data-home-subject="Computer Science" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-code"/></svg>Computer Science</button>
+              <button type="button" data-home-subject="SAT" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg>SAT</button>
+            </div>
+          </section>
+
+          <section class="hp-studio" aria-labelledby="hpStudioTitle">
+            <div>
+              <h2 id="hpStudioTitle" data-hp="studioTitle">Make every minute count</h2>
+              <p data-hp="studioText">Start a focus session right here, or open Study Studio to plan tasks and build flashcards.</p>
+              <button class="hp-btn hp-btn-gold" type="button" data-page="studio"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg><span data-hp="openStudio">Open Study Studio</span></button>
+            </div>
+            <div class="hp-timer">
+              <div class="hp-timer-ring"><svg viewBox="0 0 200 200" aria-hidden="true"><circle class="bg" cx="100" cy="100" r="90"/><circle class="fg" id="hpTimerFg" cx="100" cy="100" r="90"/></svg><b id="hpTime" role="timer" aria-live="off">25:00</b></div>
+              <div class="hp-presets" role="group" aria-label="Focus length"><button type="button" data-min="15" aria-pressed="false">15</button><button type="button" data-min="25" aria-pressed="true">25</button><button type="button" data-min="45" aria-pressed="false">45</button></div>
+              <div class="hp-timer-btns"><button class="hp-btn hp-btn-gold" type="button" id="hpTimerToggle" data-hp="timerStart">Start focus</button><button class="hp-btn hp-btn-ghost" type="button" id="hpTimerReset" data-hp="timerReset">Reset</button></div>
+            </div>
+          </section>
+
+          <section class="hp-final">
+            <div class="hp-final-id"><img src="assets/logo-192.png" width="84" height="84" alt="EduTube Ethiopia logo"><div><h2 data-hp="ctaTitle">Ready to keep learning?</h2><p data-hp="ctaText">Choose a lesson, practice a question and make progress at your own pace.</p></div></div>
+            <div class="hp-actions"><button class="hp-btn hp-btn-gold" type="button" data-page="library"><span data-hp="ctaStart">Explore video library</span><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></button></div>
+          </section>
         </div>
-        <div class="section-heading"><div><span class="eyebrow" data-i18n="chooseGrade">CHOOSE YOUR LEVEL</span><h2 data-i18n="gradesTitle">Explore by grade</h2></div></div>
-        <div class="grade-grid">
-          <button class="grade-card" data-grade="9"><span>09</span><b data-i18n="grade">Grade</b><small data-i18n="grade9Desc">Build your foundations</small></button>
-          <button class="grade-card" data-grade="10"><span>10</span><b data-i18n="grade">Grade</b><small data-i18n="grade10Desc">Strengthen your skills</small></button>
-          <button class="grade-card" data-grade="11"><span>11</span><b data-i18n="grade">Grade</b><small data-i18n="grade11Desc">Prepare for what is next</small></button>
-          <button class="grade-card" data-grade="12"><span>12</span><b data-i18n="grade">Grade</b><small data-i18n="grade12Desc">Get ready for exams</small></button>
-        </div>
-        <div class="section-heading"><div><span class="eyebrow" data-i18n="quickAccess">QUICK ACCESS</span><h2 data-i18n="jumpBack">Pick up where you left off</h2></div></div>
-        <div class="quick-grid">
-          <button class="quick-card" data-page="library"><b data-i18n="browseVideos">Browse video lessons</b><small data-i18n="browseVideosDesc">Find a topic and start learning</small></button>
-          <button class="quick-card" data-page="exams"><b data-i18n="practiceExams">Practice exams</b><small data-i18n="practiceExamsDesc">Test what you have learned</small></button>
-          <button class="quick-card" data-page="dashboard"><b data-i18n="viewProgress">View your progress</b><small data-i18n="viewProgressDesc">See your learning activity</small></button>
-        </div>
-        <!-- EduTube premium long-scroll home additions: existing routes and features only -->
-        <section class="home-feature-section" aria-labelledby="homeFeaturesTitle">
-          <div class="home-section-intro"><span class="eyebrow" data-i18n="homeWhyEyebrow">WHY EDUTUBE</span><h2 id="homeFeaturesTitle" data-i18n="homeFeaturesTitle">Everything you need to move forward</h2><p data-i18n="homeFeaturesText">A connected learning space for lessons, practice, revision and progress.</p></div>
-          <div class="home-feature-grid">
-            <button class="home-feature-card feature-violet" data-page="library"><span class="home-feature-icon">▶</span><b data-i18n="homeFeatureVideos">Video lessons</b><small data-i18n="homeFeatureVideosDesc">Explore lessons by grade and subject.</small><span class="home-card-arrow">↗</span></button>
-            <button class="home-feature-card feature-blue" data-page="exams"><span class="home-feature-icon">✎</span><b data-i18n="homeFeatureExams">Practice exams</b><small data-i18n="homeFeatureExamsDesc">Check your understanding with quizzes.</small><span class="home-card-arrow">↗</span></button>
-            <button class="home-feature-card feature-orange" data-page="notes"><span class="home-feature-icon">▤</span><b data-i18n="homeFeatureNotes">Study notes</b><small data-i18n="homeFeatureNotesDesc">Review learning materials and notes.</small><span class="home-card-arrow">↗</span></button>
-            <button class="home-feature-card feature-green" data-page="studio"><span class="home-feature-icon">◷</span><b data-i18n="homeFeatureStudio">Study Studio</b><small data-i18n="homeFeatureStudioDesc">Focus timer, tasks and flashcards.</small><span class="home-card-arrow">↗</span></button>
-            <button class="home-feature-card feature-pink" data-page="dashboard"><span class="home-feature-icon">▥</span><b data-i18n="homeFeatureProgress">Progress tracking</b><small data-i18n="homeFeatureProgressDesc">See your completed lessons and activity.</small><span class="home-card-arrow">↗</span></button>
-            <button class="home-feature-card feature-cyan" data-page="favorites"><span class="home-feature-icon">♡</span><b data-i18n="homeFeatureFavorites">Saved favorites</b><small data-i18n="homeFeatureFavoritesDesc">Keep useful lessons close at hand.</small><span class="home-card-arrow">↗</span></button>
-            <button class="home-feature-card feature-gold" data-page="certificates"><span class="home-feature-icon">✧</span><b data-i18n="homeFeatureCertificates">Certificates</b><small data-i18n="homeFeatureCertificatesDesc">View your learning achievements.</small><span class="home-card-arrow">↗</span></button>
-            <button class="home-feature-card feature-indigo" data-page="ai"><span class="home-feature-icon">✦</span><b data-i18n="homeFeatureHelper">AI study helper</b><small data-i18n="homeFeatureHelperDesc">Open the study support workspace.</small><span class="home-card-arrow">↗</span></button>
-          </div>
-        </section>
-
-        <section class="home-pathway-section">
-          <div class="home-section-intro"><span class="eyebrow" data-i18n="homePathEyebrow">YOUR LEARNING PATH</span><h2 data-i18n="homePathTitle">Choose a grade. Build your future.</h2><p data-i18n="homePathText">Jump straight into the learning level that matches you.</p></div>
-          <div class="home-path-grid">
-            <button class="home-path-card" data-grade="9"><span>GRADE 09</span><strong data-i18n="homePath9">Build strong foundations</strong><small data-i18n="homePath9Desc">Start with the essentials.</small><b>Explore →</b></button>
-            <button class="home-path-card" data-grade="10"><span>GRADE 10</span><strong data-i18n="homePath10">Grow your skills</strong><small data-i18n="homePath10Desc">Practice and deepen your knowledge.</small><b>Explore →</b></button>
-            <button class="home-path-card" data-grade="11"><span>GRADE 11</span><strong data-i18n="homePath11">Prepare for what is next</strong><small data-i18n="homePath11Desc">Strengthen subject understanding.</small><b>Explore →</b></button>
-            <button class="home-path-card" data-grade="12"><span>GRADE 12</span><strong data-i18n="homePath12">Get exam ready</strong><small data-i18n="homePath12Desc">Revise and test your knowledge.</small><b>Explore →</b></button>
-          </div>
-        </section>
-
-        <section class="home-study-banner">
-          <div class="home-study-copy"><span class="eyebrow" data-i18n="homeStudioEyebrow">MAKE EVERY MINUTE COUNT</span><h2 data-i18n="homeStudioTitle">Your personal Study Studio</h2><p data-i18n="homeStudioText">Plan your sessions, focus with a timer, build flashcards and keep your study tasks organized.</p><button class="primary-button" data-page="studio" data-i18n="homeStudioButton">Open Study Studio →</button></div>
-          <div class="home-study-orbit" aria-hidden="true"><span>25:00</span><small>FOCUS MODE</small><i>✦</i><b>◷</b></div>
-        </section>
-
-        <section class="home-subject-section">
-          <div class="home-section-intro"><span class="eyebrow" data-i18n="homeSubjectsEyebrow">EXPLORE KNOWLEDGE</span><h2 data-i18n="homeSubjectsTitle">Find your next topic</h2><p data-i18n="homeSubjectsText">Browse the subjects available in the video library.</p></div>
-          <div class="home-subject-chips">
-            <button data-home-subject="Mathematics" data-page="library">∑ Mathematics</button><button data-home-subject="Physics" data-page="library">⚛ Physics</button><button data-home-subject="Chemistry" data-page="library">⚗ Chemistry</button><button data-home-subject="Biology" data-page="library">❋ Biology</button><button data-home-subject="English" data-page="library">A English</button><button data-home-subject="Geography" data-page="library">⌖ Geography</button><button data-home-subject="History" data-page="library">▤ History</button><button data-home-subject="Computer Science" data-page="library">⌘ Computer Science</button>
-          </div>
-        </section>
-
-        <section class="home-final-cta"><div><span class="eyebrow" data-i18n="homeCtaEyebrow">YOUR NEXT STEP STARTS HERE</span><h2 data-i18n="homeCtaTitle">Ready to keep learning?</h2><p data-i18n="homeCtaText">Choose a lesson, practice a question and make progress at your own pace.</p></div><div class="home-cta-actions"><button class="primary-button" data-page="library" data-i18n="homeCtaBrowse">Explore video library →</button><button class="home-secondary-button" data-page="exams" data-i18n="homeCtaExam">Try a practice exam</button></div></section>
       </section>
 
       <section class="page" id="page-library">

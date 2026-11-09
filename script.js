@@ -569,7 +569,7 @@ document.addEventListener("contextmenu",e=>{
 document.addEventListener("dragstart",e=>{if(e.target.closest("#videoModal"))e.preventDefault()});
 document.addEventListener("copy",e=>{if(e.target.closest("#videoModal"))e.preventDefault()});
 document.addEventListener("keydown",e=>{
-  const k=(e.key||"").toLowerCase();
+  const k=e.key.toLowerCase();
   if(e.key==="PrintScreen"){e.preventDefault();privacyFlash();return}
   if((e.ctrlKey||e.metaKey)&&["s","p","u"].includes(k)){e.preventDefault();notify("ይህ ተግባር ተከልክሏል።")}
   if((e.ctrlKey||e.metaKey)&&e.shiftKey&&["i","j","c"].includes(k)){e.preventDefault();notify("DevTools መክፈት ተከልክሏል።")}
@@ -964,9 +964,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const {data,error}=await c.storage.from(note.pdf_bucket||BUCKET).createSignedUrl(note.pdf_path,3600);
       if(error) throw error;
       if(!data?.signedUrl) throw new Error("Supabase did not return a signed PDF URL.");
-      const open=h("a","small-button","Open PDF in browser ↗");
-      open.href=data.signedUrl;open.target="_blank";open.rel="noopener noreferrer";
-      actions.prepend(open);
       frame.src=data.signedUrl;
       status.textContent="PDF ready · Read-only viewer. If this area stays blank on your phone, use Open PDF in browser.";
       if(note.allow_download){const a=h("a","small-button","Download PDF");a.href=data.signedUrl;a.download=(note.title||"EduTube-Note")+".pdf";a.rel="noopener noreferrer";actions.append(a);}

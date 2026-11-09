@@ -41,7 +41,7 @@
   $('pomoStart').addEventListener('click',()=>{
     if(pomoInterval){stopPomo();return;}
     $('pomoStart').textContent='Pause';
-    pomoInterval=setInterval(()=>{pomoSeconds--;displayPomo();if(pomoSeconds<=0){stopPomo();if(pomoLength===25){state.sessions++;addMinutes(25);$('pomoStatus').textContent='🎉 Focus session complete! Take a short break.';}else $('pomoStatus').textContent='Break complete. Ready for another round?';save();updateStats();$('pomoStart').textContent='Start';}},1000);
+    pomoInterval=setInterval(()=>{pomoSeconds--;displayPomo();if(pomoSeconds<=0){stopPomo();if(pomoLength===25){state.sessions++;addMinutes(25);$('pomoStatus').textContent='🎉 Focus session complete! Take a short break.';}else $('pomoStatus').textContent='Break complete. Ready for another round?';save();updateStats();$('pomoStart').textContent='Start';if(typeof window.edutubeTimerComplete==='function')window.edutubeTimerComplete('Pomodoro timer');}},1000);
   });
   $('pomoReset').addEventListener('click',()=>{stopPomo();pomoSeconds=pomoLength*60;displayPomo();$('pomoStart').textContent='Start';});
   document.querySelectorAll('[data-pomo]').forEach(b=>b.addEventListener('click',()=>{stopPomo();pomoLength=Number(b.dataset.pomo);pomoSeconds=pomoLength*60;displayPomo();$('pomoStart').textContent='Start';$('pomoStatus').textContent=pomoLength===25?'A completed focus session adds 25 minutes to your daily goal.':'Break timer selected.';}));
