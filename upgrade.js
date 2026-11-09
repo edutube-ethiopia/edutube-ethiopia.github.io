@@ -11,8 +11,7 @@
   async function forceSignOut(reason) {
     if (signingOut || !sb()?.auth) return;
     signingOut = true;
-    try { await sb().auth.signOut({scope:"local"}); } catch(e) { console.warn("Automatic sign out:",e); }
-    window.__edutubeSessionUser=null; syncAccountLabel();
+    try { await sb().auth.signOut(); } catch(e) { console.warn("Automatic sign out:",e); }
     localStorage.removeItem("edutube_student_signed_at");
     localStorage.removeItem("edutube_admin_last_activity");
     if (typeof window.notify === "function") window.notify(reason);
@@ -35,26 +34,58 @@
     localStorage.setItem("edutube_admin_last_activity",String(Date.now()));
     adminTimer=setTimeout(()=>forceSignOut("Admin signed out after 1 minute of inactivity."),ADMIN_IDLE);
   }
-  function syncAccountLabel(){
-    const label=$("accountLabel"); if(!label) return;
-    const user=window.__edutubeSessionUser;
-    if(!user){label.textContent="Sign in";$("accountShortcut")?.setAttribute("aria-label","Sign in");}
-  }
   function applySession(session){
     stopTimers();
     const user=session?.user||null;
     window.__edutubeSessionUser=user;
-    syncAccountLabel();
     if(!user){localStorage.removeItem("edutube_student_signed_at");localStorage.removeItem("edutube_admin_last_activity");return;}
     if(isAdminUser(user)){
-      const last=Number(localStorage.getItem("edutube_admin_last_activity"))||0;
+      const last=Number(localStorage.getItem("edutube_admin_last_activity"))||Date.now();
       if(Date.now()-last>=ADMIN_IDLE){setTimeout(()=>forceSignOut("Admin session expired after 1 minute of inactivity."),0);return;}
       resetAdminIdle();
     } else startStudentTimer();
   }
-  function initSecurity(){
+  /* Header account button: "Admin" / name ONLY while a real, valid session exists; otherwise always "Sign in". */
+  let sessionKnown=false;
+  function paintAccountLabel(user){
+    const el=$("accountLabel"); if(!el)return;
+    let text="Sign in";
+    if(user){
+      const role=String(user.app_metadata?.role||"").toLowerCase();
+      if(role==="super_admin")text="Super Admin";
+      else if(role==="admin")text="Admin";
+      else text=user.user_metadata?.full_name||(user.email?user.email.split("@")[0]:"Account");
+    }
+    if(el.textContent!==text)el.textContent=text;
+  }
+  function adminIdleExpired(user){
+    return isAdminUser(user)&&Date.now()-(Number(localStorage.getItem("edutube_admin_last_activity"))||0)>=ADMIN_IDLE+2000;
+  }
+  async function verifyAccountLabel(){
     if(!sb()?.auth)return;
-    ["adminLoginForm","studentAuthForm"].forEach(id=>$(id)?.addEventListener("submit",()=>localStorage.setItem("edutube_admin_last_activity",String(Date.now())),true));
+    try{
+      const {data}=await sb().auth.getSession();
+      let user=data?.session?.user||null;
+      if(user&&adminIdleExpired(user)){user=null;forceSignOut("Admin signed out after 1 minute of inactivity.");}
+      sessionKnown=true;window.__edutubeSessionUser=user;paintAccountLabel(user);
+    }catch(e){console.warn("Account label check:",e);}
+  }
+  function initAccountLabel(){
+    const el=$("accountLabel"); if(!el)return;
+    el.textContent="Sign in";
+    /* if any other script writes a signed-in name while nobody is signed in, put "Sign in" back */
+    new MutationObserver(()=>{ if(sessionKnown&&!window.__edutubeSessionUser&&el.textContent!=="Sign in")el.textContent="Sign in"; })
+      .observe(el,{childList:true,characterData:true,subtree:true});
+    if(sb()?.auth)sb().auth.onAuthStateChange((_e,session)=>{sessionKnown=true;paintAccountLabel(session?.user||null);});
+    verifyAccountLabel();
+    setInterval(verifyAccountLabel,5000);
+    window.addEventListener("focus",verifyAccountLabel);
+    window.addEventListener("pageshow",verifyAccountLabel);
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")verifyAccountLabel();});
+  }
+  function initSecurity(){
+    initAccountLabel();
+    if(!sb()?.auth)return;
     sb().auth.getSession().then(({data})=>applySession(data?.session)).catch(console.warn);
     sb().auth.onAuthStateChange((_event,session)=>applySession(session));
     ["pointerdown","keydown","touchstart","mousemove","scroll","click"].forEach(ev=>

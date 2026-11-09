@@ -11,8 +11,7 @@
   .topbar{position:fixed!important;inset:0 0 auto 0;height:76px;z-index:100}
   .app-layout{padding-top:76px;min-height:100vh}
   .sidebar{position:fixed;top:76px;bottom:0;left:0;width:230px;overflow-y:auto;overscroll-behavior:contain;z-index:40}
-  .app-layout{display:block!important}
-  .main-content{margin-left:230px;width:calc(100% - 230px);max-width:none};min-width:0
+  .main-content{margin-left:230px;width:calc(100% - 230px);max-width:none}
 }
 @media (max-width:760px){
   .topbar{position:fixed!important;top:0;left:0;right:0;z-index:100}
@@ -47,3 +46,13 @@ body.notes-reading-mode .eu-pdf-stage{flex:1;min-height:0;height:auto!important;
 body.notes-reading-mode .eu-pdf-stage canvas{max-width:100%;height:auto!important;object-fit:contain}
 body.notes-reading-mode .eu-pdf-footer{flex:0 0 auto}
 @media(max-width:600px){.exam-pro{padding:12px}.exam-pro-welcome{align-items:flex-start}.exam-pro-welcome h2{font-size:16px}.exam-pro-stats{grid-template-columns:repeat(2,1fr)}.exam-pro-clock{min-width:92px;padding:7px}.exam-pro-tools input{min-width:100%}.exam-pro-tools select{flex:1}.exam-grid.exam-list-view .exam-card{grid-template-columns:1fr}.exam-grid.exam-list-view .exam-card .primary-button,.exam-grid.exam-list-view .exam-card .ep-save{grid-column:1;grid-row:auto}}
+
+/* FIX: the sidebar is position:fixed, so the old 2-column grid squeezed the page into the 230px sidebar column.
+   Use a plain block layout so every page fills the whole area to the right of the menu. */
+@media (min-width:761px){
+  .app-layout{display:block!important;grid-template-columns:none!important}
+  .main-content{margin-left:230px!important;width:auto!important;max-width:none!important;padding-left:clamp(18px,3vw,44px);padding-right:clamp(18px,3vw,44px)}
+  .main-content>.page{width:100%;max-width:none}
+}
+@media (max-width:760px){.main-content{margin-left:0!important;width:100%!important;max-width:none!important}}
+.account-shortcut,.account-shortcut #accountLabel{white-space:nowrap}
