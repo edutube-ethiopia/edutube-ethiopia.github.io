@@ -185,7 +185,7 @@ on('ppSpeed', 'click', e => { e.stopPropagation(); togglePanel(true, 'speed'); }
 on('ppCC', 'click', () => (ccLang ? ccOff() : ccOn()));
 on('ppSave', 'click', () => { if (currentVideo && typeof toggleFavorite === 'function') { toggleFavorite(currentVideo.id); sync(); } });
 on('ppShare', 'click', async () => {
-  const title = (currentVideo && currentVideo.title) || 'EduTube', url = location.href.split('#')[0];
+  const title = (currentVideo && currentVideo.title) || 'ZSecret For Free', url = location.href.split('#')[0];
   if (navigator.share) { try { await navigator.share({ title, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
   try { await navigator.clipboard.writeText(url); notify(T('copied')); } catch { notify(url); }
 });

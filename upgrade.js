@@ -1,4 +1,4 @@
-/* EduTube Ethiopia — Security, Admin UX and reader upgrades */
+/* ZSecret For Free — Security, Admin UX and reader upgrades */
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);

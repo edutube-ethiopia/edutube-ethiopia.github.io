@@ -1,4 +1,4 @@
-/* EduTube Ethiopia Advanced Admin Command Center.
+/* ZSecret For Free Advanced Admin Command Center.
    Uses the existing authenticated Supabase client and database RLS. */
 (() => {
 'use strict';
@@ -15,7 +15,7 @@ function mount(){
  const w=$('adminWorkspace');if(!w||$('adminAdvancedPanel'))return;
  const p=document.createElement('section');p.id='adminAdvancedPanel';p.className='admin-advanced';
  p.innerHTML=`
- <header class="aa-head"><div><span class="eyebrow">EDUTUBE · ADMIN PRO</span><h2>⚡ Advanced Admin Command Center</h2><p>Monitor, audit, organize and manage your learning platform.</p></div><div class="aa-head-actions"><span class="aa-chip" id="aaHealthBadge">Connecting…</span><button class="small-button" id="aaRefresh">↻ Refresh all</button></div></header>
+ <header class="aa-head"><div><span class="eyebrow">ZSECRET · ADMIN PRO</span><h2>⚡ Advanced Admin Command Center</h2><p>Monitor, audit, organize and manage your learning platform.</p></div><div class="aa-head-actions"><span class="aa-chip" id="aaHealthBadge">Connecting…</span><button class="small-button" id="aaRefresh">↻ Refresh all</button></div></header>
  <div class="aa-kpis">
  ${[['Lessons','aaLessons','Published + drafts'],['Published','aaPublished','Visible to students'],['Drafts','aaDrafts','Awaiting review'],['Notes','aaNotes','Learning resources'],['Students','aaStudents','Profiles available'],['Exam attempts','aaAttempts','Submitted records']].map(x=>`<article><small>${x[0]}</small><strong id="${x[1]}">—</strong><span>${x[2]}</span></article>`).join('')}
  </div>

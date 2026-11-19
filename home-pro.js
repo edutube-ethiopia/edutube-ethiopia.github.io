@@ -1,4 +1,4 @@
-/* EduTube Ethiopia — Home Pro. Additive: icon sprite, nav icons, home page behaviour, English/Amharic text for the new home page. */
+/* ZSecret For Free — Home Pro. Additive: icon sprite, nav icons, home page behaviour, English/Amharic text for the new home page. */
 (function () {
   "use strict";
   var P = {

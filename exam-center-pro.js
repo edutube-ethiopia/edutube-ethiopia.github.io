@@ -17,7 +17,7 @@
     if(!page||!grid||$('examProTools'))return;
     const panel=document.createElement('section');panel.id='examProTools';panel.className='exam-pro';
     panel.innerHTML=`
-      <div class="exam-pro-welcome"><div><span class="eyebrow">EXAM CENTER · PRO</span><h2>Your personal exam command center</h2><p>Find, organize and practice with the quizzes already published on EduTube.</p></div><div class="exam-pro-clock"><small>FOCUS TIMER</small><b id="epTimer">25:00</b><button type="button" id="epTimerToggle">Start focus</button></div></div>
+      <div class="exam-pro-welcome"><div><span class="eyebrow">EXAM CENTER · PRO</span><h2>Your personal exam command center</h2><p>Find, organize and practice with the quizzes already published on ZSecret For Free.</p></div><div class="exam-pro-clock"><small>FOCUS TIMER</small><b id="epTimer">25:00</b><button type="button" id="epTimerToggle">Start focus</button></div></div>
       <div class="exam-pro-stats"><article><b id="epTotal">0</b><small>Available exams</small></article><article><b id="epShown">0</b><small>Showing now</small></article><article><b id="epSaved">0</b><small>Saved exams</small></article><article><b id="epAttempts">0</b><small>Recorded attempts</small></article></div>
       <div class="exam-pro-tools">
         <input id="epSearch" type="search" placeholder="Search exam title or subject…" aria-label="Search exams">

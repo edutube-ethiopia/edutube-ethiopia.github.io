@@ -56,3 +56,12 @@ body.notes-reading-mode .eu-pdf-footer{flex:0 0 auto}
 }
 @media (max-width:760px){.main-content{margin-left:0!important;width:100%!important;max-width:none!important}}
 .account-shortcut,.account-shortcut #accountLabel{white-space:nowrap}
+
+
+/* ZSecret For Free - download buttons */
+.zs-download{display:inline-flex;align-items:center;gap:6px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap}
+.zs-download:disabled{opacity:.6;cursor:wait}
+.zs-download.zs-unavailable{opacity:.55}
+.zs-note-item{display:flex;flex-direction:column;gap:8px}
+.zs-note-item .notes-card{width:100%}
+.watch-head{flex-wrap:wrap;gap:8px}
