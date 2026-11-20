@@ -132,3 +132,8 @@
 }
 @media(max-height:430px){.pp-dock{padding:6px 10px}.pp-bigplay{width:56px;height:56px}.pp-bottom{padding-top:20px}}
 @media(prefers-reduced-motion:reduce){.pp-ui,.pp-circle,.pp-panel,.pp-menu,.pp-switch,.pp-switch::after{transition:none!important;animation:none!important}}
+
+/* Hosted video support: native media and embed links */
+#videoFrame.hosted-player #hostVideo, #videoFrame.hosted-player #externalVideo{position:absolute;inset:0;width:100%;height:100%;background:#000;object-fit:contain;border:0;z-index:2;}
+#videoFrame.hosted-player .controls,#videoFrame.hosted-player .tap-layer,#videoFrame.hosted-player .poster,#videoFrame.hosted-player .fb-full,#videoFrame.hosted-player #ytHost{display:none!important;}
+#videoFrame.hosted-player #hostVideo[hidden],#videoFrame.hosted-player #externalVideo[hidden]{display:none!important;}

@@ -132,7 +132,7 @@ function videoCard(video){
  const vid=getYouTubeId(video.url);
  const thumb=document.createElement("button");
  thumb.type="button";thumb.className="video-thumb";thumb.setAttribute("aria-label",video.title);
- if(vid)thumb.style.backgroundImage=`linear-gradient(transparent 40%,#000b),url(https://i.ytimg.com/vi/${vid}/hqdefault.jpg)`;
+ if(vid)thumb.style.backgroundImage=`linear-gradient(transparent 40%,#000b),url(https://i.ytimg.com/vi/${vid}/hqdefault.jpg)`;else if(video.thumbnail_url)thumb.style.backgroundImage=`linear-gradient(transparent 40%,#000b),url(${video.thumbnail_url})`;else thumb.style.backgroundImage="linear-gradient(135deg,#153f77,#071426)";
  thumb.addEventListener("click",()=>openVideo(video.id));
  const chip=document.createElement("span");chip.className="thumb-chip";chip.textContent="Grade "+video.grade;
  thumb.append(chip);
@@ -397,13 +397,13 @@ function renderUpNext(){
   box.replaceChildren();
   if(!currentVideo)return;
   const i=videos.findIndex(v=>v.id===currentVideo.id);
-  const list=[...videos.slice(i+1),...videos.slice(0,i)].filter(v=>getYouTubeId(v.url));
+  const list=[...videos.slice(i+1),...videos.slice(0,i)].filter(v=>v.url);
   if(!list.length){box.textContent="ሌላ ትምህርት የለም";return}
   const pct=read(PCT,{});
   list.forEach(v=>{
     const row=document.createElement("button");row.type="button";row.className="up-item";
     const img=document.createElement("span");img.className="up-thumb";
-    img.style.backgroundImage=`url(https://i.ytimg.com/vi/${getYouTubeId(v.url)}/mqdefault.jpg)`;
+    img.style.backgroundImage=getYouTubeId(v.url)?`url(https://i.ytimg.com/vi/${getYouTubeId(v.url)}/mqdefault.jpg)`:v.thumbnail_url?`url(${v.thumbnail_url})`:"linear-gradient(135deg,#153f77,#071426)";
     if(pct[v.id]){const bar=document.createElement("i");bar.className="thumb-bar";const f=document.createElement("b");f.style.width=Math.min(pct[v.id],100)+"%";bar.append(f);img.append(bar)}
     const txt=document.createElement("span");txt.className="up-text";
     const h=document.createElement("b");h.textContent=v.title;
@@ -417,9 +417,9 @@ function renderUpNext(){
 async function openVideo(id){
   const video=videos.find(v=>v.id===id);if(!video)return;
   const vid=getYouTubeId(video.url);
-  if(!vid){notify(t("videoUnavailable"));return}
+  if(!vid&&!video.url){notify(t("videoUnavailable"));return}
   ensureUpNext();currentVideo=video;
-  {const dlb=$("videoDownload");if(dlb){const du=video.download_url;
+  {const dlb=$("videoDownload");if(dlb){const du=video.download_url||(/\.(mp4|webm|ogg|m4v)(?:$|[?#])/i.test(video.url||"")?video.url:"");
     dlb.onclick=e=>{if(!du||!/^https?:\/\//i.test(du)){e.preventDefault();notify("Download is not available for this video yet.");}};
     if(du&&/^https?:\/\//i.test(du)){dlb.href=du;dlb.target="_blank";dlb.setAttribute("download",(video.title||"ZSecret-video").replace(/[\\/:*?"<>|]+/g,"-")+".mp4");dlb.classList.remove("zs-unavailable");}
     else{dlb.href="#";dlb.removeAttribute("target");dlb.removeAttribute("download");dlb.classList.add("zs-unavailable");}}}
@@ -434,6 +434,20 @@ async function openVideo(id){
   lockPageScroll();
   const mc=document.querySelector("#videoModal .modal-content");if(mc)mc.scrollTop=0;
   renderUpNext();
+  const native=$("hostVideo"),ext=$("externalVideo"),ytHost=$("ytHost");
+  if(native){native.pause();native.removeAttribute("src");native.load();native.hidden=true;}
+  if(ext){ext.src="";ext.hidden=true;}
+  if(ytHost)ytHost.style.display="";
+  if(!vid){
+    const raw=video.url;frame.classList.add("hosted-player");
+    frame.classList.remove("loading");poster.classList.add("hidden");
+    const isFile=/\.(mp4|webm|ogg|m4v)(?:$|[?#])/i.test(raw)||/\.m3u8(?:$|[?#])/i.test(raw);
+    if(isFile&&native){native.hidden=false;native.src=raw;native.style.display="block";native.onloadedmetadata=()=>{const resume=Number(start)||0;if(resume&&native.duration>resume)native.currentTime=resume;};native.onended=()=>{if(currentVideo&&!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed);renderAll();notify(t("completedNotice"));}};native.play().catch(()=>{});if(ytHost)ytHost.style.display="none";}
+    else if(ext){ext.hidden=false;ext.src=raw;ext.style.display="block";if(native)native.style.display="none";if(ytHost)ytHost.style.display="none";}
+    else {notify("This host link could not be opened in the player.");return;}
+    frame.classList.add("hosted-player");clearInterval(tick);tick=setInterval(()=>{if(native&&!native.hidden&&native.duration){const d=native.duration,c=native.currentTime,p=read(PROG,{}),q=read(PCT,{});if(c>5&&c<d-10){p[currentVideo.id]=Math.floor(c);q[currentVideo.id]=Math.round(c/d*100)}else delete p[currentVideo.id];write(PROG,p);write(PCT,q);if(c/d>=.9&&!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed);renderAll();}}},3000);return;
+  }
+  frame.classList.remove("hosted-player");
   if(!(window.YT&&YT.Player)){
     try{await Promise.race([loadYTApi(),new Promise((_,rej)=>setTimeout(()=>rej(new Error("slow")),9000))])}
     catch(e){
@@ -451,8 +465,8 @@ async function openVideo(id){
 function closeVideo(){
   saveProgress();clearInterval(tick);
   if(yt&&yt.stopVideo)yt.stopVideo();
-  const fb=$("fbPlayer");if(fb)fb.src="";
-  $("videoFrame").classList.remove("loading","fallback");
+  const fb=$("fbPlayer");if(fb)fb.src="";const hv=$("hostVideo");if(hv){hv.pause();hv.removeAttribute("src");hv.load();hv.hidden=true;hv.style.display="none";}const ex=$("externalVideo");if(ex){ex.src="";ex.hidden=true;ex.style.display="none";}$("ytHost").style.display="";
+  $("videoFrame").classList.remove("loading","fallback","hosted-player");
   if(document.fullscreenElement)document.exitFullscreen();
   $("videoModal").classList.add("hidden");
   unlockPageScroll();currentVideo=null;
@@ -462,7 +476,7 @@ function closeVideo(){
 /* ============ PLAYER PRO PATCH & SURPRISES ============ */
 const poster=$("poster"),posterImg=$("posterImg"),posterTitle=$("posterTitle");
 function showPoster(vid,title){
-  posterImg.src=`https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
+  if(vid)posterImg.src=`https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;else posterImg.removeAttribute("src");
   posterTitle.textContent=title;poster.classList.remove("hidden");
   $("videoFrame").classList.remove("playing");
 }
@@ -681,11 +695,11 @@ function filterSuperStudents(){
   document.querySelectorAll('.super-student-row').forEach(row=>{row.hidden=!row.textContent.toLowerCase().includes(q);});
 }
 
-async function refreshPublicLessons(){if(!supabaseClient){console.warn('Supabase is unavailable; keeping local lessons.');return;}const {data,error}=await supabaseClient.from('lessons').select('*').eq('is_published',true).order('created_at',{ascending:false});if(error){console.error('Public lessons:',error);return;}videos=(data||[]).map(v=>({id:'db'+v.id,dbId:v.id,title:v.title,grade:String(v.grade),subject:v.subject,description:v.description||'',url:v.youtube_url||'',thumbnail_url:v.thumbnail_url||'',published:true}));renderAll();}
+async function refreshPublicLessons(){if(!supabaseClient){console.warn('Supabase is unavailable; keeping local lessons.');return;}const {data,error}=await supabaseClient.from('lessons').select('*').eq('is_published',true).order('created_at',{ascending:false});if(error){console.error('Public lessons:',error);return;}videos=(data||[]).map(v=>({id:'db'+v.id,dbId:v.id,title:v.title,grade:String(v.grade),subject:v.subject,description:v.description||'',url:v.youtube_url||'',download_url:v.download_url||'',thumbnail_url:v.thumbnail_url||'',published:true}));renderAll();}
 async function loadAdminLessons(){if(!edutubeAdminUser||!supabaseClient)return;const list=$('adminLessonList');list.textContent='Loading lessons…';const {data,error}=await supabaseClient.from('lessons').select('*').order('created_at',{ascending:false});if(error){console.error(error);list.textContent=error.message;adminMsg('Could not load admin lessons. Check admin RLS policies.',true);return;}list.replaceChildren();if(!data.length){list.textContent='No lessons yet. Add your first lesson above.';return;}data.forEach(row=>{const item=document.createElement('div');item.className='admin-lesson-row';const info=document.createElement('div');const title=document.createElement('strong');title.textContent=row.title;const meta=document.createElement('small');meta.textContent=`Grade ${row.grade} · ${row.subject} · ${row.is_published?'Published':'Draft'}`;info.append(title,meta);const actions=document.createElement('div');actions.className='admin-row-actions';const toggle=document.createElement('button');toggle.type='button';toggle.className='small-button';toggle.textContent=row.is_published?'Unpublish':'Publish';toggle.addEventListener('click',()=>changePublishState(row.id,!row.is_published));const del=document.createElement('button');del.type='button';del.className='small-button delete-button';del.textContent='Delete';del.addEventListener('click',()=>deleteAdminLesson(row.id,row.title));actions.append(toggle,del);item.append(info,actions);list.append(item);});}
 async function changePublishState(id,publish){if(!edutubeAdminUser||!supabaseClient)return;const {error}=await supabaseClient.from('lessons').update({is_published:publish}).eq('id',id);if(error){adminMsg('Update failed: '+error.message,true);return;}adminMsg(publish?'Lesson published for all students.':'Lesson moved to draft.');await loadAdminLessons();await refreshPublicLessons();}
 async function deleteAdminLesson(id,title){if(!edutubeAdminUser||!supabaseClient||!confirm(`Permanently delete “${title}”?`))return;const {error}=await supabaseClient.from('lessons').delete().eq('id',id);if(error){adminMsg('Delete failed: '+error.message,true);return;}adminMsg('Lesson deleted.');await loadAdminLessons();await refreshPublicLessons();}
-async function addAdminLesson(event){event.preventDefault();if(!supabaseClient){adminMsg('Supabase is unavailable. Check your internet connection and CDN access.',true);return;}if(!edutubeAdminUser){adminMsg('Please sign in with an authorized admin account.',true);return;}const url=$('lessonUrl').value.trim();const videoId=getYouTubeId(url);if(!videoId){adminMsg('Enter a valid YouTube video URL.',true);return;}const payload={title:$('lessonTitle').value.trim(),grade:Number($('lessonGrade').value),subject:$('lessonSubject').value,youtube_url:url,thumbnail_url:$('lessonThumbnail').value.trim()||`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,description:$('lessonDescription').value.trim(),is_published:$('lessonPublish').checked};const dl=($('lessonDownload')?.value||'').trim();if(dl)payload.download_url=dl;const button=event.submitter;if(button){button.disabled=true;button.textContent='Saving…';}const {error}=await supabaseClient.from('lessons').insert(payload);if(button){button.disabled=false;button.textContent='＋ Save lesson to Supabase';}if(error){adminMsg('Could not save lesson: '+error.message,true);return;}event.target.reset();$('lessonPublish').checked=true;adminMsg(payload.is_published?'Lesson saved and published. Students can now see it.':'Lesson saved as a draft.');await loadAdminLessons();await refreshPublicLessons();}
+async function addAdminLesson(event){event.preventDefault();if(!supabaseClient){adminMsg('Supabase is unavailable. Check your internet connection and CDN access.',true);return;}if(!edutubeAdminUser){adminMsg('Please sign in with an authorized admin account.',true);return;}const url=$('lessonUrl').value.trim();let parsed;try{parsed=new URL(url)}catch{}if(!parsed||!/^https?:$/.test(parsed.protocol)){adminMsg('Enter a valid HTTP(S) video or embed URL.',true);return;}const videoId=getYouTubeId(url);const customThumb=$('lessonThumbnail').value.trim();const payload={title:$('lessonTitle').value.trim(),grade:Number($('lessonGrade').value),subject:$('lessonSubject').value,youtube_url:url,thumbnail_url:customThumb||(videoId?`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`:null),description:$('lessonDescription').value.trim(),is_published:$('lessonPublish').checked};const dl=($('lessonDownload')?.value||'').trim();if(dl){try{const parsedDl=new URL(dl);if(!/^https?:$/.test(parsedDl.protocol))throw new Error();payload.download_url=dl;}catch{adminMsg('Download URL must be a valid HTTP(S) URL.',true);return;}}const button=event.submitter;if(button){button.disabled=true;button.textContent='Saving…';}const {error}=await supabaseClient.from('lessons').insert(payload);if(button){button.disabled=false;button.textContent='Save lesson to Supabase';}if(error){adminMsg('Could not save lesson: '+error.message,true);return;}event.target.reset();$('lessonPublish').checked=true;adminMsg(payload.is_published?'Lesson saved and published. Students can now see it.':'Lesson saved as a draft.');await loadAdminLessons();await refreshPublicLessons();}
 async function initEdutubeAdmin(){
   if(!supabaseClient||!supabaseClient.auth){updateAdminView(null);adminMsg('Supabase library did not load. Check your internet connection, then reload.',true);return;}
   const recoveryRequested=new URLSearchParams(window.location.search).get('password-recovery')==='1';

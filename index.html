@@ -301,9 +301,9 @@
           <form id="lessonForm" class="admin-form">
             <label>Lesson title<input id="lessonTitle" required maxlength="100" placeholder="e.g. Introduction to algebra"></label>
             <div class="form-row"><label>Grade<select id="lessonGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label><label>Subject<select id="lessonSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label></div>
-            <label>YouTube video URL<input id="lessonUrl" type="url" required placeholder="https://www.youtube.com/watch?v=..."></label>
-            <label>Video download link (optional, direct .mp4 file)<input id="lessonDownload" type="url" placeholder="https://.../lesson.mp4"></label>
-            <label>Thumbnail URL (optional)<input id="lessonThumbnail" type="url" placeholder="https://img.youtube.com/vi/VIDEO_ID/hqdefault.jpg"></label>
+            <label>Video URL (YouTube, direct MP4/WebM, or hosting embed link)<input id="lessonUrl" type="url" required placeholder="https://your-video-host.com/video-or-embed-link"></label>
+            <label>Download URL (optional; direct file link)<input id="lessonDownload" type="url" placeholder="https://.../lesson.mp4"></label>
+            <label>Thumbnail URL (optional)<input id="lessonThumbnail" type="url" placeholder="https://.../thumbnail.jpg"></label>
             <label>Description<textarea id="lessonDescription" rows="3" maxlength="500" placeholder="What will students learn?"></textarea></label>
             <label class="publish-check"><input id="lessonPublish" type="checkbox" checked> Publish immediately (visible to everyone)</label>
             <button class="primary-button" type="submit"> Save lesson to Supabase</button>
@@ -315,7 +315,7 @@
             <div class="form-row"><label>Note type<select id="noteType" required><option value="video">Video Notes</option><option value="competency">Competency Based Notes</option></select></label><label>Grade<select id="noteGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label></div>
             <div class="form-row"><label>Subject<select id="noteSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label><label>Unit<input id="noteUnit" required maxlength="60" placeholder="e.g. Unit 1"></label></div>
             <label>PDF title<input id="noteTitle" required maxlength="120" placeholder="e.g. Physical Quantities and Measurement"></label>
-            <label>Related video URL (optional)<input id="noteVideoUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></label>
+            <label>Related video URL (optional; YouTube or your host)<input id="noteVideoUrl" type="url" placeholder="https://.../video-or-embed-link"></label>
             <label class="pdf-file-label">PDF file<input id="notePdfFile" type="file" accept="application/pdf,.pdf" required><small>PDF only · maximum 20 MB</small></label>
             <label class="publish-check"><input id="notePublish" type="checkbox" checked> Publish immediately</label>
             <label class="publish-check"><input id="noteAllowDownload" type="checkbox" checked> Show Download button to students</label>
@@ -362,7 +362,7 @@
     <!-- 1) Player: ላይኛው ጥ ላይ የተጣበቀ -->
     <div class="watch-top">
       <div class="player advanced-player" id="videoFrame" aria-label="Advanced video player">
-        <div id="ytHost"></div>
+        <div id="ytHost"></div><video id="hostVideo" playsinline controls preload="metadata" hidden></video><iframe id="externalVideo" title="Hosted lesson video" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen hidden></iframe>
         <button class="poster" id="poster" type="button" aria-label="Play video">
           <img id="posterImg" alt="" draggable="false"><span class="poster-title" id="posterTitle"></span>
           <span class="poster-center-play">▶</span>
