@@ -421,7 +421,7 @@ async function openVideo(id){
   ensureUpNext();currentVideo=video;
   {const dlb=$("videoDownload");if(dlb){const du=video.download_url||(/\.(mp4|webm|ogg|m4v)(?:$|[?#])/i.test(video.url||"")?video.url:"");
     dlb.onclick=e=>{if(!du||!/^https?:\/\//i.test(du)){e.preventDefault();notify("Download is not available for this video yet.");}};
-    if(du&&/^https?:\/\//i.test(du)){dlb.href=du;dlb.target="_blank";dlb.setAttribute("download",(video.title||"ZSecret-video").replace(/[\\/:*?"<>|]+/g,"-")+".mp4");dlb.classList.remove("zs-unavailable");}
+    if(du&&/^https?:\/\//i.test(du)){dlb.href=du;dlb.target="_blank";dlb.rel="noopener noreferrer";dlb.removeAttribute("download");dlb.classList.remove("zs-unavailable");}
     else{dlb.href="#";dlb.removeAttribute("target");dlb.removeAttribute("download");dlb.classList.add("zs-unavailable");}}}
   $("modalTitle").textContent=video.title;
   const start=read(PROG,{})[video.id]||0;
