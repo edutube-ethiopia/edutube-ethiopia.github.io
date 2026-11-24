@@ -297,12 +297,12 @@
               </div>
             </div>
           </section>
-          <div class="admin-toolbar"><div><h2> Lesson publishing studio</h2><p>Create, publish, unpublish, and remove lessons.</p></div><button class="small-button" id="adminSignOut" type="button">Sign out</button></div>
+          <div class="admin-toolbar"><div><h2> Lesson publishing studio</h2><p>Create, publish, unpublish, and remove lessons. Vimeo videos are supported.</p></div><button class="small-button" id="adminSignOut" type="button">Sign out</button></div>
           <form id="lessonForm" class="admin-form">
             <label>Lesson title<input id="lessonTitle" required maxlength="100" placeholder="e.g. Introduction to algebra"></label>
             <div class="form-row"><label>Grade<select id="lessonGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label><label>Subject<select id="lessonSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label></div>
-            <label>Uqload Embed URL (or YouTube / other video embed link)<input id="lessonUrl" type="url" required placeholder="https://uqload.com/embed-VIDEOID.html"></label>
-            <label>Uqload Download URL (optional)<input id="lessonDownload" type="url" placeholder="Paste the download link supplied by Uqload"></label>
+            <label>Vimeo Embed / Video Link<input id="lessonUrl" type="url" required placeholder="https://player.vimeo.com/video/123456789 or Vimeo link"></label>
+            <label>Vimeo Download URL (optional; direct downloadable file URL)<input id="lessonDownload" type="url" placeholder="Paste the direct download URL provided for your Vimeo video"></label>
             <label>Thumbnail URL (optional)<input id="lessonThumbnail" type="url" placeholder="https://.../thumbnail.jpg"></label>
             <label>Description<textarea id="lessonDescription" rows="3" maxlength="500" placeholder="What will students learn?"></textarea></label>
             <label class="publish-check"><input id="lessonPublish" type="checkbox" checked> Publish immediately (visible to everyone)</label>
