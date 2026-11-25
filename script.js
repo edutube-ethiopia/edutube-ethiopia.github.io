@@ -115,6 +115,18 @@ function applyLanguage(){
  renderAll();
 }
 function notify(message){const toast=$("toast");toast.textContent=message;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),2600)}
+function getVimeoId(url){
+  if(!url) return null;
+  try{
+    const u=new URL(url);
+    const host=u.hostname.toLowerCase().replace(/^www\./,'');
+    if(host!=='vimeo.com' && host!=='player.vimeo.com' && !host.endsWith('.vimeo.com')) return null;
+    const parts=u.pathname.split('/').filter(Boolean);
+    // Vimeo URLs commonly use /123456789, /video/123456789, or /channels/name/123456789.
+    const id=parts.find(part=>/^\d{6,}$/.test(part));
+    return id||null;
+  }catch{return null;}
+}
 function getYouTubeId(url){
  try{const u=new URL(url);let id="";if(["youtube.com","www.youtube.com","m.youtube.com"].includes(u.hostname))id=u.searchParams.get("v")||"";else if(u.hostname==="youtu.be")id=u.pathname.slice(1);else if(u.hostname==="www.youtube-nocookie.com"||u.hostname==="youtube-nocookie.com")id=u.pathname.split("/").filter(Boolean).pop()||"";return /^[a-zA-Z0-9_-]{11}$/.test(id)?id:null}catch{return null}
 }
