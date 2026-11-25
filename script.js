@@ -309,13 +309,14 @@ function saveProgress(){
   write(PROG,p);write(PCT,q);
 }
 function showControls(){const p=$("videoFrame");p.classList.add("show");clearTimeout(hideT);hideT=setTimeout(()=>p.classList.remove("show"),3000)}
-function togglePlay(){yt.getPlayerState()===1?yt.pauseVideo():yt.playVideo();showControls()}
+function togglePlay(){if(!yt||typeof yt.getPlayerState!=="function"||typeof yt.playVideo!=="function"){notify("⏳ Player እየተጫነ ነው...");return}try{yt.getPlayerState()===1?yt.pauseVideo():yt.playVideo();showControls()}catch(e){notify("Player ገና ዝግጁ አይደለም። እባክዎ ትንሽ ይጠብቁ።")}}
 function skip(d){
-  yt.seekTo(Math.max(0,yt.getCurrentTime()+d),true);
+  if(!yt||typeof yt.getCurrentTime!=="function"||typeof yt.seekTo!=="function"){notify("⏳ Player እየተጫነ ነው...");return}
+  try{yt.seekTo(Math.max(0,yt.getCurrentTime()+d),true);}catch(e){notify("Seek አልተሳካም። Player ዝግጁ እስኪሆን ይጠብቁ።");return}
   const f=$("skipFx");f.textContent=(d<0?"⏪ ":"⏩ ")+Math.abs(d)+"s";
   f.className="skip-fx "+(d<0?"l":"r");void f.offsetWidth;f.classList.add("go");showControls();
 }
-function toggleMute(){if(yt.isMuted()){yt.unMute();$("btnMute").innerHTML='<i data-lucide="volume-2" aria-hidden="true"></i>';refreshIcons()}else{yt.mute();$("btnMute").innerHTML='<i data-lucide="volume-x" aria-hidden="true"></i>';refreshIcons()}}
+function toggleMute(){if(!yt||typeof yt.isMuted!=="function"||typeof yt.mute!=="function"||typeof yt.unMute!=="function"){notify("⏳ Player እየተጫነ ነው...");return}try{if(yt.isMuted()){yt.unMute();$("btnMute").innerHTML='<i data-lucide="volume-2" aria-hidden="true"></i>';refreshIcons()}else{yt.mute();$("btnMute").innerHTML='<i data-lucide="volume-x" aria-hidden="true"></i>';refreshIcons()}}catch(e){notify("Volume control ገና ዝግጁ አይደለም።")}}
 
 function setSpeedButton(s){
   document.querySelectorAll(".speed-btn").forEach(b=>b.classList.toggle("active",Number(b.dataset.speed)===s));
@@ -552,7 +553,7 @@ function onState(e){
   frame.classList.toggle("playing",playing);
   if([1,2,3,5].includes(e.data))frame.classList.remove("loading");
   if(playing){poster.classList.add("hidden");showControls();
-    if(yt.getPlaybackRate&&yt.getPlaybackRate()!==speed)yt.setPlaybackRate(speed)}
+    if(yt&&yt.getPlaybackRate&&yt.setPlaybackRate&&yt.getPlaybackRate()!==speed)yt.setPlaybackRate(speed)}
   if(e.data===YT.PlayerState.ENDED&&currentVideo){
     const p=read(PROG,{}),q=read(PCT,{});
     delete p[currentVideo.id];q[currentVideo.id]=100;write(PROG,p);write(PCT,q);
