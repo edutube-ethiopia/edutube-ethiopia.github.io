@@ -699,18 +699,62 @@ async function refreshPublicLessons(){if(!supabaseClient){console.warn('Supabase
 async function loadAdminLessons(){if(!edutubeAdminUser||!supabaseClient)return;const list=$('adminLessonList');list.textContent='Loading lessons…';const {data,error}=await supabaseClient.from('lessons').select('*').order('created_at',{ascending:false});if(error){console.error(error);list.textContent=error.message;adminMsg('Could not load admin lessons. Check admin RLS policies.',true);return;}list.replaceChildren();if(!data.length){list.textContent='No lessons yet. Add your first lesson above.';return;}data.forEach(row=>{const item=document.createElement('div');item.className='admin-lesson-row';const info=document.createElement('div');const title=document.createElement('strong');title.textContent=row.title;const meta=document.createElement('small');meta.textContent=`Grade ${row.grade} · ${row.subject} · ${row.is_published?'Published':'Draft'}`;info.append(title,meta);const actions=document.createElement('div');actions.className='admin-row-actions';const toggle=document.createElement('button');toggle.type='button';toggle.className='small-button';toggle.textContent=row.is_published?'Unpublish':'Publish';toggle.addEventListener('click',()=>changePublishState(row.id,!row.is_published));const del=document.createElement('button');del.type='button';del.className='small-button delete-button';del.textContent='Delete';del.addEventListener('click',()=>deleteAdminLesson(row.id,row.title));actions.append(toggle,del);item.append(info,actions);list.append(item);});}
 async function changePublishState(id,publish){if(!edutubeAdminUser||!supabaseClient)return;const {error}=await supabaseClient.from('lessons').update({is_published:publish}).eq('id',id);if(error){adminMsg('Update failed: '+error.message,true);return;}adminMsg(publish?'Lesson published for all students.':'Lesson moved to draft.');await loadAdminLessons();await refreshPublicLessons();}
 async function deleteAdminLesson(id,title){if(!edutubeAdminUser||!supabaseClient||!confirm(`Permanently delete “${title}”?`))return;const {error}=await supabaseClient.from('lessons').delete().eq('id',id);if(error){adminMsg('Delete failed: '+error.message,true);return;}adminMsg('Lesson deleted.');await loadAdminLessons();await refreshPublicLessons();}
-async function addAdminLesson(event){event.preventDefault();if(!supabaseClient){adminMsg('Supabase is unavailable. Check your internet connection and CDN access.',true);return;}if(!edutubeAdminUser){adminMsg('Please sign in with an authorized admin account.',true);return;}const url=$('lessonUrl').value.trim();let parsed;try{parsed=new URL(url)}catch{}if(!parsed||!/^https?:$/.test(parsed.protocol)){adminMsg('Enter a valid HTTP(S) video or embed URL.',true);return;}const vimeoId=getVimeoId(url);const videoId=getYouTubeId(url);const customThumb=$('lessonThumbnail').value.trim();const payload={title:$('lessonTitle').value.trim(),grade:Number($('lessonGrade').value),subject:$('lessonSubject').value,youtube_url:url,thumbnail_url:customThumb||(videoId?`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`:null),description:$('lessonDescription').value.trim(),is_published:$('lessonPublish').checked};const manualDl=($('lessonDownload')?.value||'').trim();if(manualDl){try{const parsedDl=new URL(manualDl);if(!/^https?:$/.test(parsedDl.protocol))throw new Error();payload.download_url=manualDl;}catch{adminMsg('Download URL must be a valid HTTP(S) URL.',true);return;}}const button=event.submitter;if(button){button.disabled=true;button.textContent='Working…';}if(vimeoId&&!manualDl){adminMsg('Contacting Vimeo API to retrieve an authorized download link…');const {data,error}=await supabaseClient.functions.invoke('vimeo-download',{body:{video_id:vimeoId}});if(error||!data?.download_url){if(button){button.disabled=false;button.textContent='Save lesson to Supabase';}adminMsg(data?.error||error?.message||'Vimeo did not return a downloadable file. Check API token scopes and video download permissions.',true);return;}payload.download_url=data.download_url;}const {error}=await supabaseClient.from('lessons').insert(payload);if(button){button.disabled=false;button.textContent='Save lesson to Supabase';}if(error){adminMsg('Could not save lesson: '+error.message,true);return;}event.target.reset();$('lessonPublish').checked=true;adminMsg(payload.is_published?'Lesson saved and published. Vimeo download link retrieved automatically.':'Lesson saved as a draft. Vimeo download link retrieved automatically.');await loadAdminLessons();await refreshPublicLessons();}
+async function addAdminLesson(event){
+  event.preventDefault();
+  const form=event.currentTarget;
+  const button=event.submitter||form.querySelector('button[type="submit"]');
+  const originalText=button?.textContent||'Save lesson to Supabase';
+  const show=(message,error=false)=>adminMsg(message,error);
+  try{
+    show('Publish button responded. Checking admin session…');
+    if(!supabaseClient?.auth){show('Supabase is not loaded. Reload the page and try again.',true);return;}
+    const {data,error:sessionError}=await supabaseClient.auth.getSession();
+    if(sessionError)throw sessionError;
+    const user=data?.session?.user;
+    if(!isEdutubeAdmin(user)){show('Admin session not detected. Sign out, then sign in again using the authorized admin account.',true);return;}
+    const title=$('lessonTitle')?.value.trim()||'';
+    const url=$('lessonUrl')?.value.trim()||'';
+    if(!title){show('Enter the lesson title.',true);$('lessonTitle')?.focus();return;}
+    let parsed;try{parsed=new URL(url);}catch{}
+    if(!parsed||!/^https?:$/.test(parsed.protocol)){show('Video link is invalid. Use a complete https:// or http:// URL.',true);$('lessonUrl')?.focus();return;}
+    const vimeoId=getVimeoId(url),videoId=getYouTubeId(url);
+    const thumb=$('lessonThumbnail')?.value.trim()||'';
+    const payload={title,grade:Number($('lessonGrade')?.value),subject:$('lessonSubject')?.value,youtube_url:url,thumbnail_url:thumb||(videoId?`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`:null),description:$('lessonDescription')?.value.trim()||'',is_published:$('lessonPublish')?.checked??true};
+    const manualDl=$('lessonDownload')?.value.trim()||'';
+    if(manualDl){let dl;try{dl=new URL(manualDl);}catch{}if(!dl||!/^https?:$/.test(dl.protocol)){show('Download override must be a valid HTTP(S) URL.',true);return;}payload.download_url=manualDl;}
+    if(button){button.disabled=true;button.textContent='Saving lesson…';}
+    // Download extraction is optional; it must never block lesson publishing.
+    let downloadWarning='';
+    if(vimeoId&&!manualDl){
+      show('Saving lesson. Vimeo download-link lookup is optional…');
+      try{
+        const {data:downloadData,error:downloadError}=await supabaseClient.functions.invoke('vimeo-download',{body:{video_id:vimeoId}});
+        if(!downloadError&&downloadData?.download_url)payload.download_url=downloadData.download_url;
+        else downloadWarning=' Lesson saved, but Vimeo download link was not retrieved; playback link is still published.';
+      }catch(downloadErr){console.warn('Optional Vimeo download lookup failed:',downloadErr);downloadWarning=' Lesson saved, but Vimeo download lookup failed; playback link is still published.';}
+    }
+    show('Inserting lesson into Supabase…');
+    const {error:insertError}=await supabaseClient.from('lessons').insert(payload);
+    if(insertError){show('Database insert failed: '+insertError.message,true);return;}
+    form.reset();if($('lessonPublish'))$('lessonPublish').checked=true;
+    show((payload.is_published?'SUCCESS: Lesson published.':'SUCCESS: Lesson saved as draft.')+downloadWarning);
+    await loadAdminLessons();await refreshPublicLessons();
+  }catch(err){console.error('Lesson publish handler error:',err);show('Publish failed: '+(err?.message||String(err)),true);}
+  finally{if(button){button.disabled=false;button.textContent=originalText;}}
+}
+function bindLessonPublishHandler(){
+  const form=$('lessonForm');
+  if(!form||form.dataset.publishHandlerBound==='1')return;
+  form.addEventListener('submit',addAdminLesson);
+  form.dataset.publishHandlerBound='1';
+}
+
 async function initEdutubeAdmin(){
   if(!supabaseClient||!supabaseClient.auth){updateAdminView(null);adminMsg('Supabase library did not load. Check your internet connection, then reload.',true);return;}
-  // Attach the lesson submit handler before asynchronous auth initialization.
-  // If getSession() hangs or throws, the publishing form won't be left inert.
-  $('lessonForm')?.addEventListener('submit',addAdminLesson);
   const recoveryRequested=new URLSearchParams(window.location.search).get('password-recovery')==='1';
   const recoveryForm=$('adminRecoveryForm');
   const showRecoveryForm=()=>{recoveryForm?.classList.remove('hidden');$('adminLoginForm')?.classList.add('hidden');adminMsg('Recovery link accepted. Choose a new password below.');};
-  let session=null;
-  try{const sessionResult=await supabaseClient.auth.getSession();if(sessionResult.error)throw sessionResult.error;session=sessionResult.data?.session||null;}
-  catch(err){console.error('Admin session initialization failed:',err);updateAdminView(null);adminMsg('Could not initialize admin session: '+(err?.message||err),true);return;}
+  const {data:{session}}=await supabaseClient.auth.getSession();
   if(recoveryRequested&&session)showRecoveryForm();
   if(session&&!isEdutubeAdmin(session.user)){updateAdminView(null);adminMsg('Signed in as a student. Admin tools require a separate account with the admin role.',true);}else updateAdminView(session?.user||null);
   supabaseClient.auth.onAuthStateChange((event,newSession)=>{
@@ -740,7 +784,7 @@ async function initEdutubeAdmin(){
   $('adminSignOut')?.addEventListener('click',async()=>{await supabaseClient.auth.signOut();updateAdminView(null);adminMsg('You have signed out.');});
   $('refreshAdmin')?.addEventListener('click',loadAdminLessons);$('refreshSuperOverview')?.addEventListener('click',loadSuperAdminOverview);$('superStudentSearch')?.addEventListener('input',filterSuperStudents);
 }
-document.addEventListener('DOMContentLoaded',()=>{initEdutubeAdmin();refreshPublicLessons();});
+document.addEventListener('DOMContentLoaded',()=>{bindLessonPublishHandler();initEdutubeAdmin();refreshPublicLessons();});
 
 function refreshIcons(root=document) {
   if (window.lucide && typeof window.lucide.createIcons === "function") {
