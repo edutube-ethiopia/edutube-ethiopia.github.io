@@ -143,7 +143,7 @@ function getVimeoEmbedUrl(url){
     return embed.toString();
   }catch{return null;}
 }
-function getVimeoId(url){return getVimeoId(url);}
+
 function showPage(name){
  const target=$("page-"+name);if(!target)return;
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));target.classList.add("active");
