@@ -144,7 +144,17 @@ function getVimeoEmbedUrl(url){
   }catch{return null;}
 }
 function getYouTubeId(url){
- try{const u=new URL(url);let id="";if(["youtube.com","www.youtube.com","m.youtube.com"].includes(u.hostname))id=u.searchParams.get("v")||"";else if(u.hostname==="youtu.be")id=u.pathname.slice(1);else if(u.hostname==="www.youtube-nocookie.com"||u.hostname==="youtube-nocookie.com")id=u.pathname.split("/").filter(Boolean).pop()||"";return /^[a-zA-Z0-9_-]{11}$/.test(id)?id:null}catch{return null}
+ try{
+  const u=new URL(String(url||""));
+  const host=u.hostname.toLowerCase().replace(/^www\\./,"");
+  let id="";
+  if(host==="youtu.be") id=u.pathname.split("/").filter(Boolean)[0]||"";
+  else if(["youtube.com","m.youtube.com","music.youtube.com","youtube-nocookie.com"].includes(host)){
+    id=u.searchParams.get("v")||"";
+    if(!id){const parts=u.pathname.split("/").filter(Boolean);const marker=parts.findIndex(p=>["embed","shorts","live","v"].includes(p));if(marker>=0)id=parts[marker+1]||"";}
+  }
+  return /^[a-zA-Z0-9_-]{11}$/.test(id)?id:null;
+ }catch{return null}
 }
 function showPage(name){
  const target=$("page-"+name);if(!target)return;
