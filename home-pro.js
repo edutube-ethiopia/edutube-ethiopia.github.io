@@ -108,7 +108,7 @@
       if (sm && /^[^A-Za-z]+\s*Studio/.test(sm.textContent)) sm.textContent = "Studio";
       b.insertAdjacentHTML("afterbegin", ic(MAP[b.dataset.page] || "home"));
     });
-    var pairs = [["themeButton", "moon"], ["menuButton", "menu"], ["notificationShortcut", "bell"], ["accountShortcut", "user"]];
+    var pairs = [["themeButton", "moon"], ["menuButton", "menu"], ["notificationShortcut", "bell"]];
     pairs.forEach(function (p) {
       var b = document.getElementById(p[0]);
       if (!b || b.querySelector(".hp-nav-ic")) return;
