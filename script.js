@@ -583,6 +583,19 @@ async function initEdutubeAdmin(){
     const user=newSession?.user||null;
     if(user&&!isEdutubeAdmin(user)){updateAdminView(null);adminMsg('This account does not have an administrator role.',true);}else updateAdminView(user);
   });
+  $('adminChangePasswordForm')?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    if(!edutubeAdminUser){adminMsg('Sign in as an administrator before changing the password.',true);return;}
+    const newPassword=$('adminChangePassword').value,confirmPassword=$('adminConfirmChangePassword').value;
+    if(newPassword.length<12){adminMsg('Choose a password with at least 12 characters.',true);return;}
+    if(newPassword!==confirmPassword){adminMsg('The two passwords do not match.',true);return;}
+    const button=e.submitter,oldLabel=button?.textContent;if(button){button.disabled=true;button.textContent='Updating…';}
+    const {error}=await supabaseClient.auth.updateUser({password:newPassword});
+    if(button){button.disabled=false;button.textContent=oldLabel||'Update admin password';}
+    if(error){adminMsg('Password update failed: '+error.message,true);return;}
+    $('adminChangePassword').value='';$('adminConfirmChangePassword').value='';
+    adminMsg('Admin password updated successfully. Use the new password next time you sign in.');
+  });
   $('adminLoginForm')?.addEventListener('submit',async e=>{
     e.preventDefault();
     if(isLocked()){adminMsg('Login temporarily locked after repeated failed attempts. Try again in '+remaining()+' minute(s).',true);return;}
