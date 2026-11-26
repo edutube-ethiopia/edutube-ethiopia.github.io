@@ -299,7 +299,7 @@
           <form id="lessonForm" class="admin-form">
             <label>Lesson title<input id="lessonTitle" required maxlength="100" placeholder="e.g. Introduction to algebra"></label>
             <div class="form-row"><label>Grade<select id="lessonGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label><label>Subject<select id="lessonSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label></div>
-            <label>Vimeo / YouTube / video link<input id="lessonUrl" type="url" required placeholder="https://your-video-host.com/video-or-embed-link"></label>
+            <label>Vimeo video link<input id="lessonUrl" type="url" required placeholder="https://your-video-host.com/video-or-embed-link"></label>
             <label>Download URL override (optional — Vimeo API auto-fetches)<input id="lessonDownload" type="url" placeholder="https://.../lesson.mp4"></label>
             <label>Thumbnail URL (optional)<input id="lessonThumbnail" type="url" placeholder="https://.../thumbnail.jpg"></label>
             <label>Description<textarea id="lessonDescription" rows="3" maxlength="500" placeholder="What will students learn?"></textarea></label>
@@ -313,7 +313,7 @@
             <div class="form-row"><label>Note type<select id="noteType" required><option value="video">Video Notes</option><option value="competency">Competency Based Notes</option></select></label><label>Grade<select id="noteGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label></div>
             <div class="form-row"><label>Subject<select id="noteSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label><label>Unit<input id="noteUnit" required maxlength="60" placeholder="e.g. Unit 1"></label></div>
             <label>PDF title<input id="noteTitle" required maxlength="120" placeholder="e.g. Physical Quantities and Measurement"></label>
-            <label>Related video URL (optional; YouTube or your host)<input id="noteVideoUrl" type="url" placeholder="https://.../video-or-embed-link"></label>
+            <label>Related Vimeo video URL (optional)<input id="noteVideoUrl" type="url" placeholder="https://.../video-or-embed-link"></label>
             <label class="pdf-file-label">PDF file<input id="notePdfFile" type="file" accept="application/pdf,.pdf" required><small>PDF only · maximum 20 MB</small></label>
             <label class="publish-check"><input id="notePublish" type="checkbox" checked> Publish immediately</label>
             <label class="publish-check"><input id="noteAllowDownload" type="checkbox" checked> Show Download button to students</label>
@@ -352,7 +352,7 @@
   <nav class="mobile-nav"><button data-page="home"><small data-i18n="navHome">Home</small></button><button data-page="library"><small data-i18n="navLibrary">Videos</small></button><button data-page="exams"><small data-i18n="navExams">Exams</small></button><button data-page="notes"><small data-i18n="navNotes">Notes</small></button><button data-page="dashboard"><small data-i18n="navDashboard">Progress</small></button><button data-page="studio"><small>🚀 Studio</small></button><button data-page="accounts"><small>Account</small></button></nav>
 
 
-    <!-- ===== YouTube-style WATCH PAGE (አሮጌውን #videoModal ብክ ሙሉ ተካው) ===== -->
+    <!-- ===== Vimeo WATCH PAGE (አሮጌውን #videoModal ብክ ሙሉ ተካው) ===== -->
 <div class="modal hidden" id="videoModal">
   <div class="modal-backdrop" data-close-modal></div>
   <div class="modal-content watch-content">
