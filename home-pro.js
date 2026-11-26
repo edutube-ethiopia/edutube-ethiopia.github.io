@@ -94,7 +94,7 @@
   }
 
   /* ---- icons for existing navigation (added next to the existing labels; nothing removed) ---- */
-  var MAP = { home: "home", library: "video", exams: "exam", notes: "notes", contact: "chat", favorites: "heart", dashboard: "chart", studio: "timer", accounts: "user", notifications: "bell", leaderboard: "trophy", certificates: "award", ai: "spark", admin: "layers" };
+  var MAP = { home: "home", library: "video", exams: "exam", notes: "notes", contact: "chat", favorites: "heart", dashboard: "chart", studio: "timer", accounts: "user", notifications: "bell", leaderboard: "trophy", admin: "layers" };
   function addNavIcons() {
     document.querySelectorAll(".side-link[data-page]").forEach(function (b) {
       if (b.querySelector(".hp-nav-ic")) return;
