@@ -250,6 +250,14 @@
           <p class="admin-hint">Only trusted Supabase accounts with admin or super_admin app_metadata roles can enter this workspace.</p>
         </form>
                 <div id="adminWorkspace" class="hidden">
+          <section class="dashboard-panel" id="adminPasswordPanel">
+            <div class="admin-toolbar"><div><h2>Change admin password</h2><p>Use a unique password with at least 12 characters.</p></div></div>
+            <form id="adminChangePasswordForm" class="admin-form">
+              <label>New password<input id="adminChangePassword" type="password" minlength="12" autocomplete="new-password" required placeholder="At least 12 characters"></label>
+              <label>Confirm new password<input id="adminConfirmChangePassword" type="password" minlength="12" autocomplete="new-password" required placeholder="Type the new password again"></label>
+              <button class="primary-button" type="submit">Update admin password</button>
+            </form>
+          </section>
           <section class="super-overview" aria-labelledby="superOverviewTitle">
             <div class="super-section-heading">
               <div><span class="eyebrow">COMMAND CENTER</span><h2 id="superOverviewTitle">Platform overview</h2><p>Live totals from your connected Supabase tables.</p></div>
