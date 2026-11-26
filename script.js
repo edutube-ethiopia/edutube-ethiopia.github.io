@@ -758,16 +758,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(!data?.length){list.textContent='No ranked students yet. Complete lessons and exams to get started.';return;}
     data.forEach((student,index)=>{const row=document.createElement('div');row.className='activity-item rank-row';const rank=document.createElement('span');rank.className='rank-number';rank.textContent=String(index+1);const name=document.createElement('strong');name.textContent=student.display_name||'Student';const meta=document.createElement('span');meta.className='rank-meta';meta.textContent=`${student.points||0} pts · ${student.completed_lessons||0} lessons · ${Math.round(student.average_score||0)}% avg`;row.append(rank,name,meta);list.append(row)});
   }
-  function addAiMessage(text,role){const node=document.createElement('div');node.className='ai-message '+role;node.textContent=text;el('aiMessages').append(node);el('aiMessages').scrollTop=el('aiMessages').scrollHeight;}
-  function localStudyReply(prompt){
-    const p=prompt.toLowerCase();
-    if(/newton|force|f\s*=\s*ma/.test(p))return 'Newton’s Second Law: the net force on an object equals its mass multiplied by its acceleration (F = ma).\nExample: a 2 kg object accelerating at 3 m/s² has a net force of 6 N.\nStudy steps: define force, identify mass and acceleration, choose SI units, then calculate.';
-    if(/algebra|equation|solve|variable/.test(p))return 'Algebra uses symbols such as x to represent unknown values.\nExample: 2x + 4 = 12 → subtract 4 from both sides → 2x = 8 → divide by 2 → x = 4.\nTry checking by substituting 4 back into the original equation.';
-    if(/study plan|schedule|plan/.test(p))return 'A practical 45-minute study cycle:\n1. 5 min: review the learning goal.\n2. 20 min: study one small concept.\n3. 10 min: close your notes and recall the idea.\n4. 10 min: solve two practice questions and correct mistakes.\nTake a short break before the next cycle.';
-    if(/python|programming|javascript|html|css/.test(p))return 'For programming, learn in this order: variables and data types → conditions → loops → functions → arrays/objects → small projects. Write and run a tiny example for each concept, then explain what every line does.';
-    return 'I can help you organize this topic, but this offline starter does not generate open-ended AI answers yet. Try asking for a definition, a worked example, or a short study plan. For accurate subject-specific explanations, include your grade and the exact topic.';
-  }
-  function submitAi(event){event.preventDefault();const prompt=el('aiPrompt').value.trim();if(!prompt)return;addAiMessage(prompt,'user');el('aiPrompt').value='';setTimeout(()=>addAiMessage(localStudyReply(prompt),'assistant'),180);}
   function patchActivityHooks(){
     const originalComplete=markComplete;
     markComplete=function(){const before=completed.length;const title=currentVideo?.title||'a lesson';originalComplete();if(completed.length>before){addNotification('Lesson completed','You completed '+title+'.');syncCompletedLessons()}};
