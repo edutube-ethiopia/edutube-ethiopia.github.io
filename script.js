@@ -479,7 +479,7 @@ async function openVideo(id){
     const raw=video.url;frame.classList.add("hosted-player");
     frame.classList.remove("loading");poster.classList.add("hidden");
     const isFile=/\.(mp4|webm|ogg|m4v)(?:$|[?#])/i.test(raw)||/\.m3u8(?:$|[?#])/i.test(raw);
-    if(isFile&&native){native.hidden=false;native.src=raw;native.style.display="block";native.onloadedmetadata=()=>{const resume=Number(start)||0;if(resume&&native.duration>resume)native.currentTime=resume;};native.onended=()=>{if(currentVideo&&!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed);renderAll();notify(t("completedNotice"));}};native.play().catch(()=>{});if(ytHost)ytHost.style.display="none";}
+    if(isFile&&native){native.hidden=false;native.src=raw;native.style.display="block";const savedVol=Math.max(0,Math.min(100,Number(localStorage.getItem("edutube_pp_vol")||100)));native.volume=savedVol/100;native.muted=savedVol===0;native.playbackRate=speed||1;native.onloadedmetadata=()=>{const resume=Number(start)||0;if(resume&&native.duration>resume)native.currentTime=resume;};native.onended=()=>{if(currentVideo&&!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed);renderAll();notify(t("completedNotice"));}};native.play().catch(()=>{});if(ytHost)ytHost.style.display="none";}
     else if(ext){
       const vimeoEmbed=getVimeoEmbedUrl(raw);
       ext.hidden=false;
@@ -492,7 +492,7 @@ async function openVideo(id){
       if(ytHost)ytHost.style.display="none";
     }
     else {notify("This host link could not be opened in the player.");return;}
-    frame.classList.add("hosted-player");clearInterval(tick);tick=setInterval(()=>{if(native&&!native.hidden&&native.duration){const d=native.duration,c=native.currentTime,p=read(PROG,{}),q=read(PCT,{});if(c>5&&c<d-10){p[currentVideo.id]=Math.floor(c);q[currentVideo.id]=Math.round(c/d*100)}else delete p[currentVideo.id];write(PROG,p);write(PCT,q);if(c/d>=.9&&!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed);renderAll();}}},3000);return;
+    frame.classList.add("hosted-player");clearInterval(tick);tick=setInterval(update,500);return;
   }
   frame.classList.remove("hosted-player");
   if(!(window.YT&&YT.Player)){
