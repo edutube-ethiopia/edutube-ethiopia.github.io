@@ -21,7 +21,8 @@ const TXT = {
 const lang = () => (typeof language !== 'undefined' && language === 'am') ? 'am' : 'en';
 const T = k => TXT[lang()][k];
 const note = m => { if (typeof notify === 'function') notify(m); };
-const ready = () => typeof yt !== 'undefined' && yt && typeof yt.getPlayerState === 'function' && typeof yt.getCurrentTime === 'function';
+const native = () => { const v=g('hostVideo'); return v&&!v.hidden&&v.src?v:null; };
+const ready = () => !!native() || (typeof yt !== 'undefined' && yt && typeof yt.getPlayerState === 'function' && typeof yt.getCurrentTime === 'function');
 const curSpeed = () => (typeof speed !== 'undefined' ? speed : 1);
 const fmt = s => {
   s = Math.max(0, Math.floor(s || 0)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
@@ -36,8 +37,10 @@ const parseTime = v => {
 
 /* ---------- state ---------- */
 const S = { vid: null, a: null, b: null, ab: false, loop: false, step: +ls.get(LS.step, 10) || 10, sleepMode: 0, sleepAt: 0, awake: false, lock: null, lastLang: null };
-const now = () => safe(() => yt.getCurrentTime(), 0), dur = () => safe(() => yt.getDuration(), 0);
-const seekTo = t => { if (ready()) { safe(() => yt.seekTo(Math.max(0, t), true)); if (typeof showControls === 'function') showControls(); } };
+const now = () => native()?native().currentTime:safe(() => yt.getCurrentTime(), 0), dur = () => native()?native().duration:safe(() => yt.getDuration(), 0);
+const seekTo = t => { if (ready()) { const v=native();if(v)v.currentTime=Math.max(0,Math.min(t||0,v.duration||t||0));else safe(() => yt.seekTo(Math.max(0, t), true)); if (typeof showControls === 'function') showControls(); } };
+const playing = () => native()?!native().paused:safe(() => yt.getPlayerState(), -1)===1;
+const pauseMedia = () => {const v=native();if(v)v.pause();else safe(()=>yt.pauseVideo());};
 const readMarks = () => safe(() => JSON.parse(ls.get(LS.marks, '{}')), {});
 const writeMarks = o => ls.set(LS.marks, JSON.stringify(o));
 
@@ -97,7 +100,7 @@ function applyLang() {
 }
 
 /* ---------- actions ---------- */
-function setSpeed(s) { const b = document.querySelector(`.speed-btn[data-speed="${s}"]`); if (b) b.click(); setTimeout(paint, 30); }
+function setSpeed(s) { const b = document.querySelector(`.speed-btn[data-speed="${s}"]`); if (b) b.click(); else if(native()){native().playbackRate=s;if(typeof speed!=='undefined')speed=s;} setTimeout(paint, 30); }
 function stepSpeed(d) { let i = SPEEDS.findIndex(s => s >= curSpeed() - 1e-6); if (i < 0) i = 3; setSpeed(SPEEDS[Math.max(0, Math.min(SPEEDS.length - 1, i + d))]); }
 function skip(d) { if (!ready()) return; seekTo(Math.min(Math.max(0, now() + d), Math.max(0, dur() - 0.5))); const f = g('skipFx'); if (f) { f.textContent = (d < 0 ? '⏪ ' : '⏩ ') + Math.abs(d) + 's'; f.className = 'skip-fx ' + (d < 0 ? 'l' : 'r'); void f.offsetWidth; f.classList.add('go'); } }
 function setLoop(v) { S.loop = v ?? !S.loop; note(S.loop ? T('loopOn') : T('loopOff')); paint(); }
@@ -166,7 +169,7 @@ function tick() {
   if (currentVideo.id !== S.vid) { S.vid = currentVideo.id; S.a = S.b = null; S.ab = false; S.loop = false; renderMarks(); paint(); }
   applyLang();
   if (!ready()) return;
-  const t = now(), d = dur(), st = safe(() => yt.getPlayerState(), -1);
+  const t = now(), d = dur(), st = native()?(playing()?1:2):safe(() => yt.getPlayerState(), -1);
   host.classList.toggle('is-playing', st === 1); setTxt($('scLive'), st === 1 ? T('live') : T('paused'));
   setTxt($('scAddT'), fmt(t));
   if (d > 0) {
@@ -175,13 +178,13 @@ function tick() {
     setTxt($('scLeft'), fmt(left)); setTxt($('scReal'), fmt(real));
     setTxt($('scEnds'), new Date(Date.now() + real * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
     if (S.loop && st === 1 && d - t < 0.7) seekTo(0);
-    if (S.sleepMode === -1 && st === 1 && d - t < 1.5) { safe(() => yt.pauseVideo()); S.sleepMode = 0; note(T('sleepDone')); paint(); }
+    if (S.sleepMode === -1 && st === 1 && d - t < 1.5) { pauseMedia(); S.sleepMode = 0; note(T('sleepDone')); paint(); }
   }
   if (S.ab && S.a != null && S.b != null && t >= S.b && t < S.b + 1.5) seekTo(S.a);
   const si = $('scSleepInfo');
   if (S.sleepMode > 0) {
     const ms = S.sleepAt - Date.now();
-    if (ms <= 0) { safe(() => yt.pauseVideo()); S.sleepMode = 0; S.sleepAt = 0; note(T('sleepDone')); paint(); setTxt(si, ''); }
+    if (ms <= 0) { pauseMedia(); S.sleepMode = 0; S.sleepAt = 0; note(T('sleepDone')); paint(); setTxt(si, ''); }
     else setTxt(si, `${T('sleepLeft')} ${fmt(ms / 1000)}`);
   } else setTxt(si, S.sleepMode === -1 ? T('endLesson') : '');
 }
