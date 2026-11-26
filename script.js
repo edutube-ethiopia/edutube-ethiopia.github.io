@@ -369,7 +369,7 @@ function setSpeedButton(s){
 function playNext(){
   if(!currentVideo)return;
   const i=videos.findIndex(v=>v.id===currentVideo.id);
-  const n=videos.slice(i+1).find(v=>getYouTubeId(v.url));
+  const n=videos.slice(i+1).find(v=>getYouTubeId(v.url)||getVimeoId(v.url)||/\.(mp4|webm|ogg|m4v|m3u8)(?:$|[?#])/i.test(v.url||""));
   if(!n){notify("ቀጣይ ትምህርት የለም");return}
   saveProgress();openVideo(n.id);
 }
@@ -512,7 +512,7 @@ async function openVideo(id){
       }catch(err){console.error('Vimeo init failed',err);frame.classList.remove("loading");notify('Vimeo Player መጫን አልተሳካም። Refresh ያድርጉ።');}}
     }
     else {notify("This host link could not be opened in the player.");return;}
-    frame.classList.add("hosted-player");clearInterval(tick);tick=setInterval(()=>{if(native&&!native.hidden&&native.duration){const d=native.duration,c=native.currentTime,p=read(PROG,{}),q=read(PCT,{});if(c>5&&c<d-10){p[currentVideo.id]=Math.floor(c);q[currentVideo.id]=Math.round(c/d*100)}else delete p[currentVideo.id];write(PROG,p);write(PCT,q);if(c/d>=.9&&!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed);renderAll();}}},3000);return;
+    frame.classList.add("hosted-player");clearInterval(tick);tick=setInterval(()=>{if(vimeoPlayer&&yt)update();if(native&&!native.hidden&&native.duration){const d=native.duration,c=native.currentTime,p=read(PROG,{}),q=read(PCT,{});if(c>5&&c<d-10){p[currentVideo.id]=Math.floor(c);q[currentVideo.id]=Math.round(c/d*100)}else delete p[currentVideo.id];write(PROG,p);write(PCT,q);if(c/d>=.9&&!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed);renderAll();}}},500);return;
   }
   frame.classList.remove("hosted-player");
   if(!(window.YT&&YT.Player)){
