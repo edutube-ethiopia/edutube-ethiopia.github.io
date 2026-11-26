@@ -772,7 +772,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const originalComplete=markComplete;
     markComplete=function(){const before=completed.length;const title=currentVideo?.title||'a lesson';originalComplete();if(completed.length>before){addNotification('Lesson completed','You completed '+title+'.');syncCompletedLessons()}};
     const originalFinish=finishExam;
-    finishExam=function(timeUp=false){const before=attempts.length;originalFinish(timeUp);if(attempts.length>before){const latest=attempts[0];addNotification('Exam result saved',`${latest.title}: ${latest.percent}%`);syncExamAttempt(latest)}renderCertificates()};
+    finishExam=function(timeUp=false){const before=attempts.length;originalFinish(timeUp);if(attempts.length>before){const latest=attempts[0];addNotification('Exam result saved',`${latest.title}: ${latest.percent}%`);syncExamAttempt(latest)}};
     const originalSaveProgress=saveProgress;
     saveProgress=function(){originalSaveProgress();if(studentSession&&currentVideo&&vm){Promise.all([vm.getCurrentTime(),vm.getDuration()]).then(([seconds,duration])=>{if(duration>0)supabaseClient.from('learning_progress').upsert({user_id:studentSession.user.id,lesson_key:String(currentVideo.dbId||currentVideo.id),completed:completed.includes(currentVideo.id),progress_seconds:Math.floor(seconds||0),progress_percent:Math.min(100,Math.round(seconds/duration*100)),updated_at:new Date().toISOString()},{onConflict:'user_id,lesson_key'}).then(({error})=>{if(error)console.warn('Watch progress sync:',error.message)});}).catch(()=>{});}};
     const originalRenderDashboard=renderDashboard;
