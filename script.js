@@ -146,7 +146,7 @@ function getVimeoEmbedUrl(url){
 function getYouTubeId(url){
  try{
   const u=new URL(String(url||""));
-  const host=u.hostname.toLowerCase().replace(/^www\\./,"");
+  const host=u.hostname.toLowerCase().replace(/^www\./,"");
   let id="";
   if(host==="youtu.be") id=u.pathname.split("/").filter(Boolean)[0]||"";
   else if(["youtube.com","m.youtube.com","music.youtube.com","youtube-nocookie.com"].includes(host)){
