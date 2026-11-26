@@ -150,10 +150,12 @@ function loadVimeoApi(){
  window.__edutubeVimeoApi=new Promise((resolve,reject)=>{
   let s=document.querySelector('script[src*="player.vimeo.com/api/player.js"]');
   if(!s){s=document.createElement('script');s.src='https://player.vimeo.com/api/player.js';s.async=true;document.head.appendChild(s);}
-  const timeout=setTimeout(()=>reject(new Error('Vimeo API timeout')),12000);
-  s.addEventListener('load',()=>{clearTimeout(timeout);window.Vimeo?.Player?resolve():reject(new Error('Vimeo API unavailable'));},{once:true});
-  s.addEventListener('error',()=>{clearTimeout(timeout);reject(new Error('Vimeo API failed'));},{once:true});
-  if(window.Vimeo?.Player){clearTimeout(timeout);resolve();}
+  let settled=false;const finish=(err)=>{if(settled)return;settled=true;clearInterval(check);clearTimeout(timeout);err?reject(err):resolve();};
+  const check=setInterval(()=>{if(window.Vimeo&&window.Vimeo.Player)finish();},100);
+  const timeout=setTimeout(()=>finish(new Error('Vimeo API load timeout')),15000);
+  s.addEventListener('error',()=>finish(new Error('Vimeo API script failed to load')),{once:true});
+  s.addEventListener('load',()=>{if(window.Vimeo&&window.Vimeo.Player)finish();},{once:true});
+  if(window.Vimeo&&window.Vimeo.Player)finish();
  });
  return window.__edutubeVimeoApi;
 }
@@ -505,9 +507,12 @@ async function openVideo(id){
       ext.hidden=false;ext.src=vimeoEmbed||raw;ext.allow="autoplay; fullscreen; picture-in-picture; encrypted-media";ext.allowFullscreen=true;
       ext.referrerPolicy="strict-origin-when-cross-origin";ext.style.display="block";if(native)native.style.display="none";if(ytHost)ytHost.style.display="none";
       yt=null;vimeoPlayer=null;vimeoState=-1;vimeoTime=0;vimeoDuration=0;vimeoVolume=1;vimeoMuted=false;vimeoRate=speed;
-      if(vimeoEmbed){try{await loadVimeoApi();if(currentVideo!==video)return;vimeoPlayer=new Vimeo.Player(ext);await vimeoPlayer.ready();
+      if(vimeoEmbed){try{await loadVimeoApi();if(currentVideo!==video)return;vimeoPlayer=new Vimeo.Player(ext);
+        yt=createVimeoController(vimeoPlayer);
+        await vimeoPlayer.ready();
         vimeoDuration=await vimeoPlayer.getDuration();vimeoTime=await vimeoPlayer.getCurrentTime();vimeoVolume=await vimeoPlayer.getVolume();vimeoMuted=await vimeoPlayer.getMuted();
-        yt=createVimeoController(vimeoPlayer);vimeoPlayer.setPlaybackRate(speed).catch(()=>{});if(start>0)vimeoPlayer.setCurrentTime(start).catch(()=>{});vimeoPlayer.play().catch(()=>{});
+        vimeoState=(await vimeoPlayer.getPaused())?2:1;
+        vimeoPlayer.setPlaybackRate(speed).catch(()=>{});if(start>0)vimeoPlayer.setCurrentTime(start).catch(()=>{});vimeoPlayer.play().catch(()=>{});
         frame.classList.remove("loading");poster.classList.add("hidden");setSpeedButton(speed);clearInterval(tick);tick=setInterval(update,500);
       }catch(err){console.error('Vimeo init failed',err);frame.classList.remove("loading");notify('Vimeo Player መጫን አልተሳካም። Refresh ያድርጉ።');}}
     }
