@@ -81,7 +81,7 @@ const translations = {
 };
 let language = localStorage.getItem(STORAGE.language) || "en";
 let videos = read(STORAGE.videos, [
- {id:"v1",title:"Introduction to Algebra",grade:"9",subject:"Mathematics",description:"Learn variables and simple algebraic expressions.",url:"https://www.youtube.com/watch?v=NybHckbien0"},
+ {id:"v1",title:"Introduction to Algebra",grade:"9",subject:"Mathematics",description:"Learn variables and simple algebraic expressions.",url:""},
  {id:"v2",title:"Newton's Laws of Motion",grade:"10",subject:"Physics",description:"Understand the foundations of classical mechanics.",url:""},
  {id:"v3",title:"Cell Structure and Function",grade:"11",subject:"Biology",description:"Explore the main parts of a living cell.",url:""},
  {id:"v4",title:"Chemical Bonding",grade:"12",subject:"Chemistry",description:"An introduction to ionic and covalent bonds.",url:""}
@@ -143,7 +143,7 @@ function getVimeoEmbedUrl(url){
     return embed.toString();
   }catch{return null;}
 }
-function getYouTubeId(url){return getVimeoId(url);}
+function getVimeoId(url){return getVimeoId(url);}
 function showPage(name){
  const target=$("page-"+name);if(!target)return;
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));target.classList.add("active");
