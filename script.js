@@ -564,38 +564,42 @@ function bindLessonPublishHandler(){
 
 async function initEdutubeAdmin(){
   if(!supabaseClient||!supabaseClient.auth){updateAdminView(null);adminMsg('Supabase library did not load. Check your internet connection, then reload.',true);return;}
-  const recoveryRequested=new URLSearchParams(window.location.search).get('password-recovery')==='1';
-  const recoveryForm=$('adminRecoveryForm');
-  const showRecoveryForm=()=>{recoveryForm?.classList.remove('hidden');$('adminLoginForm')?.classList.add('hidden');adminMsg('Recovery link accepted. Choose a new password below.');};
+  const lockKey='edutube_admin_login_lock_v1';
+  const MAX_ATTEMPTS=5, WINDOW_MS=15*60*1000, LOCK_MS=15*60*1000;
+  const readLock=()=>{try{return JSON.parse(localStorage.getItem(lockKey)||'{}')}catch{return {}}};
+  const lockedUntil=()=>Number(readLock().lockedUntil||0);
+  const isLocked=()=>lockedUntil()>Date.now();
+  const remaining=()=>Math.max(0,Math.ceil((lockedUntil()-Date.now())/60000));
+  const failed=()=>{
+    const now=Date.now(),state=readLock(),recent=(state.failures||[]).filter(t=>now-t<WINDOW_MS);
+    recent.push(now);
+    if(recent.length>=MAX_ATTEMPTS){localStorage.setItem(lockKey,JSON.stringify({failures:[],lockedUntil:now+LOCK_MS}));return true;}
+    localStorage.setItem(lockKey,JSON.stringify({failures:recent,lockedUntil:0}));return false;
+  };
+  const clearFailures=()=>localStorage.removeItem(lockKey);
   const {data:{session}}=await supabaseClient.auth.getSession();
-  if(recoveryRequested&&session)showRecoveryForm();
-  if(session&&!isEdutubeAdmin(session.user)){updateAdminView(null);adminMsg('Signed in as a student. Admin tools require a separate account with the admin role.',true);}else updateAdminView(session?.user||null);
-  supabaseClient.auth.onAuthStateChange((event,newSession)=>{
-    if(event==='PASSWORD_RECOVERY'){showRecoveryForm();return;}
+  if(session&&!isEdutubeAdmin(session.user)){updateAdminView(null);adminMsg('Signed in as a student. Admin tools are available only to authorized administrators.',true);}else updateAdminView(session?.user||null);
+  supabaseClient.auth.onAuthStateChange((_event,newSession)=>{
     const user=newSession?.user||null;
-    if(user&&!isEdutubeAdmin(user)){updateAdminView(null);adminMsg('Student account active. Admin tools are available only to authorized administrators.',true);}else updateAdminView(user);
+    if(user&&!isEdutubeAdmin(user)){updateAdminView(null);adminMsg('This account does not have an administrator role.',true);}else updateAdminView(user);
   });
-  $('adminForgotPassword')?.addEventListener('click',async()=>{
-    const email=$('adminEmail')?.value.trim();
-    if(!email){adminMsg('Enter your existing admin email address first, then choose Forgot password.',true);$('adminEmail')?.focus();return;}
-    const redirectTo=window.location.origin+window.location.pathname+'?password-recovery=1';
-    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
-    if(error){adminMsg('Could not send recovery email: '+error.message,true);return;}
-    adminMsg('If this email belongs to an account, Supabase has sent a password recovery link. Check Inbox and Spam.');
+  $('adminLoginForm')?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    if(isLocked()){adminMsg('Login temporarily locked after repeated failed attempts. Try again in '+remaining()+' minute(s).',true);return;}
+    const button=e.submitter,original=button?.textContent;
+    if(button){button.disabled=true;button.textContent='Checking…';}
+    const {data,error}=await supabaseClient.auth.signInWithPassword({email:$('adminEmail').value.trim(),password:$('adminPassword').value});
+    if(button){button.disabled=false;button.textContent=original||'Sign in securely';}
+    if(error){
+      const didLock=failed();
+      $('adminPassword').value='';
+      adminMsg(didLock?'Too many failed attempts. Admin login is locked for 15 minutes.':'Sign-in failed. Check your email/password. Attempts remaining: '+Math.max(0,MAX_ATTEMPTS-(readLock().failures||[]).length),true);
+      return;
+    }
+    if(!isEdutubeAdmin(data.user)){await supabaseClient.auth.signOut();failed();$('adminPassword').value='';adminMsg('Login succeeded, but this account does not have the admin role.',true);return;}
+    clearFailures();$('adminPassword').value='';updateAdminView(data.user);adminMsg('Welcome to the secure admin workspace.');
   });
-  recoveryForm?.addEventListener('submit',async e=>{
-    e.preventDefault();const password=$('adminNewPassword').value;const confirmPassword=$('adminConfirmPassword').value;
-    if(password.length<8){adminMsg('Use a password with at least 8 characters.',true);return;}
-    if(password!==confirmPassword){adminMsg('The two passwords do not match.',true);return;}
-    const button=e.submitter;if(button){button.disabled=true;button.textContent='Saving…';}
-    const {error}=await supabaseClient.auth.updateUser({password});
-    if(button){button.disabled=false;button.textContent='Save new password';}
-    if(error){adminMsg('Password update failed: '+error.message,true);return;}
-    recoveryForm.classList.add('hidden');$('adminLoginForm')?.classList.remove('hidden');$('adminNewPassword').value='';$('adminConfirmPassword').value='';history.replaceState({},document.title,window.location.pathname);adminMsg('Password updated. Sign in using your new password.');
-  });
-  $('adminLoginForm')?.addEventListener('submit',async e=>{e.preventDefault();const {data,error}=await supabaseClient.auth.signInWithPassword({email:$('adminEmail').value.trim(),password:$('adminPassword').value});if(error){adminMsg('Sign-in failed: '+error.message,true);return;}if(!isEdutubeAdmin(data.user)){await supabaseClient.auth.signOut();adminMsg('Login succeeded, but this account does not have the admin role.',true);return;}$('adminPassword').value='';updateAdminView(data.user);adminMsg('Welcome to the secure admin workspace.');});
-  $('adminSignOut')?.addEventListener('click',async()=>{await supabaseClient.auth.signOut();updateAdminView(null);adminMsg('You have signed out.');});
-  $('refreshAdmin')?.addEventListener('click',loadAdminLessons);$('refreshSuperOverview')?.addEventListener('click',loadSuperAdminOverview);$('superStudentSearch')?.addEventListener('input',filterSuperStudents);
+  $('adminSignOut')?.addEventListener('click',async()=>{await supabaseClient.auth.signOut();updateAdminView(null);adminMsg('Signed out.');});
 }
 document.addEventListener('DOMContentLoaded',()=>{bindLessonPublishHandler();initEdutubeAdmin();refreshPublicLessons();});
 
@@ -703,7 +707,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateStudentView(session){
     studentSession=session;const user=session?.user||null;const adminUser=!!(user&&typeof isEdutubeAdmin==="function"&&isEdutubeAdmin(user));el('accountSignedOut')?.classList.toggle('hidden',!!user);el('accountSignedIn')?.classList.toggle('hidden',!user);
     const displayName=adminUser?(user.app_metadata?.role==="super_admin"?"Super Admin":"Admin"):(user?.user_metadata?.full_name||user?.email?.split('@')[0]||'Account');
-    el('accountLabel').textContent=user?displayName:'Sign in';el('accountShortcut')?.setAttribute('aria-label',user?(adminUser?'Administrator account':'Student account'):'Sign in');
+    if(el('accountLabel'))el('accountLabel').textContent=user?displayName:'Sign in';el('accountShortcut')?.setAttribute('aria-label',user?(adminUser?'Administrator account':'Student account'):'Sign in');
     if(user){const name=displayName;el('studentDisplayName').textContent=name;el('studentDisplayEmail').textContent=(adminUser?'Administrator account · ':'')+(user.email||'');el('studentAvatar').textContent=adminUser?'A':name.charAt(0).toUpperCase();el('accountSignedIn')?.classList.toggle('admin-account-view',adminUser);el('accountCompleted').textContent=completed.length;el('accountAttempts').textContent=attempts.length;syncLocalActivity();loadRemoteNotifications();}
   }
   async function syncCompletedLessons(){
@@ -754,7 +758,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(!data?.length){list.textContent='No ranked students yet. Complete lessons and exams to get started.';return;}
     data.forEach((student,index)=>{const row=document.createElement('div');row.className='activity-item rank-row';const rank=document.createElement('span');rank.className='rank-number';rank.textContent=String(index+1);const name=document.createElement('strong');name.textContent=student.display_name||'Student';const meta=document.createElement('span');meta.className='rank-meta';meta.textContent=`${student.points||0} pts · ${student.completed_lessons||0} lessons · ${Math.round(student.average_score||0)}% avg`;row.append(rank,name,meta);list.append(row)});
   }
-  function renderCertificates(){
+  function /* certificates removed */{
     const root=el('certificateList');if(!root)return;root.replaceChildren();
     const milestones=[{id:'starter',title:'Learning Starter',need:1,desc:'Completed your first lesson.'},{id:'focused',title:'Focused Learner',need:5,desc:'Completed five lessons.'},{id:'scholar',title:'Dedicated Scholar',need:10,desc:'Completed ten lessons.'}];
     milestones.forEach(m=>{const card=document.createElement('article');card.className='certificate-card';const status=completed.length>=m.need;const title=document.createElement('h3');title.textContent=m.title;const desc=document.createElement('p');desc.textContent=m.desc;const progress=document.createElement('p');progress.textContent=status?'Milestone achieved':`${completed.length} / ${m.need} lessons completed`;const btn=document.createElement('button');btn.className='small-button';btn.textContent=status?'Print certificate':'Not yet available';btn.disabled=!status;btn.addEventListener('click',()=>printCertificate(m.title));card.append(title,desc,progress,btn);root.append(card)});
@@ -792,7 +796,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('[data-page="leaderboard"]').forEach(b=>b.addEventListener('click',renderLeaderboard));
     document.querySelectorAll('[data-page="certificates"]').forEach(b=>b.addEventListener('click',renderCertificates));
     el('adminSignOut')?.addEventListener('click',()=>{});
-    patchActivityHooks();renderNotifications();renderCertificates();initStudentAuth();
+    patchActivityHooks();renderNotifications();
   });
 })();
 
