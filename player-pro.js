@@ -20,7 +20,7 @@ const TXT = {
 const T = k => (TXT[(typeof language !== 'undefined' && language === 'am') ? 'am' : 'en'][k]);
 const ico = n => `<svg class="pp-i" aria-hidden="true"><use href="#pi-${n}"/></svg>`;
 const ready = () => typeof yt !== 'undefined' && yt && typeof yt.getPlayerState === 'function';
-const playable = () => (typeof videos !== 'undefined' ? videos : []).filter(v => getYouTubeId(v.url));
+const playable = () => (typeof videos !== 'undefined' ? videos : []).filter(v => getYouTubeId(v.url) || (typeof getVimeoId === 'function' && getVimeoId(v.url)) || /\\.(mp4|webm|ogg|m4v|m3u8)(?:$|[?#])/i.test(v.url || ''));
 const curIdx = () => playable().findIndex(v => typeof currentVideo !== 'undefined' && currentVideo && v.id === currentVideo.id);
 const curSpeed = () => (typeof speed !== 'undefined' ? speed : 1);
 const thumbUrl = v => { const id = getYouTubeId(v.url); return id ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg` : ''; };
