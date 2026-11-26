@@ -247,7 +247,7 @@
           <label>Password<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Your admin password"></label>
           <button class="primary-button" type="submit">Sign in securely</button>
           
-          <p class="admin-hint">Only trusted Supabase accounts with admin or super_admin app_metadata roles can enter this workspace.</p>
+          <p class="admin-hint">Only trusted Supabase admin or super_admin accounts can enter. Five failed attempts lock this browser for 15 minutes; Supabase also enforces its own auth limits.</p>
         </form>
                 <div id="adminWorkspace" class="hidden">
           <section class="dashboard-panel" id="adminPasswordPanel">
