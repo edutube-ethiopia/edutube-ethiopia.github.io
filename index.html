@@ -39,7 +39,7 @@
     <div class="top-actions">
       <button id="themeButton" class="icon-button text-control" aria-label="Toggle theme" title="Toggle theme" type="button">Theme</button>
       <button id="languageButton" class="language-button" type="button">አማ</button>
-      <button class="small-button account-shortcut" id="accountShortcut" type="button" data-page="accounts"><span id="accountLabel">Sign in</span></button><button class="icon-button text-control" id="notificationShortcut" type="button" data-page="notifications" aria-label="Notifications">Alerts<span class="notification-dot hidden" id="notificationDot"></span></button>
+      <button class="icon-button text-control" id="notificationShortcut" type="button" data-page="notifications" aria-label="Notifications">Alerts<span class="notification-dot hidden" id="notificationDot"></span></button>
       <button id="menuButton" class="icon-button menu-button text-control" aria-label="Open menu" type="button">Menu</button>
     </div>
   </header>
@@ -56,11 +56,11 @@
       <p class="side-label second-label" data-i18n="yourSpace">YOUR SPACE</p>
       <button class="side-link" data-page="dashboard"><span data-i18n="navDashboard">Dashboard</span></button>
       <button class="side-link" data-page="studio"><span>🚀</span><span>Study Studio</span></button>
-      <button class="side-link" data-page="accounts"><span>Student account</span></button>
+      
       <button class="side-link" data-page="notifications"><span>Notifications</span></button>
       <button class="side-link" data-page="leaderboard"><span>Leaderboard</span></button>
-      <button class="side-link" data-page="certificates"><span>Certificates</span></button>
-      <button class="side-link" data-page="ai"><span>AI study helper</span></button>
+      
+      
       <button class="side-link" data-page="admin"><span data-i18n="navAdmin">Content Manager</span></button>
       <div class="sidebar-note"><b data-i18n="keepLearning">Keep learning!</b><p data-i18n="sidebarNote">Small steps every day lead to big results.</p></div>
     </aside>
@@ -133,8 +133,8 @@
               <button class="hp-feat" type="button" data-page="studio"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg><h3 data-hp="fStudio">Study Studio</h3><p data-hp="fStudioD">Focus timer, tasks and flashcards.</p></button>
               <button class="hp-feat" type="button" data-page="dashboard"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg><h3 data-hp="fProgress">Progress tracking</h3><p data-hp="fProgressD">See completed lessons and activity.</p></button>
               <button class="hp-feat" type="button" data-page="favorites"><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg><h3 data-hp="fFav">Saved favorites</h3><p data-hp="fFavD">Keep useful lessons close at hand.</p></button>
-              <button class="hp-feat" type="button" data-page="certificates"><svg class="ic" aria-hidden="true"><use href="#i-award"/></svg><h3 data-hp="fCert">Certificates</h3><p data-hp="fCertD">Print proof of what you completed.</p></button>
-              <button class="hp-feat" type="button" data-page="ai"><svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg><h3 data-hp="fAi">AI study helper</h3><p data-hp="fAiD">Ask for explanations and study plans.</p></button>
+              
+              
               <button class="hp-feat" type="button" data-page="leaderboard"><svg class="ic" aria-hidden="true"><use href="#i-trophy"/></svg><h3 data-hp="fBoard">Leaderboard</h3><p data-hp="fBoardD">See how your activity compares.</p></button>
             </div>
           </section>
@@ -227,20 +227,9 @@
       </section>
 
 
-      <section class="page" id="page-accounts">
-        <div class="page-heading"><div><span class="eyebrow">STUDENT PROFILE</span><h1>Student account</h1><p>Create an account to sync learning activity across devices.</p></div></div>
-        <div class="account-card" id="accountSignedOut"><div class="account-tabs"><button class="account-tab active" data-auth-mode="login" type="button">Sign in</button><button class="account-tab" data-auth-mode="signup" type="button">Create account</button></div>
-          <form id="studentAuthForm" class="admin-form"><label>Full name<input id="studentName" type="text" maxlength="60" placeholder="Your name"></label><label>Email<input id="studentEmail" type="email" required autocomplete="email" placeholder="you@example.com"></label><label>Password<input id="studentPassword" type="password" required minlength="8" autocomplete="current-password" placeholder="At least 8 characters"></label><button class="primary-button" id="studentAuthSubmit" type="submit">Sign in</button><p class="admin-hint" id="authHint">Use your student account. Email confirmation may be required.</p></form>
-        </div>
-        <div class="account-card hidden" id="accountSignedIn"><div class="account-avatar" id="studentAvatar">S</div><h2 id="studentDisplayName">Student</h2><p id="studentDisplayEmail" class="muted-text"></p><div class="stats-grid account-stats"><article class="stat-card"><div><strong id="accountCompleted">0</strong><small>Lessons completed</small></div></article><article class="stat-card"><div><strong id="accountAttempts">0</strong><small>Exam attempts</small></div></article></div><button class="small-button" id="studentSignOut" type="button">Sign out</button></div>
-        <p class="admin-hint">Privacy: your personal learning records are private to your account. Do not use a shared device without signing out.</p>
-      </section>
-      <section class="page" id="page-notifications"><div class="page-heading"><div><span class="eyebrow">YOUR UPDATES</span><h1>Notifications</h1><p>Lesson milestones and exam updates.</p></div><button class="small-button" id="clearNotifications" type="button">Clear all</button></div><div class="dashboard-panel"><div id="notificationList" class="activity-list"></div></div></section>
+            <section class="page" id="page-notifications"><div class="page-heading"><div><span class="eyebrow">YOUR UPDATES</span><h1>Notifications</h1><p>Lesson milestones and exam updates.</p></div><button class="small-button" id="clearNotifications" type="button">Clear all</button></div><div class="dashboard-panel"><div id="notificationList" class="activity-list"></div></div></section>
       <section class="page" id="page-leaderboard"><div class="page-heading"><div><span class="eyebrow">LEARNING COMMUNITY</span><h1>Leaderboard</h1><p>Compare learning activity with other signed-in students.</p></div></div><div class="admin-warning" id="leaderboardStatus">Sign in and complete lessons or exams to appear here. Rankings require the database setup SQL.</div><div class="dashboard-panel"><div id="leaderboardList" class="activity-list"></div></div></section>
-      <section class="page" id="page-certificates"><div class="page-heading"><div><span class="eyebrow">YOUR ACHIEVEMENTS</span><h1>Certificates</h1><p>Print a completion certificate when you meet the course milestone.</p></div></div><div id="certificateList" class="certificate-grid"></div></section>
-      <section class="page" id="page-ai"><div class="page-heading"><div><span class="eyebrow">STUDY SUPPORT</span><h1>AI Learning Assistant</h1><p>Ask for explanations, examples, or a study plan.</p></div></div><div class="admin-warning">This starter assistant runs locally with guided prompts. It is not connected to a generative AI model yet. Never enter passwords or private information here.</div><div class="ai-panel"><div id="aiMessages" class="ai-messages"><div class="ai-message assistant">Hello! Tell me the topic you are studying, and I can help you structure your learning.</div></div><form id="aiForm" class="ai-form"><textarea id="aiPrompt" rows="2" maxlength="1000" placeholder="e.g. Explain Newton's second law with an example..."></textarea><button class="primary-button" type="submit">Send </button></form></div></section>
-
-      <section class="page" id="page-contact">
+            <section class="page" id="page-contact">
         <div class="page-heading"><div><span class="eyebrow">WE ARE HERE TO HELP</span><h1>Contact ZSecret For Free</h1><p>Questions, feedback, corrections, or partnership enquiries — reach our support team.</p></div></div>
         <div class="contact-grid">
           <article class="contact-card"><span class="contact-kicker">EMAIL SUPPORT</span><h2>Talk to our team</h2><p>For account help, learning content corrections, technical issues, or general enquiries.</p><a class="primary-button contact-link" href="mailto:support.edutubeethiopia@gmail.com">support.edutubeethiopia@gmail.com</a></article>
@@ -260,14 +249,7 @@
           <button class="small-button" id="adminForgotPassword" type="button">Forgot password?</button>
           <p class="admin-hint">Only trusted Supabase accounts with admin or super_admin app_metadata roles can enter this workspace.</p>
         </form>
-        <form id="adminRecoveryForm" class="admin-form hidden" novalidate>
-          <h2>Set a new admin password</h2>
-          <label>New password<input id="adminNewPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="At least 8 characters"></label>
-          <label>Confirm new password<input id="adminConfirmPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="Enter it again"></label>
-          <button class="primary-button" type="submit">Save new password</button>
-          <p class="admin-hint">Open this form only after following the password recovery link sent to your admin email.</p>
-        </form>
-        <div id="adminWorkspace" class="hidden">
+                <div id="adminWorkspace" class="hidden">
           <section class="super-overview" aria-labelledby="superOverviewTitle">
             <div class="super-section-heading">
               <div><span class="eyebrow">COMMAND CENTER</span><h2 id="superOverviewTitle">Platform overview</h2><p>Live totals from your connected Supabase tables.</p></div>
@@ -349,7 +331,7 @@
     </main>
   </div>
 
-  <nav class="mobile-nav"><button data-page="home"><small data-i18n="navHome">Home</small></button><button data-page="library"><small data-i18n="navLibrary">Videos</small></button><button data-page="exams"><small data-i18n="navExams">Exams</small></button><button data-page="notes"><small data-i18n="navNotes">Notes</small></button><button data-page="dashboard"><small data-i18n="navDashboard">Progress</small></button><button data-page="studio"><small>🚀 Studio</small></button><button data-page="accounts"><small>Account</small></button></nav>
+  <nav class="mobile-nav"><button data-page="home"><small data-i18n="navHome">Home</small></button><button data-page="library"><small data-i18n="navLibrary">Videos</small></button><button data-page="exams"><small data-i18n="navExams">Exams</small></button><button data-page="notes"><small data-i18n="navNotes">Notes</small></button><button data-page="dashboard"><small data-i18n="navDashboard">Progress</small></button><button data-page="studio"><small>🚀 Studio</small></button></nav>
 
 
     <!-- ===== Vimeo WATCH PAGE (አሮጌውን #videoModal ብክ ሙሉ ተካው) ===== -->
