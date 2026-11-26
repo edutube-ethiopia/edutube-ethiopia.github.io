@@ -285,118 +285,41 @@ async function loadVideosFromSupabase() {
 
 document.addEventListener("DOMContentLoaded", loadVideosFromSupabase);
 
-const PROG="edutube_v4_progress";
+const PROG="edutube_v4_progress",PCT="edutube_v4_pct";
 let yt=null,vm=null,tick=null,seeking=false,lastTap=0,hideT=null,saveTick=0;
 function nativeVideo(){const v=$("hostVideo");return v&&!v.hidden&&v.src?v:null;}
 function nativeActive(){return !!nativeVideo();}
-function mediaTime(){const v=nativeVideo();return v?v.currentTime:0;}
-function mediaDuration(){const v=nativeVideo();return v?v.duration:0;}
+async function mediaTime(){const v=nativeVideo();if(v)return v.currentTime;return vm?await vm.getCurrentTime().catch(()=>0):0;}
+async function mediaDuration(){const v=nativeVideo();if(v)return v.duration;return vm?await vm.getDuration().catch(()=>0):0;}
 function mediaSeek(t){const v=nativeVideo();if(v){v.currentTime=Math.max(0,Math.min(t||0,v.duration||t||0));return true;}if(vm){vm.setCurrentTime(Math.max(0,t||0)).catch(()=>{});return true;}return false;}
 function mediaSpeed(s){const v=nativeVideo();if(v){v.playbackRate=s;return;}if(vm)vm.setPlaybackRate(s).catch(()=>{});}
 let speed=Number(localStorage.getItem("edutube_v4_speed"))||1;
 const fmt=s=>{s=Math.floor(s||0);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
-
 function loadVimeoSDK(){if(window.Vimeo&&window.Vimeo.Player)return Promise.resolve();if(window._eduVimeoPromise)return window._eduVimeoPromise;window._eduVimeoPromise=new Promise((resolve,reject)=>{const s=document.createElement("script");s.src="https://player.vimeo.com/api/player.js";s.onload=resolve;s.onerror=()=>reject(new Error("Vimeo SDK load failed"));document.head.appendChild(s);});return window._eduVimeoPromise;}
-async function buildPlayer(url,start){await loadVimeoSDK();const frame=$("videoFrame"),host=$("ytHost"),embed=getVimeoEmbedUrl(url);if(!embed)throw Error("Invalid Vimeo URL");host.innerHTML="";const iframe=document.createElement("iframe");iframe.src=embed;iframe.title="Vimeo player";iframe.allow="autoplay; fullscreen; picture-in-picture";iframe.allowFullscreen=true;iframe.setAttribute("referrerpolicy","strict-origin-when-cross-origin");host.appendChild(iframe);vm=new Vimeo.Player(iframe);await vm.ready();if(start>0)await vm.setCurrentTime(start).catch(()=>{});await vm.play().catch(()=>{});vm.on("play",()=>{frame.classList.add("playing");frame.classList.remove("loading");$("btnPlay").textContent="⏸";poster.classList.add("hidden");showControls();});vm.on("pause",()=>{$("btnPlay").textContent="▶";frame.classList.remove("playing");});vm.on("timeupdate",()=>update());vm.on("ended",()=>onVimeoEnded());vm.on("error",()=>notify("Vimeo player error"));frame.classList.remove("loading");}
+async function buildPlayer(url,start){await loadVimeoSDK();const frame=$("videoFrame"),host=$("ytHost"),embed=getVimeoEmbedUrl(url);if(!embed)throw new Error("Invalid Vimeo URL");host.innerHTML="";const iframe=document.createElement("iframe");iframe.src=embed;iframe.title="Vimeo player";iframe.allow="autoplay; fullscreen; picture-in-picture";iframe.allowFullscreen=true;iframe.setAttribute("referrerpolicy","strict-origin-when-cross-origin");host.appendChild(iframe);vm=new Vimeo.Player(iframe);await vm.ready();if(start>0)await vm.setCurrentTime(start).catch(()=>{});await vm.setPlaybackRate(speed).catch(()=>{});await vm.play().catch(()=>{});vm.on("play",()=>{frame.classList.add("playing");frame.classList.remove("loading");$("btnPlay").textContent="⏸";poster.classList.add("hidden");showControls();});vm.on("pause",()=>{$("btnPlay").textContent="▶";frame.classList.remove("playing");});vm.on("timeupdate",()=>update());vm.on("ended",()=>onVimeoEnded());vm.on("error",()=>notify("Vimeo player error"));frame.classList.remove("loading");}
 function onVimeoEnded(){if(!currentVideo)return;const p=read(PROG,{}),q=read(PCT,{});delete p[currentVideo.id];q[currentVideo.id]=100;write(PROG,p);write(PCT,q);if(!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed);renderAll();}if($("autoNext")&&$("autoNext").checked)startNextCountdown();else notify("ትምህርቱ ተጠናቀቀ!");}
-async async function update(){const v=nativeVideo();if(!v&&!vm)return;let d=0,c=0;if(v){d=v.duration||0;c=v.currentTime||0;$("btnPlay").textContent=v.paused?"▶":"⏸";$("videoFrame").classList.toggle("playing",!v.paused);$("btnMute").classList.toggle("is-muted",v.muted||v.volume===0);}else{try{d=await vm.getDuration();c=await vm.getCurrentTime();$("btnMute").classList.toggle("is-muted",await vm.getMuted());}catch{return;}}const pct=d?c/d:0;if(!seeking)$("seek").value=pct*1000;$("seek").style.setProperty("--p",pct*100+"%");$("timeLabel").textContent=fmt(c)+" / "+fmt(d);if(++saveTick%6===0)saveProgress();if(pct>=.9&&currentVideo&&!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed);renderAll();notify(t("completedNotice"));}}
-async async function saveProgress(){if((!nativeVideo()&&!vm)||!currentVideo)return;const c=await mediaTime(),d=await mediaDuration(),p=read(PROG,{}),q=read(PCT,{});if(c>5&&d&&c<d-10){p[currentVideo.id]=Math.floor(c);q[currentVideo.id]=Math.round(c/d*100);}else delete p[currentVideo.id];write(PROG,p);write(PCT,q);}
-function showControls(){function showControls(){const p=$("videoFrame");p.classList.add("show");clearTimeout(hideT);hideT=setTimeout(()=>p.classList.remove("show"),3000)}
+async function update(){const v=nativeVideo();if(!v&&!vm)return;let d=0,c=0;if(v){d=v.duration||0;c=v.currentTime||0;$("btnPlay").textContent=v.paused?"▶":"⏸";$("videoFrame").classList.toggle("playing",!v.paused);$("btnMute").classList.toggle("is-muted",v.muted||v.volume===0);}else{try{d=await vm.getDuration();c=await vm.getCurrentTime();$("btnMute").classList.toggle("is-muted",await vm.getMuted());}catch{return;}}const pct=d?c/d:0;if(!seeking)$("seek").value=pct*1000;$("seek").style.setProperty("--p",pct*100+"%");$("timeLabel").textContent=fmt(c)+" / "+fmt(d);if(++saveTick%6===0)saveProgress();if(pct>=.9&&currentVideo&&!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed);renderAll();notify(t("completedNotice"));}}
+async function saveProgress(){if((!nativeVideo()&&!vm)||!currentVideo)return;const c=await mediaTime(),d=await mediaDuration(),p=read(PROG,{}),q=read(PCT,{});if(c>5&&d&&c<d-10){p[currentVideo.id]=Math.floor(c);q[currentVideo.id]=Math.round(c/d*100);}else delete p[currentVideo.id];write(PROG,p);write(PCT,q);}
+function showControls(){const p=$("videoFrame");p.classList.add("show");clearTimeout(hideT);hideT=setTimeout(()=>p.classList.remove("show"),3000);}
 function togglePlay(){const v=nativeVideo();if(v){v.paused?v.play().catch(()=>{}):v.pause();showControls();return;}if(!vm){notify("Vimeo player is loading…");return;}vm.getPaused().then(p=>p?vm.play():vm.pause()).catch(()=>{});showControls();}
-function skip(d){if(!nativeVideo()&&!vm){notify("Player loading…");return;}Promise.resolve(mediaTime()).then(t=>mediaSeek(t+d));const fx=$("skipFx");fx.textContent=(d<0?"⏪ ":"⏩ ")+Math.abs(d)+"s";fx.className="skip-fx "+(d<0?"l":"r");void fx.offsetWidth;fx.classList.add("go");showControls();}
+function skip(d){if(!nativeVideo()&&!vm){notify("Player loading…");return;}mediaTime().then(t=>mediaSeek(t+d));const fx=$("skipFx");fx.textContent=(d<0?"⏪ ":"⏩ ")+Math.abs(d)+"s";fx.className="skip-fx "+(d<0?"l":"r");void fx.offsetWidth;fx.classList.add("go");showControls();}
 function toggleMute(){const v=nativeVideo();if(v){v.muted=!v.muted;$("btnMute").setAttribute("aria-label",v.muted?"Unmute":"Mute");return;}if(vm)vm.getMuted().then(m=>vm.setMuted(!m)).catch(()=>{});}
-function setSpeedButton(s){function setSpeedButton(s){
-  document.querySelectorAll(".speed-btn").forEach(b=>b.classList.toggle("active",Number(b.dataset.speed)===s));
-  const label=$("currentSpeedLabel");if(label)label.textContent=s+"×";
-}
-function playNext(){
-  if(!currentVideo)return;
-  const i=videos.findIndex(v=>v.id===currentVideo.id);
-  const n=videos.slice(i+1).find(v=>getYouTubeId(v.url)||getVimeoEmbedUrl(v.url)||/\.(mp4|webm|ogg|m4v|m3u8)(?:$|[?#])/i.test(v.url||""));
-  if(!n){notify("ቀጣይ ትምህርት የለም");return}
-  saveProgress();openVideo(n.id);
-}
-
-$("btnPlay").addEventListener("click",togglePlay);
-$("btnBack").addEventListener("click",()=>skip(-10));
-$("btnFwd").addEventListener("click",()=>skip(10));
-$("btnMute").addEventListener("click",toggleMute);
-$("btnFull").addEventListener("click",()=>toggleFull());
-$("nextLesson").addEventListener("click",playNext);
-$("seek").addEventListener("input",async()=>{const v=nativeVideo();if(!v&&!vm)return;seeking=true;mediaSeek((await mediaDuration())* $("seek").value/1000);showControls()});
-$("seek").addEventListener("change",()=>{seeking=false});
-document.querySelectorAll(".speed-btn").forEach(b=>b.addEventListener("click",()=>{
-  speed=Number(b.dataset.speed);localStorage.setItem("edutube_v4_speed",speed);
-  mediaSpeed(speed);
-  setSpeedButton(speed);
-  $("speedMenu").classList.add("hidden");
-  $("speedMenuButton").setAttribute("aria-expanded","false");
-}));
-$("speedMenuButton").addEventListener("click",()=>{
-  const menu=$("speedMenu"),willOpen=menu.classList.contains("hidden");
-  menu.classList.toggle("hidden",!willOpen);
-  $("speedMenuButton").setAttribute("aria-expanded",String(willOpen));
-});
-document.addEventListener("click",e=>{
-  if(!e.target.closest(".speed-menu-wrap")){
-    $("speedMenu").classList.add("hidden");
-    $("speedMenuButton").setAttribute("aria-expanded","false");
-  }
-});
-$("tapLayer").addEventListener("click",e=>{
-  const now=Date.now(),r=e.currentTarget.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;
-  if(now-lastTap<300){lastTap=0;if(x<.4)skip(-10);else if(x>.6)skip(10);else togglePlay();return}
-  lastTap=now;setTimeout(()=>{if(lastTap===now){lastTap=0;togglePlay()}},300);
-});
-document.addEventListener("keydown",e=>{
-  if($("videoModal").classList.contains("hidden")||(!vm&&!nativeVideo()))return;
-  const k=String(e.key||"").toLowerCase();
-  if(k===" "||k==="k"){e.preventDefault();togglePlay()}
-  else if(k==="arrowleft"||k==="j")skip(-10);
-  else if(k==="arrowright"||k==="l")skip(10);
-  else if(k==="f")toggleFull();
-  else if(k==="m")toggleMute();
-});
-document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&screen.orientation&&screen.orientation.unlock)screen.orientation.unlock()});
-
-const PCT="edutube_v4_pct";
-// YouTube API intentionally removed. Vimeo Player SDK loads only on demand.
-function ensureUpNext(){function ensureUpNext(){
-  if($("upNext"))return;
-  const wrap=document.createElement("div");
-  wrap.innerHTML='<div class="upnext-head"><h3>⏭ Up next</h3><label class="autoplay"><input type="checkbox" id="autoNext"> Autoplay</label></div><div id="upNext" class="upnext"></div>';
-  document.querySelector("#videoModal .modal-footer").before(wrap);
-  const cb=$("autoNext");
-  cb.checked=localStorage.getItem("edutube_v4_auto")!=="0";
-  cb.addEventListener("change",()=>localStorage.setItem("edutube_v4_auto",cb.checked?"1":"0"));
-}
-
-function renderUpNext(){
-  const box=$("upNext");if(!box)return;
-  box.replaceChildren();
-  if(!currentVideo)return;
-  const i=videos.findIndex(v=>v.id===currentVideo.id);
-  const list=[...videos.slice(i+1),...videos.slice(0,i)].filter(v=>v.url);
-  if(!list.length){box.textContent="ሌላ ትምህርት የለም";return}
-  const pct=read(PCT,{});
-  list.forEach(v=>{
-    const row=document.createElement("button");row.type="button";row.className="up-item";
-    const img=document.createElement("span");img.className="up-thumb";
-    img.style.backgroundImage=getYouTubeId(v.url)?`url(https://i.ytimg.com/vi/${getYouTubeId(v.url)}/mqdefault.jpg)`:v.thumbnail_url?`url(${v.thumbnail_url})`:"linear-gradient(135deg,#153f77,#071426)";
-    if(pct[v.id]){const bar=document.createElement("i");bar.className="thumb-bar";const f=document.createElement("b");f.style.width=Math.min(pct[v.id],100)+"%";bar.append(f);img.append(bar)}
-    const txt=document.createElement("span");txt.className="up-text";
-    const h=document.createElement("b");h.textContent=v.title;
-    const m=document.createElement("small");m.textContent=`Grade ${v.grade} · ${v.subject}`+(completed.includes(v.id)?" · ✓":"");
-    txt.append(h,m);row.append(img,txt);
-    row.addEventListener("click",()=>{saveProgress();openVideo(v.id)});
-    box.append(row);
-  });
-}
-
-async async function openVideo(id){const video=videos.find(v=>v.id===id);if(!video)return;if(!getVimeoId(video.url)){notify("This lesson requires a Vimeo link.");return;}ensureUpNext();currentVideo=video;const dlb=$("videoDownload");if(dlb){dlb.href="#";dlb.onclick=e=>{e.preventDefault();notify("Vimeo download is not available from the embed.");};} $("modalTitle").textContent=video.title;const start=read(PROG,{})[video.id]||0,frame=$("videoFrame");frame.classList.add("loading");frame.classList.remove("fallback","playing","hosted-player");frame.style.setProperty("--poster",video.thumbnail_url?"url("+video.thumbnail_url+")":"none");const fb=$("fbPlayer");if(fb)fb.src="";const nv=$("hostVideo"),ex=$("externalVideo");if(nv){nv.pause();nv.removeAttribute("src");nv.load();nv.hidden=true;nv.style.display="none";}if(ex){ex.src="";ex.hidden=true;ex.style.display="none";}showPoster(getVimeoId(video.url),video.title);$("videoModal").classList.remove("hidden");lockPageScroll();const mc=document.querySelector("#videoModal .modal-content");if(mc)mc.scrollTop=0;renderUpNext();const host=$("ytHost");host.style.display="";host.innerHTML="";if(vm){vm.destroy().catch(()=>{});vm=null;}yt=null;try{await buildPlayer(video.url,start);}catch(e){frame.classList.remove("loading");notify("Vimeo playback failed. Check Vimeo link and embed permissions.");}clearInterval(tick);tick=setInterval(update,500);}
+function setSpeedButton(s){document.querySelectorAll(".speed-btn").forEach(b=>b.classList.toggle("active",Number(b.dataset.speed)===s));const label=$("currentSpeedLabel");if(label)label.textContent=s+"×";}
+function playNext(){if(!currentVideo)return;const i=videos.findIndex(v=>v.id===currentVideo.id),n=videos.slice(i+1).find(v=>getVimeoEmbedUrl(v.url));if(!n){notify("ቀጣይ ትምህርት የለም");return;}saveProgress();openVideo(n.id);}
+$("btnPlay").addEventListener("click",togglePlay);$("btnBack").addEventListener("click",()=>skip(-10));$("btnFwd").addEventListener("click",()=>skip(10));$("btnMute").addEventListener("click",toggleMute);$("btnFull").addEventListener("click",()=>toggleFull());$("nextLesson").addEventListener("click",playNext);
+$("seek").addEventListener("input",async()=>{if(!nativeVideo()&&!vm)return;seeking=true;mediaSeek((await mediaDuration())*Number($("seek").value)/1000);showControls();});$("seek").addEventListener("change",()=>{seeking=false;});
+document.querySelectorAll(".speed-btn").forEach(b=>b.addEventListener("click",()=>{speed=Number(b.dataset.speed);localStorage.setItem("edutube_v4_speed",speed);mediaSpeed(speed);setSpeedButton(speed);$("speedMenu").classList.add("hidden");$("speedMenuButton").setAttribute("aria-expanded","false");}));
+$("speedMenuButton").addEventListener("click",()=>{const menu=$("speedMenu"),open=menu.classList.contains("hidden");menu.classList.toggle("hidden",!open);$("speedMenuButton").setAttribute("aria-expanded",String(open));});
+document.addEventListener("click",e=>{if(!e.target.closest(".speed-menu-wrap")){$("speedMenu").classList.add("hidden");$("speedMenuButton").setAttribute("aria-expanded","false");}});
+$("tapLayer").addEventListener("click",e=>{const now=Date.now(),r=e.currentTarget.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;if(now-lastTap<300){lastTap=0;if(x<.4)skip(-10);else if(x>.6)skip(10);else togglePlay();return;}lastTap=now;setTimeout(()=>{if(lastTap===now){lastTap=0;togglePlay();}},300);});
+document.addEventListener("keydown",e=>{if($("videoModal").classList.contains("hidden")||(!vm&&!nativeVideo()))return;const k=String(e.key||"").toLowerCase();if(k===" "||k==="k"){e.preventDefault();togglePlay();}else if(k==="arrowleft"||k==="j")skip(-10);else if(k==="arrowright"||k==="l")skip(10);else if(k==="f")toggleFull();else if(k==="m")toggleMute();});
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&screen.orientation&&screen.orientation.unlock)screen.orientation.unlock();});
+// Vimeo API is loaded only when a lesson is opened.
+function ensureUpNext(){if($("upNext"))return;const wrap=document.createElement("div");wrap.innerHTML='<div class="upnext-head"><h3>⏭ Up next</h3><label class="autoplay"><input type="checkbox" id="autoNext"> Autoplay</label></div><div id="upNext" class="upnext"></div>';document.querySelector("#videoModal .modal-footer").before(wrap);const cb=$("autoNext");cb.checked=localStorage.getItem("edutube_v4_auto")!=="0";cb.addEventListener("change",()=>localStorage.setItem("edutube_v4_auto",cb.checked?"1":"0"));}
+function renderUpNext(){const box=$("upNext");if(!box)return;box.replaceChildren();if(!currentVideo)return;const i=videos.findIndex(v=>v.id===currentVideo.id),list=[...videos.slice(i+1),...videos.slice(0,i)].filter(v=>getVimeoEmbedUrl(v.url));if(!list.length){box.textContent="ሌላ ትምህርት የለም";return;}const pct=read(PCT,{});list.forEach(v=>{const row=document.createElement("button");row.type="button";row.className="up-item";const img=document.createElement("span");img.className="up-thumb";img.style.backgroundImage=v.thumbnail_url?"url("+v.thumbnail_url+")":"linear-gradient(135deg,#153f77,#071426)";if(pct[v.id]){const bar=document.createElement("i");bar.className="thumb-bar";const fill=document.createElement("b");fill.style.width=Math.min(pct[v.id],100)+"%";bar.append(fill);img.append(bar);}const txt=document.createElement("span");txt.className="up-text";const title=document.createElement("b");title.textContent=v.title;const meta=document.createElement("small");meta.textContent="Grade "+v.grade+" · "+v.subject+(completed.includes(v.id)?" · ✓":"");txt.append(title,meta);row.append(img,txt);row.addEventListener("click",()=>{saveProgress();openVideo(v.id);});box.append(row);});}
+async function openVideo(id){const video=videos.find(v=>v.id===id);if(!video)return;if(!getVimeoId(video.url)){notify("This lesson requires a Vimeo link.");return;}ensureUpNext();currentVideo=video;const dlb=$("videoDownload");if(dlb){dlb.href="#";dlb.onclick=e=>{e.preventDefault();notify("Vimeo download is not available from the embed.");};}$("modalTitle").textContent=video.title;const start=read(PROG,{})[video.id]||0,frame=$("videoFrame");frame.classList.add("loading");frame.classList.remove("fallback","playing","hosted-player");frame.style.setProperty("--poster",video.thumbnail_url?"url("+video.thumbnail_url+")":"none");const fb=$("fbPlayer");if(fb)fb.src="";const nv=$("hostVideo"),ex=$("externalVideo");if(nv){nv.pause();nv.removeAttribute("src");nv.load();nv.hidden=true;nv.style.display="none";}if(ex){ex.src="";ex.hidden=true;ex.style.display="none";}showPoster(getVimeoId(video.url),video.title);$("videoModal").classList.remove("hidden");lockPageScroll();const mc=document.querySelector("#videoModal .modal-content");if(mc)mc.scrollTop=0;renderUpNext();const host=$("ytHost");host.style.display="";host.innerHTML="";if(vm){vm.destroy().catch(()=>{});vm=null;}yt=null;try{await buildPlayer(video.url,start);}catch(e){frame.classList.remove("loading");notify("Vimeo playback failed. Check Vimeo link and embed permissions.");}clearInterval(tick);tick=setInterval(update,500);}
 function closeVideo(){saveProgress();clearInterval(tick);if(vm){vm.pause().catch(()=>{});vm.destroy().catch(()=>{});vm=null;}yt=null;const fb=$("fbPlayer");if(fb)fb.src="";const hv=$("hostVideo");if(hv){hv.pause();hv.removeAttribute("src");hv.load();hv.hidden=true;hv.style.display="none";}const ex=$("externalVideo");if(ex){ex.src="";ex.hidden=true;ex.style.display="none";}$("ytHost").style.display="";$("ytHost").innerHTML="";$("videoFrame").classList.remove("loading","fallback","hosted-player","playing");if(document.fullscreenElement)document.exitFullscreen();$("videoModal").classList.add("hidden");unlockPageScroll();currentVideo=null;renderVideos();}
-
-/* ============ PLAYER PRO PATCH/* ============ PLAYER PRO PATCH & SURPRISES ============ */
+/* ============ PLAYER PRO PATCH & SURPRISES ============ */
 const poster=$("poster"),posterImg=$("posterImg"),posterTitle=$("posterTitle");
 function showPoster(vid,title){if(currentVideo&&currentVideo.thumbnail_url)posterImg.src=currentVideo.thumbnail_url;else posterImg.removeAttribute("src");posterTitle.textContent=title;poster.classList.remove("hidden");$("videoFrame").classList.remove("playing");}
 poster.addEventListener("click",()=>{if(vm){poster.classList.add("hidden");vm.play().catch(()=>{});}else notify("Vimeo player loading…");});
