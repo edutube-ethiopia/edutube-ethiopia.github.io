@@ -758,16 +758,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(!data?.length){list.textContent='No ranked students yet. Complete lessons and exams to get started.';return;}
     data.forEach((student,index)=>{const row=document.createElement('div');row.className='activity-item rank-row';const rank=document.createElement('span');rank.className='rank-number';rank.textContent=String(index+1);const name=document.createElement('strong');name.textContent=student.display_name||'Student';const meta=document.createElement('span');meta.className='rank-meta';meta.textContent=`${student.points||0} pts · ${student.completed_lessons||0} lessons · ${Math.round(student.average_score||0)}% avg`;row.append(rank,name,meta);list.append(row)});
   }
-  function /* certificates removed */{
-    const root=el('certificateList');if(!root)return;root.replaceChildren();
-    const milestones=[{id:'starter',title:'Learning Starter',need:1,desc:'Completed your first lesson.'},{id:'focused',title:'Focused Learner',need:5,desc:'Completed five lessons.'},{id:'scholar',title:'Dedicated Scholar',need:10,desc:'Completed ten lessons.'}];
-    milestones.forEach(m=>{const card=document.createElement('article');card.className='certificate-card';const status=completed.length>=m.need;const title=document.createElement('h3');title.textContent=m.title;const desc=document.createElement('p');desc.textContent=m.desc;const progress=document.createElement('p');progress.textContent=status?'Milestone achieved':`${completed.length} / ${m.need} lessons completed`;const btn=document.createElement('button');btn.className='small-button';btn.textContent=status?'Print certificate':'Not yet available';btn.disabled=!status;btn.addEventListener('click',()=>printCertificate(m.title));card.append(title,desc,progress,btn);root.append(card)});
-    if(!completed.length){const note=document.createElement('p');note.className='admin-hint';note.textContent='Complete lessons to unlock your certificates.';root.append(note)}
-  }
-  function printCertificate(title){
-    document.querySelector('.print-certificate')?.remove();const name=studentSession?.user?.user_metadata?.full_name||studentSession?.user?.email?.split('@')[0]||'Learner';
-    const paper=document.createElement('section');paper.className='print-certificate';paper.innerHTML='<div style="font-size:18px;letter-spacing:4px">ZSECRET FOR FREE</div><h1>Certificate of Achievement</h1><p>This certificate is presented to</p><h2></h2><p>in recognition of achieving the learning milestone</p><h2 class="cert-title"></h2><p>Issued on '+new Date().toLocaleDateString()+'</p><p>Keep learning. Build your future.</p>';paper.querySelector('h2').textContent=name;paper.querySelector('.cert-title').textContent=title;document.body.append(paper);window.print();paper.remove();
-  }
   function addAiMessage(text,role){const node=document.createElement('div');node.className='ai-message '+role;node.textContent=text;el('aiMessages').append(node);el('aiMessages').scrollTop=el('aiMessages').scrollHeight;}
   function localStudyReply(prompt){
     const p=prompt.toLowerCase();
@@ -780,7 +770,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function submitAi(event){event.preventDefault();const prompt=el('aiPrompt').value.trim();if(!prompt)return;addAiMessage(prompt,'user');el('aiPrompt').value='';setTimeout(()=>addAiMessage(localStudyReply(prompt),'assistant'),180);}
   function patchActivityHooks(){
     const originalComplete=markComplete;
-    markComplete=function(){const before=completed.length;const title=currentVideo?.title||'a lesson';originalComplete();if(completed.length>before){addNotification('Lesson completed','You completed '+title+'.');syncCompletedLessons()}renderCertificates()};
+    markComplete=function(){const before=completed.length;const title=currentVideo?.title||'a lesson';originalComplete();if(completed.length>before){addNotification('Lesson completed','You completed '+title+'.');syncCompletedLessons()}};
     const originalFinish=finishExam;
     finishExam=function(timeUp=false){const before=attempts.length;originalFinish(timeUp);if(attempts.length>before){const latest=attempts[0];addNotification('Exam result saved',`${latest.title}: ${latest.percent}%`);syncExamAttempt(latest)}renderCertificates()};
     const originalSaveProgress=saveProgress;
@@ -789,12 +779,12 @@ document.addEventListener("DOMContentLoaded", () => {
     renderDashboard=function(){originalRenderDashboard();if(el('accountSignedIn')&&!el('accountSignedIn').classList.contains('hidden')){el('accountCompleted').textContent=completed.length;el('accountAttempts').textContent=attempts.length}};
   }
   document.addEventListener('DOMContentLoaded',()=>{
-    setAuthMode('login');document.querySelectorAll('[data-auth-mode]').forEach(b=>b.addEventListener('click',()=>setAuthMode(b.dataset.authMode)));
-    el('studentAuthForm')?.addEventListener('submit',submitStudentAuth);el('studentSignOut')?.addEventListener('click',signOutStudent);
-    el('clearNotifications')?.addEventListener('click',()=>{saveNotes([]);renderNotifications()});el('aiForm')?.addEventListener('submit',submitAi);
+    // Student login/signup UI removed.
+    
+    el('clearNotifications')?.addEventListener('click',()=>{saveNotes([]);renderNotifications()});
     el('notificationShortcut')?.addEventListener('click',renderNotifications);
     document.querySelectorAll('[data-page="leaderboard"]').forEach(b=>b.addEventListener('click',renderLeaderboard));
-    document.querySelectorAll('[data-page="certificates"]').forEach(b=>b.addEventListener('click',renderCertificates));
+    
     el('adminSignOut')?.addEventListener('click',()=>{});
     patchActivityHooks();renderNotifications();
   });
