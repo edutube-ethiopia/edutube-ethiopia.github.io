@@ -278,6 +278,12 @@ document.addEventListener("DOMContentLoaded", loadVideosFromSupabase);
 
 const PROG="edutube_v4_progress";
 let yt=null,tick=null,seeking=false,lastTap=0,hideT=null,saveTick=0;
+function nativeVideo(){const v=$("hostVideo");return v&&!v.hidden&&v.src?v:null;}
+function nativeActive(){return !!nativeVideo();}
+function mediaTime(){const v=nativeVideo();return v?v.currentTime:(yt&&yt.getCurrentTime?yt.getCurrentTime():0);}
+function mediaDuration(){const v=nativeVideo();return v?v.duration:(yt&&yt.getDuration?yt.getDuration():0);}
+function mediaSeek(t){const v=nativeVideo();if(v){v.currentTime=Math.max(0,Math.min(t||0,v.duration||t||0));return true;}if(yt&&yt.seekTo){yt.seekTo(Math.max(0,t||0),true);return true;}return false;}
+function mediaSpeed(s){const v=nativeVideo();if(v){v.playbackRate=s;return;}if(yt&&yt.setPlaybackRate)yt.setPlaybackRate(s);}
 let speed=Number(localStorage.getItem("edutube_v4_speed"))||1;
 const fmt=s=>{s=Math.floor(s||0);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
 
@@ -307,8 +313,9 @@ function buildPlayer(vid,start){
 }
 
 function update(){
-  if(!yt||!yt.getDuration)return;
-  const d=yt.getDuration()||0,c=yt.getCurrentTime()||0,pct=d?c/d:0;
+  const v=nativeVideo();
+  if(!v&&(!yt||!yt.getDuration))return;
+  const d=v?(v.duration||0):(yt.getDuration()||0),c=v?(v.currentTime||0):(yt.getCurrentTime()||0),pct=d?c/d:0;
   if(!seeking)$("seek").value=pct*1000;
   $("seek").style.setProperty("--p",pct*100+"%");
   $("timeLabel").textContent=fmt(c)+" / "+fmt(d);
@@ -318,21 +325,21 @@ function update(){
   }
 }
 function saveProgress(){
-  if(!yt||!yt.getCurrentTime||!currentVideo)return;
-  const c=yt.getCurrentTime(),d=yt.getDuration(),p=read(PROG,{}),q=read(PCT,{});
+  if((!nativeVideo()&&(!yt||!yt.getCurrentTime))||!currentVideo)return;
+  const c=mediaTime(),d=mediaDuration(),p=read(PROG,{}),q=read(PCT,{});
   if(c>5&&d&&c<d-10){p[currentVideo.id]=Math.floor(c);q[currentVideo.id]=Math.round(c/d*100)}
   else delete p[currentVideo.id];
   write(PROG,p);write(PCT,q);
 }
 function showControls(){const p=$("videoFrame");p.classList.add("show");clearTimeout(hideT);hideT=setTimeout(()=>p.classList.remove("show"),3000)}
-function togglePlay(){if(!yt||typeof yt.getPlayerState!=="function"||typeof yt.playVideo!=="function"){notify("⏳ Player እየተጫነ ነው...");return}try{yt.getPlayerState()===1?yt.pauseVideo():yt.playVideo();showControls()}catch(e){notify("Player ገና ዝግጁ አይደለም። እባክዎ ትንሽ ይጠብቁ።")}}
+function togglePlay(){const v=nativeVideo();if(v){v.paused?v.play().catch(()=>{}):v.pause();showControls();return}if(!yt||typeof yt.getPlayerState!=="function"||typeof yt.playVideo!=="function"){notify("⏳ Player እየተጫነ ነው...");return}try{yt.getPlayerState()===1?yt.pauseVideo():yt.playVideo();showControls()}catch(e){notify("Player ገና ዝግጁ አይደለም። እባክዎ ትንሽ ይጠብቁ።")}}
 function skip(d){
-  if(!yt||typeof yt.getCurrentTime!=="function"||typeof yt.seekTo!=="function"){notify("⏳ Player እየተጫነ ነው...");return}
-  try{yt.seekTo(Math.max(0,yt.getCurrentTime()+d),true);}catch(e){notify("Seek አልተሳካም። Player ዝግጁ እስኪሆን ይጠብቁ።");return}
+  if(!nativeVideo()&&(!yt||typeof yt.getCurrentTime!=="function"||typeof yt.seekTo!=="function")){notify("⏳ Player እየተጫነ ነው...");return}
+  try{mediaSeek(mediaTime()+d);}catch(e){notify("Seek አልተሳካም። Player ዝግጁ እስኪሆን ይጠብቁ።");return}
   const f=$("skipFx");f.textContent=(d<0?"⏪ ":"⏩ ")+Math.abs(d)+"s";
   f.className="skip-fx "+(d<0?"l":"r");void f.offsetWidth;f.classList.add("go");showControls();
 }
-function toggleMute(){if(!yt||typeof yt.isMuted!=="function"||typeof yt.mute!=="function"||typeof yt.unMute!=="function"){notify("⏳ Player እየተጫነ ነው...");return}try{if(yt.isMuted()){yt.unMute();$("btnMute").innerHTML='<i data-lucide="volume-2" aria-hidden="true"></i>';refreshIcons()}else{yt.mute();$("btnMute").innerHTML='<i data-lucide="volume-x" aria-hidden="true"></i>';refreshIcons()}}catch(e){notify("Volume control ገና ዝግጁ አይደለም።")}}
+function toggleMute(){const v=nativeVideo();if(v){v.muted=!v.muted;$("btnMute").setAttribute("aria-label",v.muted?"Unmute":"Mute");return}if(!yt||typeof yt.isMuted!=="function"||typeof yt.mute!=="function"||typeof yt.unMute!=="function"){notify("⏳ Player እየተጫነ ነው...");return}try{if(yt.isMuted()){yt.unMute();$("btnMute").innerHTML='<i data-lucide="volume-2" aria-hidden="true"></i>';refreshIcons()}else{yt.mute();$("btnMute").innerHTML='<i data-lucide="volume-x" aria-hidden="true"></i>';refreshIcons()}}catch(e){notify("Volume control ገና ዝግጁ አይደለም።")}}
 
 function setSpeedButton(s){
   document.querySelectorAll(".speed-btn").forEach(b=>b.classList.toggle("active",Number(b.dataset.speed)===s));
@@ -341,7 +348,7 @@ function setSpeedButton(s){
 function playNext(){
   if(!currentVideo)return;
   const i=videos.findIndex(v=>v.id===currentVideo.id);
-  const n=videos.slice(i+1).find(v=>getYouTubeId(v.url));
+  const n=videos.slice(i+1).find(v=>getYouTubeId(v.url)||getVimeoEmbedUrl(v.url)||/\.(mp4|webm|ogg|m4v|m3u8)(?:$|[?#])/i.test(v.url||""));
   if(!n){notify("ቀጣይ ትምህርት የለም");return}
   saveProgress();openVideo(n.id);
 }
@@ -352,11 +359,11 @@ $("btnFwd").addEventListener("click",()=>skip(10));
 $("btnMute").addEventListener("click",toggleMute);
 $("btnFull").addEventListener("click",()=>toggleFull());
 $("nextLesson").addEventListener("click",playNext);
-$("seek").addEventListener("input",()=>{if(!yt||!yt.getDuration||!yt.seekTo)return;seeking=true;yt.seekTo(yt.getDuration()*$("seek").value/1000,true);showControls()});
+$("seek").addEventListener("input",()=>{const v=nativeVideo();if(!v&&(!yt||!yt.getDuration||!yt.seekTo))return;seeking=true;mediaSeek(mediaDuration()*$("seek").value/1000);showControls()});
 $("seek").addEventListener("change",()=>{seeking=false});
 document.querySelectorAll(".speed-btn").forEach(b=>b.addEventListener("click",()=>{
   speed=Number(b.dataset.speed);localStorage.setItem("edutube_v4_speed",speed);
-  if(yt&&yt.setPlaybackRate)yt.setPlaybackRate(speed);
+  mediaSpeed(speed);
   setSpeedButton(speed);
   $("speedMenu").classList.add("hidden");
   $("speedMenuButton").setAttribute("aria-expanded","false");
