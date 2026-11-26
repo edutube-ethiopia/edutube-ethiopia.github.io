@@ -316,6 +316,7 @@ function update(){
   const v=nativeVideo();
   if(!v&&(!yt||!yt.getDuration))return;
   const d=v?(v.duration||0):(yt.getDuration()||0),c=v?(v.currentTime||0):(yt.getCurrentTime()||0),pct=d?c/d:0;
+  if(v){$("btnPlay").textContent=v.paused?"▶":"⏸";$("videoFrame").classList.toggle("playing",!v.paused);if(v.muted||v.volume===0)$("btnMute").classList.add("is-muted");else $("btnMute").classList.remove("is-muted");}
   if(!seeking)$("seek").value=pct*1000;
   $("seek").style.setProperty("--p",pct*100+"%");
   $("timeLabel").textContent=fmt(c)+" / "+fmt(d);
