@@ -143,19 +143,7 @@ function getVimeoEmbedUrl(url){
     return embed.toString();
   }catch{return null;}
 }
-function getYouTubeId(url){
- try{
-  const u=new URL(String(url||""));
-  const host=u.hostname.toLowerCase().replace(/^www\./,"");
-  let id="";
-  if(host==="youtu.be") id=u.pathname.split("/").filter(Boolean)[0]||"";
-  else if(["youtube.com","m.youtube.com","music.youtube.com","youtube-nocookie.com"].includes(host)){
-    id=u.searchParams.get("v")||"";
-    if(!id){const parts=u.pathname.split("/").filter(Boolean);const marker=parts.findIndex(p=>["embed","shorts","live","v"].includes(p));if(marker>=0)id=parts[marker+1]||"";}
-  }
-  return /^[a-zA-Z0-9_-]{11}$/.test(id)?id:null;
- }catch{return null}
-}
+function getYouTubeId(url){return getVimeoId(url);}
 function showPage(name){
  const target=$("page-"+name);if(!target)return;
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));target.classList.add("active");
@@ -536,9 +524,9 @@ async function addAdminLesson(event){
     if(!title){show('Enter the lesson title.',true);$('lessonTitle')?.focus();return;}
     let parsed;try{parsed=new URL(url);}catch{}
     if(!parsed||!/^https?:$/.test(parsed.protocol)){show('Video link is invalid. Use a complete https:// or http:// URL.',true);$('lessonUrl')?.focus();return;}
-    const vimeoId=getVimeoId(url),videoId=getYouTubeId(url);
+    const vimeoId=getVimeoId(url);
     const thumb=$('lessonThumbnail')?.value.trim()||'';
-    const payload={title,grade:Number($('lessonGrade')?.value),subject:$('lessonSubject')?.value,youtube_url:url,thumbnail_url:thumb||(videoId?`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`:null),description:$('lessonDescription')?.value.trim()||'',is_published:$('lessonPublish')?.checked??true};
+    const payload={title,grade:Number($('lessonGrade')?.value),subject:$('lessonSubject')?.value,youtube_url:url,thumbnail_url:thumb||null,description:$('lessonDescription')?.value.trim()||'',is_published:$('lessonPublish')?.checked??true};
     const manualDl=$('lessonDownload')?.value.trim()||'';
     if(manualDl){let dl;try{dl=new URL(manualDl);}catch{}if(!dl||!/^https?:$/.test(dl.protocol)){show('Download override must be a valid HTTP(S) URL.',true);return;}payload.download_url=manualDl;}
     if(button){button.disabled=true;button.textContent='Saving lesson…';}
@@ -786,7 +774,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const originalFinish=finishExam;
     finishExam=function(timeUp=false){const before=attempts.length;originalFinish(timeUp);if(attempts.length>before){const latest=attempts[0];addNotification('Exam result saved',`${latest.title}: ${latest.percent}%`);syncExamAttempt(latest)}renderCertificates()};
     const originalSaveProgress=saveProgress;
-    saveProgress=function(){originalSaveProgress();if(studentSession&&currentVideo&&yt?.getCurrentTime&&yt?.getDuration){const seconds=Math.floor(yt.getCurrentTime()||0),duration=yt.getDuration()||0;if(duration>0){supabaseClient.from('learning_progress').upsert({user_id:studentSession.user.id,lesson_key:String(currentVideo.dbId||currentVideo.id),completed:completed.includes(currentVideo.id),progress_seconds:seconds,progress_percent:Math.min(100,Math.round(seconds/duration*100)),updated_at:new Date().toISOString()},{onConflict:'user_id,lesson_key'}).then(({error})=>{if(error)console.warn('Watch progress sync:',error.message)})}}};
+    saveProgress=function(){originalSaveProgress();if(studentSession&&currentVideo&&vm){Promise.all([vm.getCurrentTime(),vm.getDuration()]).then(([seconds,duration])=>{if(duration>0)supabaseClient.from('learning_progress').upsert({user_id:studentSession.user.id,lesson_key:String(currentVideo.dbId||currentVideo.id),completed:completed.includes(currentVideo.id),progress_seconds:Math.floor(seconds||0),progress_percent:Math.min(100,Math.round(seconds/duration*100)),updated_at:new Date().toISOString()},{onConflict:'user_id,lesson_key'}).then(({error})=>{if(error)console.warn('Watch progress sync:',error.message)});}).catch(()=>{});}};
     const originalRenderDashboard=renderDashboard;
     renderDashboard=function(){originalRenderDashboard();if(el('accountSignedIn')&&!el('accountSignedIn').classList.contains('hidden')){el('accountCompleted').textContent=completed.length;el('accountAttempts').textContent=attempts.length}};
   }
