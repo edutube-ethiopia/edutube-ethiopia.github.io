@@ -244,7 +244,7 @@ function startExam(id){
 function renderQuestion(){
  const q=currentExam.questions[questionIndex];
  $("questionCount").textContent="QUESTION "+(questionIndex+1)+" / "+currentExam.questions.length;
- $("questionText").textContent=q.q;
+ $("questionText").textContent=q.q;\n const passage=$("examPassage");if(passage){passage.textContent=q.passage||"";passage.classList.toggle("hidden",!q.passage);}
  $("quizProgress").style.width=((questionIndex/currentExam.questions.length)*100)+"%";
  $("answerList").replaceChildren();$("quizFeedback").textContent="";
  const labels=["A","B","C","D"];
@@ -276,11 +276,11 @@ function finishExam(timeUp=false){
  $("resultMessage").textContent=(timeUp?"Time is up. ":"")+score+" correct out of "+total+" · "+currentExam.path.join(" › ");
  const review=$("examReview");if(review){review.replaceChildren();currentExam.questions.forEach((q,i)=>{
   const item=document.createElement("article");item.className="exam-review-item";
-  const stem=document.createElement("h3");stem.textContent=(i+1)+". "+q.q;
+  const passage=q.passage?document.createElement("p"):null;if(passage){passage.className="exam-review-passage";passage.textContent=q.passage;}const stem=document.createElement("h3");stem.textContent=(i+1)+". "+q.q;
   const chosen=document.createElement("p");chosen.textContent="Your answer: "+(currentAnswers[i]===null?"Not answered":q.a[currentAnswers[i]]);
   const correct=document.createElement("p");correct.textContent="Correct answer: "+q.a[q.correct];
   item.classList.add(currentAnswers[i]===q.correct?"review-correct":"review-incorrect");
-  item.append(stem,chosen,correct);review.append(item);
+  if(passage)item.append(passage);item.append(stem,chosen,correct);review.append(item);
  });}
  showPage("results");renderDashboard();
 }
