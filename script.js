@@ -170,8 +170,13 @@ function videoCard(video){
 function renderVideos(){
  const grid=$("videoGrid");if(!grid)return;grid.replaceChildren();
  const query=$("videoSearch").value.trim().toLowerCase(),grade=$("videoGrade").value,subject=$("videoSubject").value;
- const list=videos.filter(v=>(grade==="all"||v.grade===grade)&&(subject==="all"||v.subject===subject)&&`${v.title} ${v.description} ${v.subject}`.toLowerCase().includes(query));
- list.forEach(v=>grid.append(videoCard(v)));$("videoEmpty").classList.toggle("hidden",list.length>0);
+ const categoryList=videos.filter(v=>(grade==="all"||v.grade===grade)&&(subject==="all"||v.subject===subject));
+ const list=categoryList.filter(v=>`${v.title} ${v.description} ${v.subject}`.toLowerCase().includes(query));
+ list.forEach(v=>grid.append(videoCard(v)));
+ const empty=$("videoEmpty");empty.classList.toggle("hidden",list.length>0);
+ if(!list.length){
+  empty.textContent=(!query&&subject!=="all"&&!categoryList.length)?"Not Available Now — Coming Soon":"No lessons found. Try another search or filter.";
+ }
 }
 function renderFavorites(){const grid=$("favoriteGrid");grid.replaceChildren();const list=videos.filter(v=>favorites.includes(v.id));list.forEach(v=>grid.append(videoCard(v)));$("favoriteEmpty").classList.toggle("hidden",list.length>0)}
 function toggleFavorite(id){favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];write(STORAGE.favorites,favorites);renderAll();notify(favorites.includes(id)?t("savedNotice"):t("removedNotice"))}
