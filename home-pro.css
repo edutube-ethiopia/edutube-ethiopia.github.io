@@ -1,4 +1,4 @@
-/* EduTube Ethiopia — Home Pro. Additive stylesheet: every rule is scoped to .hp / .hp-* or to the new nav icon classes. */
+
 .hp{--hp-navy:#07163a;--hp-navy2:#0c2a6b;--hp-blue:#2b8cff;--hp-sky:#7cc4ff;--hp-gold:#ffc21a;--hp-gold2:#ff9f1a;--hp-ink:#f5f7ff;
   --hp-r:22px;font-family:Inter,"Noto Sans Ethiopic",Arial,sans-serif;display:grid;gap:clamp(44px,7vw,84px)}
 body.light .hp{--hp-gold:#e8a600;--hp-blue:#1f6fe0}
@@ -12,7 +12,7 @@ body.light .hp{--hp-gold:#e8a600;--hp-blue:#1f6fe0}
 .hp-btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28)}
 .hp-btn-line{background:transparent;color:var(--text);border:1px solid var(--line)}
 
-/* ---------- Hero ---------- */
+
 .hp-hero{position:relative;overflow:hidden;border-radius:30px;color:var(--hp-ink);isolation:isolate;
   background:radial-gradient(900px 520px at 78% 40%,#17479f 0%,rgba(23,71,159,0) 60%),linear-gradient(160deg,#050f2b,#0a2160 62%,#08183f);
   display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:center;gap:28px;padding:clamp(28px,5vw,64px);min-height:540px}
@@ -49,12 +49,12 @@ body.light .hp{--hp-gold:#e8a600;--hp-blue:#1f6fe0}
 @keyframes hp-rise{from{opacity:0;transform:translateY(34px) scale(.94)}to{opacity:1;transform:none}}
 @keyframes hp-pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
 
-/* ---------- Section frame ---------- */
+
 .hp-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px;margin-bottom:26px}
 .hp-head h2{font-size:clamp(26px,3.6vw,40px);line-height:1.1;font-weight:700}
 .hp-head p{margin:8px 0 0;color:var(--muted);max-width:520px;font-size:15px}
 
-/* ---------- Snapshot ---------- */
+
 .hp-snap{display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,4vw,48px);align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--hp-r);padding:clamp(20px,3.5vw,36px);margin-top:calc(-1 * clamp(20px,4vw,44px));position:relative;z-index:2;box-shadow:var(--shadow)}
 .hp-ringwrap{position:relative;width:132px;height:132px}
 .hp-ringwrap svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -71,7 +71,7 @@ body.light .hp{--hp-gold:#e8a600;--hp-blue:#1f6fe0}
 .hp-stat strong{display:block;font-size:26px;line-height:1.1;font-family:"Bricolage Grotesque",Inter,sans-serif}
 .hp-stat small{color:var(--muted);font-size:12px}
 
-/* ---------- Grades ---------- */
+
 .hp-grades{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .hp-grade{position:relative;overflow:hidden;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:var(--hp-r);padding:22px;display:flex;flex-direction:column;gap:6px;min-height:210px;transition:transform .2s,border-color .2s}
 .hp-grade:hover{transform:translateY(-4px);border-color:var(--hp-blue)}
@@ -82,7 +82,7 @@ body.light .hp{--hp-gold:#e8a600;--hp-blue:#1f6fe0}
 .hp-grade b{margin-top:auto;display:inline-flex;align-items:center;gap:8px;color:var(--hp-blue);font-size:13px}
 body:not(.light) .hp-grade b{color:var(--hp-sky)}
 
-/* ---------- Features bento ---------- */
+
 .hp-bento{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .hp-feat{position:relative;text-align:left;display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:var(--hp-r);padding:22px;transition:transform .2s,border-color .2s}
 .hp-feat:hover{transform:translateY(-3px);border-color:var(--hp-gold)}
@@ -98,7 +98,7 @@ body:not(.light) .hp-grade b{color:var(--hp-sky)}
 .hp-feat-big p{color:#c9dbff;font-size:15px;max-width:34ch}
 .hp-feat-big:after{content:"";position:absolute;right:-70px;top:-70px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,194,26,.45),transparent 70%)}
 
-/* ---------- Steps ---------- */
+
 .hp-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;counter-reset:s;position:relative}
 .hp-step{position:relative;padding:0 18px 0 0}
 .hp-step:not(:last-child):after{content:"";position:absolute;top:21px;left:56px;right:8px;height:2px;background:linear-gradient(90deg,var(--hp-blue),transparent)}
@@ -109,7 +109,7 @@ body:not(.light) .hp-grade b{color:var(--hp-sky)}
 .hp-step h3{font-size:19px;margin:16px 0 6px}
 .hp-step p{margin:0;color:var(--muted);font-size:14px;max-width:24ch}
 
-/* ---------- Subjects ---------- */
+
 .hp-subjects{display:flex;flex-wrap:wrap;gap:12px}
 .hp-subjects button{display:inline-flex;align-items:center;gap:11px;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:13px 18px 13px 14px;font-weight:600;font-size:15px;transition:transform .15s,border-color .15s,background .15s}
 .hp-subjects button .ic{width:34px;height:34px;padding:8px;border-radius:11px;background:rgba(43,140,255,.14);color:var(--hp-blue)}
@@ -117,7 +117,7 @@ body:not(.light) .hp-grade b{color:var(--hp-sky)}
 .hp-subjects button:nth-child(3n) .ic{background:rgba(54,189,131,.15);color:var(--green)}
 .hp-subjects button:hover{transform:translateY(-2px);border-color:var(--hp-blue)}
 
-/* ---------- Study studio ---------- */
+
 .hp-studio{display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:center;border-radius:28px;color:#fff;padding:clamp(26px,5vw,56px);background:radial-gradient(520px 320px at 90% 10%,rgba(255,194,26,.28),transparent 70%),linear-gradient(150deg,#08183f,#123a8f)}
 .hp-studio h2{font-size:clamp(28px,4vw,44px);line-height:1.08}
 .hp-studio p{color:#c3d4f5;max-width:46ch;margin:14px 0 24px;line-height:1.65}
@@ -132,7 +132,7 @@ body:not(.light) .hp-grade b{color:var(--hp-sky)}
 .hp-presets button[aria-pressed="true"]{background:#fff;color:#08183f;border-color:#fff}
 .hp-timer-btns{display:flex;gap:10px}
 
-/* ---------- Final CTA ---------- */
+
 .hp-final{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;border:1px solid var(--line);background:var(--surface);border-radius:28px;padding:clamp(24px,4.5vw,48px)}
 .hp-final-id{display:flex;align-items:center;gap:20px}
 .hp-final img{width:84px;height:84px;border-radius:22px;box-shadow:0 10px 30px rgba(43,140,255,.35)}
@@ -140,7 +140,7 @@ body:not(.light) .hp-grade b{color:var(--hp-sky)}
 .hp-final p{margin:6px 0 0;color:var(--muted);max-width:44ch}
 .hp-final .hp-actions{margin:0}
 
-/* ---------- Brand + nav icons (additive) ---------- */
+
 .brand-logo{width:38px;height:38px;border-radius:11px;box-shadow:0 0 0 1px rgba(124,196,255,.3),0 4px 14px rgba(43,140,255,.35);display:block}
 .hp-nav-ic{width:1.25em;height:1.25em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .side-link .hp-nav-ic{font-size:18px;margin-right:12px}
@@ -150,12 +150,12 @@ body:not(.light) .hp-grade b{color:var(--hp-sky)}
 .top-actions .menu-button{display:none}
 @media(max-width:760px){.top-actions .menu-button{display:inline-flex}.top-actions .text-control .hp-label{display:none}.top-actions .icon-button .hp-nav-ic{margin-right:0}}
 
-/* ---------- Responsive ---------- */
+
 @media(max-width:1050px){.hp-bento{grid-template-columns:repeat(2,minmax(0,1fr))}.hp-feat-big{grid-column:span 2;grid-row:auto;min-height:240px}.hp-grades{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){.hp-hero{grid-template-columns:1fr;min-height:0}.hp-stage{min-height:300px;order:-1}.hp-logo{width:min(56%,260px)}.hp-studio{grid-template-columns:1fr}.hp-steps{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:30px}.hp-step:after{display:none}}
 @media(max-width:700px){.hp-snap{grid-template-columns:1fr;justify-items:center;text-align:center}.hp-stats{grid-template-columns:1fr;width:100%;text-align:left}.hp-grade{min-height:170px}}
 @media(max-width:520px){.hp-hero{border-radius:22px}.hp-search{flex-wrap:wrap;padding:8px}.hp-search input{flex-basis:calc(100% - 32px)}.hp-search .hp-btn{width:100%}.hp-bento,.hp-grades{grid-template-columns:1fr}.hp-feat-big{grid-column:auto}.hp-steps{grid-template-columns:1fr}.hp-badge{width:44px;height:44px;font-size:20px}.hp-final-id{flex-direction:column;align-items:flex-start}}
 @media(prefers-reduced-motion:reduce){.hp *,.hp-hero *{animation:none!important;transition:none!important}}
 
-/* compact top bar on phones so the menu button stays reachable */
+
 @media(max-width:520px){.topbar{padding:0 10px}.topbar .brand{gap:8px;font-size:13px;min-width:0}.brand-logo{width:32px;height:32px}.top-actions{gap:6px}.top-actions .icon-button,.top-actions .language-button{padding:8px 9px}.top-actions .account-shortcut{padding:8px 9px}.top-actions .account-shortcut #accountLabel{display:none}.top-actions .account-shortcut .hp-nav-ic{margin-right:0}}
