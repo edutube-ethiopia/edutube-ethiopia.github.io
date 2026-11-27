@@ -195,38 +195,65 @@ function loadExamBank(){
    console.warn("Exam bank load:",err.message);
   });
 }
+let examFlow={category:null,grade:null,subject:null,unit:null};
 function refreshExamFilters(){
  const type=$("examType"),grade=$("examGrade"),subject=$("examSubject"),topic=$("examTopic");
  if(!type||!grade||!subject||!topic)return;
- const keep={type:type.value,grade:grade.value,subject:subject.value,topic:topic.value};
- const opts=(el,values,label)=>{el.replaceChildren();const all=document.createElement("option");all.value="all";all.textContent=label;el.append(all);values.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;el.append(o);});};
- opts(type,["UEE","Weekly"],"All exam types");
- if([...type.options].some(o=>o.value===keep.type))type.value=keep.type;
- const typeVal=type.value;
- const base=exams.filter(e=>(typeVal==="all"||e.category===typeVal)&&(keep.grade==="all"||e.grade===keep.grade));
- opts(grade,[...new Set(base.map(e=>e.grade))].sort((a,b)=>Number(a)-Number(b)),"All grades");
- if([...grade.options].some(o=>o.value===keep.grade))grade.value=keep.grade;
- const filtered=exams.filter(e=>(type.value==="all"||e.category===type.value)&&(grade.value==="all"||e.grade===grade.value));
- opts(subject,[...new Set(filtered.map(e=>e.subject))].sort(),"All subjects");
- if([...subject.options].some(o=>o.value===keep.subject))subject.value=keep.subject;
- const filtered2=filtered.filter(e=>subject.value==="all"||e.subject===subject.value);
- opts(topic,[...new Set(filtered2.map(e=>e.topic))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),"All units / topics");
- if([...topic.options].some(o=>o.value===keep.topic))topic.value=keep.topic;
+ type.value=examFlow.category||"all";grade.value=examFlow.grade||"all";subject.value=examFlow.subject||"all";topic.value=examFlow.unit||"all";
 }
 function renderExams(){
  const grid=$("examGrid");if(!grid)return;grid.replaceChildren();
- if(!examBankLoaded){grid.textContent="Loading exam bank…";return;}
- const type=$("examType")?.value||"all",grade=$("examGrade").value,subject=$("examSubject").value,topic=$("examTopic")?.value||"all";
- const selected=exams.filter(e=>(type==="all"||e.category===type)&&(grade==="all"||e.grade===grade)&&(subject==="all"||e.subject===subject)&&(topic==="all"||e.topic===topic));
- if(!selected.length){const msg=document.createElement("p");msg.className="empty-state";msg.textContent="No exam files match these filters.";grid.append(msg);return;}
- selected.forEach(exam=>{
-  const card=document.createElement("article");card.className="exam-card";
+ if(!examBankLoaded){grid.textContent="Loading exams…";return;}
+ const categories=[
+  {id:"Pre-Entrance",title:"Pre-Entrance Exam",desc:"Prepare for entrance examinations",available:false},
+  {id:"UEE",title:"UEE Exam",desc:"Unit-based preparation and practice",available:true},
+  {id:"Weekly",title:"Weekly Exam",desc:"Weekly subject practice",available:true},
+  {id:"Game",title:"Game Exam",desc:"Learn through interactive exam games",available:false}
+ ];
+ const panel=document.createElement("section");panel.className="exam-wizard";
+ const breadcrumb=document.createElement("nav");breadcrumb.className="exam-wizard-breadcrumb";breadcrumb.setAttribute("aria-label","Exam selection");
+ const steps=[["category","Exam type"],["grade","Grade"],["subject","Subject"],["unit","Unit"]];
+ steps.forEach(([key,label],idx)=>{const b=document.createElement("button");b.type="button";b.textContent=label;b.className=idx===0&&!examFlow.category?"active":(examFlow[key]?"complete":"");b.disabled=idx>0&&!examFlow[steps[idx-1][0]];b.onclick=()=>{examFlow[key]=null;for(let j=idx+1;j<steps.length;j++)examFlow[steps[j][0]]=null;renderExams();};breadcrumb.append(b);});
+ panel.append(breadcrumb);
+ const heading=document.createElement("div");heading.className="exam-wizard-heading";
+ heading.innerHTML="<span class='eyebrow'>EXAM CENTER</span><h2>"+(examFlow.category?categories.find(c=>c.id===examFlow.category)?.title||"Choose exam": "Choose an exam category")+"</h2><p>Choose one step at a time to find the exam you need.</p>";panel.append(heading);
+ const cards=document.createElement("div");cards.className="exam-wizard-cards";
+ function card(title,sub,action,disabled=false){const b=document.createElement("button");b.type="button";b.className="exam-wizard-card"+(disabled?" unavailable":"");b.disabled=disabled;b.innerHTML="<strong>"+title+"</strong><span>"+sub+"</span>";if(action)b.onclick=action;cards.append(b);}
+ if(!examFlow.category){
+  categories.forEach(c=>card(c.title,c.available?c.desc:"Not available yet · Coming soon",()=>{examFlow={category:c.id,grade:null,subject:null,unit:null};renderExams()},!c.available));
+  panel.append(cards);grid.append(panel);return;
+ }
+ if(!categories.find(c=>c.id===examFlow.category)?.available){
+  const msg=document.createElement("div");msg.className="exam-coming-soon";msg.innerHTML="<h3>Coming Soon</h3><p>This exam category is not available yet. We are preparing it for you.</p><button type='button' class='small-button'>Back to categories</button>";msg.querySelector("button").onclick=()=>{examFlow={category:null,grade:null,subject:null,unit:null};renderExams();};panel.append(msg);grid.append(panel);return;
+ }
+ if(!examFlow.grade){
+  ["9","10","11","12"].forEach(g=>card("Grade "+g,"Select grade "+g,()=>{examFlow.grade=g;renderExams()}));
+  panel.append(cards);grid.append(panel);return;
+ }
+ const allInCategory=exams.filter(e=>e.category===examFlow.category&&String(e.grade)===examFlow.grade);
+ const allowed=examFlow.category==="UEE"?(examFlow.grade==="12"?["English","Mathematics","SAT","Physics","Chemistry","Biology"]:["Mathematics","Physics","Chemistry","Biology"]):[...new Set(allInCategory.map(e=>e.subject))];
+ if(!examFlow.subject){
+  allowed.forEach(sub=>{const exists=allInCategory.some(e=>e.subject===sub);card(sub,exists?"Choose subject":"Not available yet",exists?()=>{examFlow.subject=sub;renderExams();}:null,!exists);});
+  panel.append(cards);grid.append(panel);return;
+ }
+ const inSubject=allInCategory.filter(e=>e.subject===examFlow.subject);
+ const units=[...new Set(inSubject.map(e=>e.topic).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+ if(!examFlow.unit){
+  if(!units.length){const msg=document.createElement("p");msg.className="exam-coming-soon";msg.textContent="No exams are available for this subject yet. Coming soon.";panel.append(msg);}
+  units.forEach(unit=>card(unit,"Unit / topic",()=>{examFlow.unit=unit;renderExams();}));
+  panel.append(cards);grid.append(panel);return;
+ }
+ const chosen=inSubject.filter(e=>e.topic===examFlow.unit);
+ chosen.forEach(exam=>{
+  const c=document.createElement("article");c.className="exam-card";
   const meta=document.createElement("div");meta.className="video-meta";meta.textContent=exam.path.join(" › ");
   const h=document.createElement("h3");h.textContent=exam.title;
-  const p=document.createElement("p");p.textContent=exam.questions.length+" questions in bank · 1 minute per question";
-  const b=document.createElement("button");b.className="primary-button";b.textContent="Start simulation";b.addEventListener("click",()=>startExam(exam.id));
-  card.append(meta,h,p,b);grid.append(card);
+  const p=document.createElement("p");p.textContent=exam.questions.length+" questions · 1 minute per question";
+  const b=document.createElement("button");b.className="primary-button";b.type="button";b.textContent="Start Exam";b.addEventListener("click",()=>startExam(exam.id));
+  c.append(meta,h,p,b);grid.append(c);
  });
+ const back=document.createElement("button");back.type="button";back.className="small-button";back.textContent="← Choose another unit";back.onclick=()=>{examFlow.unit=null;renderExams();};panel.append(back);
+ grid.prepend(panel);
 }
 function shuffleArray(arr){const copy=arr.slice();for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;}
 function startExam(id){
@@ -694,11 +721,11 @@ async function initEdutubeAdmin(){
     if(error){
       const didLock=failed();
       $('adminPassword').value='';
-      adminMsg(didLock?'Too many failed attempts. Admin login is locked for 15 minutes.':'Sign-in failed. Check your email/password. Attempts remaining: '+Math.max(0,MAX_ATTEMPTS-(readLock().failures||[]).length),true);
+      adminMsg(didLock?'Sign-in temporarily unavailable. Please try again later.':'Sign-in failed. Please check your credentials.'),true);
       return;
     }
-    if(!isEdutubeAdmin(data.user)){await supabaseClient.auth.signOut();failed();$('adminPassword').value='';adminMsg('Login succeeded, but this account does not have the admin role.',true);return;}
-    clearFailures();$('adminPassword').value='';updateAdminView(data.user);adminMsg('Welcome to the secure admin workspace.');
+    if(!isEdutubeAdmin(data.user)){await supabaseClient.auth.signOut();failed();$('adminPassword').value='';adminMsg('Unable to sign in with this account.',true);return;}
+    clearFailures();$('adminPassword').value='';updateAdminView(data.user);adminMsg('Signed in.');
   });
   $('adminSignOut')?.addEventListener('click',async()=>{await supabaseClient.auth.signOut();updateAdminView(null);adminMsg('Signed out.');});
 }
