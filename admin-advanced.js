@@ -1,5 +1,4 @@
-/* ZSecret For Free Advanced Admin Command Center.
-   Uses the existing authenticated Supabase client and database RLS. */
+
 (() => {
 'use strict';
 const $=id=>document.getElementById(id), KEY='edutube_admin_audit_v1';
