@@ -206,8 +206,8 @@
       </section>
 
       <section class="page" id="page-exams">
-        <div class="page-heading"><div><span class="eyebrow" data-i18n="testYourself">TEST YOURSELF</span><h1 data-i18n="navExams">Exam center</h1><p data-i18n="examIntro">Practice with short sample quizzes.</p></div></div>
-        <div class="filter-bar"><select id="examGrade"><option value="all" data-i18n="allGrades">All grades</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select><select id="examSubject"><option value="all" data-i18n="allSubjects">All subjects</option><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option></select></div>
+        <div class="page-heading"><div><span class="eyebrow" data-i18n="testYourself">TEST YOURSELF</span><h1 data-i18n="navExams">Exam center</h1><p data-i18n="examIntro">Choose a category, grade, subject and unit. Take a timed simulation and review your answers after submission.</p></div></div>
+        <div class="filter-bar exam-filters"><select id="examType"><option value="all">All exam types</option><option value="UEE">UEE</option><option value="Weekly">Weekly</option></select><select id="examGrade"><option value="all">All grades</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select><select id="examSubject"><option value="all">All subjects</option></select><select id="examTopic"><option value="all">All units / topics</option></select><select id="examQuestionCount"><option value="20">20 questions</option><option value="40" selected>40 questions</option><option value="60">60 questions</option><option value="all">All questions in file</option></select></div>
         <div id="examGrid" class="exam-grid"></div>
       </section>
 
@@ -217,7 +217,7 @@
       </section>
 
       <section class="page" id="page-results">
-        <div class="results-panel"><span class="eyebrow" data-i18n="quizComplete">QUIZ COMPLETE</span><h1 data-i18n="yourResult">Your result</h1><strong id="resultScore" class="result-score">0%</strong><p id="resultMessage"></p><button class="primary-button" data-page="exams" data-i18n="tryAnother">Try another quiz</button></div>
+        <div class="results-panel"><span class="eyebrow" data-i18n="quizComplete">QUIZ COMPLETE</span><h1 data-i18n="yourResult">Your result</h1><strong id="resultScore" class="result-score">0%</strong><p id="resultMessage"></p><button class="primary-button" data-page="exams" data-i18n="tryAnother">Try another quiz</button><section id="examReview" class="exam-review-list"></section></div>
       </section>
 
       <section class="page" id="page-dashboard">
