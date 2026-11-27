@@ -401,3 +401,5 @@ body:not(.scroll-locked) {
 .exam-wizard-card:hover{transform:translateY(-2px);border-color:var(--accent,#ff7418)}.exam-wizard-card strong{font-size:1.05rem}.exam-wizard-card span{opacity:.72;font-size:.9rem}.exam-wizard-card.unavailable{opacity:.8}
 .exam-coming-soon{padding:1.2rem;border:1px dashed var(--border,#34343b);border-radius:1rem;text-align:center;margin:.5rem 0}.exam-coming-soon h3{margin:.25rem 0}.exam-coming-soon p{opacity:.8}
 @media(max-width:600px){.exam-wizard-breadcrumb{gap:.35rem}.exam-wizard-breadcrumb button{padding:.45rem .65rem;font-size:.8rem}.exam-wizard{padding:1rem}.exam-wizard-card{min-height:88px}}
+
+.exam-filters[hidden]{display:none!important}
