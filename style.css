@@ -143,13 +143,13 @@ html, body { min-height: 100%; }
 html { overflow-x: hidden; }
 body { overflow-x: hidden; }
 
-/* Scroll Freeze Fix */
+
 html.scroll-locked, 
 body.scroll-locked {
   overflow: hidden !important;
 }
 
-/* Modal ወይም Menu ከሌለ በጭራሽ overflow hidden እንዳይሆን ይከላከላል */
+
 body:not(.scroll-locked) {
   overflow: auto !important;
   position: static !important;
@@ -175,7 +175,7 @@ body:not(.scroll-locked) {
   }
 }
 
-/* ===== EduTube Ethiopia feature expansion ===== */
+
 .account-shortcut{display:inline-flex;align-items:center;gap:6px;color:var(--text)}
 .account-card,.ai-panel{max-width:760px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;margin:16px 0}
 .account-tabs{display:flex;gap:8px;margin-bottom:16px}.account-tab{flex:1;padding:11px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);color:var(--muted)}.account-tab.active{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
@@ -187,7 +187,7 @@ body:not(.scroll-locked) {
 @media(max-width:760px){.topbar{gap:8px}.top-actions{gap:6px}.account-shortcut{padding:8px}.account-shortcut i{display:none}.ai-form{display:grid}.ai-form .primary-button{justify-content:center}.mobile-nav{overflow-x:auto}.mobile-nav button{min-width:58px}}
 @media print{body *{visibility:hidden!important}.print-certificate,.print-certificate *{visibility:visible!important}.print-certificate{position:absolute;inset:0;width:100%;padding:50px;border:10px double #c78a36;color:#222;background:#fff!important;text-align:center}.print-certificate h1{font-size:38px}.print-certificate p{color:#333}}
 
-/* Icon-free text controls */
+
 .text-control{font-size:12px;font-weight:700;min-width:52px;white-space:nowrap}
 .side-link>span:first-child{width:auto;min-width:0;font-size:inherit}
 .side-link{gap:0}
@@ -198,7 +198,7 @@ body:not(.scroll-locked) {
 .mobile-nav button span{display:none}
 .brand-mark{font-size:20px}
 
-/* ===== Notes ===== */
+
 .notes-crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:18px}
 .notes-crumbs button{background:none;border:0;padding:2px 0;color:var(--accent);font-size:12px}
 .notes-crumbs .current{color:var(--text);font-weight:600}
@@ -217,7 +217,7 @@ body:not(.scroll-locked) {
 .note-article .note-video{display:inline-block;margin-bottom:14px}
 
 
-/* ===== Premium Super Admin command center ===== */
+
 .super-overview{margin:8px 0 28px}
 .super-section-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:12px 0 18px}
 .super-section-heading h2{margin:5px 0;font-size:clamp(22px,3vw,30px);letter-spacing:-.03em}
@@ -246,11 +246,11 @@ body:not(.scroll-locked) {
 @media(max-width:760px){.super-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.super-two-col{grid-template-columns:1fr}.super-section-heading{align-items:flex-start;flex-direction:column}.super-section-heading button{width:100%}}
 @media(max-width:390px){.super-stat{padding:13px;min-height:108px}}
 
-/* EduTube Study Studio upgrade */
+
 .studio-welcome{padding:18px 22px;border:1px solid rgba(255,107,26,.3);background:linear-gradient(110deg,rgba(255,107,26,.15),rgba(155,131,245,.09));border-radius:14px;font-weight:700;margin-bottom:16px}.studio-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}.studio-stat,.studio-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:17px;min-width:0}.studio-stat span{display:block;color:var(--muted);font-size:11px}.studio-stat strong{display:block;font-size:22px;margin-top:5px}.studio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.studio-card-head{display:flex;align-items:center;justify-content:space-between}.studio-card-head h2{font-size:17px;margin:4px 0 13px}.studio-card-head>span{font-size:25px}.studio-wide{grid-column:1/-1}.pomodoro-display{text-align:center;font-size:56px;font-weight:800;letter-spacing:2px;color:var(--accent);padding:13px}.pomo-presets,.studio-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pomo-presets{justify-content:center}.pomo-presets button{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:11px}.studio-hint{font-size:11px;color:var(--muted);margin:12px 0}.studio-label{display:grid;gap:8px;color:var(--muted);font-size:12px}.studio-label input,.studio-full-input{width:100%}.goal-track{height:9px;border-radius:20px;background:var(--surface2);overflow:hidden;margin-top:22px}.goal-track span{height:100%;width:0;display:block;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .3s}.studio-inline-form{display:flex;gap:7px;margin:12px 0}.studio-inline-form input{min-width:0;flex:1;width:50%}.studio-inline-form .primary-button{margin:0;padding:9px 12px}.studio-task-list{display:grid;gap:7px;max-height:170px;overflow:auto}.studio-task{display:flex;gap:8px;align-items:center;background:var(--surface2);border-radius:8px;padding:8px;font-size:12px}.studio-task span{flex:1;overflow-wrap:anywhere}.studio-task.done span{text-decoration:line-through;opacity:.55}.studio-task button{border:0;background:none;color:var(--muted)}.flashcard{min-height:135px;border:1px dashed var(--accent);border-radius:12px;background:var(--accent-soft);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:18px;margin:8px 0 12px;cursor:pointer}.flashcard small{font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:12px}.flashcard strong{font-size:17px}.studio-notes{width:100%;resize:vertical;line-height:1.7}.motivation-text{min-height:55px;font-size:15px;font-weight:600;line-height:1.5}.upload-backup{cursor:pointer;display:inline-flex;align-items:center}.focus-mode .topbar,.focus-mode .sidebar,.focus-mode .mobile-nav,.focus-mode .site-footer{display:none!important}.focus-mode .app-layout{display:block}.focus-mode .main-content{max-width:1050px;padding-top:5vh}.focus-mode #page-studio .page-heading{display:none}.focus-mode #page-studio .studio-welcome{font-size:20px}.focus-mode #page-studio .studio-card:not(:first-child){opacity:.38;transition:opacity .2s}.focus-mode #page-studio .studio-card:hover{opacity:1}.focus-mode #page-studio .studio-grid{grid-template-columns:1fr}.focus-mode #page-studio .studio-card{max-width:760px;width:100%;margin:auto}.studio-card .primary-button{margin-top:10px}
 @media(max-width:760px){.studio-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.studio-grid{grid-template-columns:1fr}.studio-wide{grid-column:auto}.studio-stat strong{font-size:19px}.pomodoro-display{font-size:48px}}
 
-/* ===== Full-width video player: fixed 300px height ===== */
+
 #videoModal.modal{
   padding:0 !important;
   place-items:stretch !important;
@@ -287,7 +287,7 @@ body:not(.scroll-locked) {
 }
 
 
-/* Fullscreen the complete EduTube watch page (video + lesson tools + up-next). */
+
 #videoModal .watch-content:fullscreen,
 #videoModal .watch-content:-webkit-full-screen,
 #videoModal .watch-content.fake-full-page {
@@ -312,7 +312,7 @@ body:not(.scroll-locked) {
 #videoModal .watch-content.fake-full-page .player { width:100%; }
 
 
-/* Advanced Admin Command Center */
+
 .admin-advanced{margin:28px 0 36px;padding:clamp(14px,2.5vw,26px);border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,var(--surface),var(--bg));box-shadow:var(--shadow)}
 .aa-head,.aa-card-title,.aa-head-actions,.aa-actions,.aa-bulk,.aa-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.aa-head{margin-bottom:20px}.aa-head h2{font-size:clamp(22px,3vw,30px);margin:5px 0}.aa-head p,.aa-card-title p{color:var(--muted);font-size:12px;margin:4px 0}.aa-chip{display:inline-flex;padding:6px 10px;border:1px solid var(--line);border-radius:99px;color:var(--green);font-size:11px;font-weight:700}.aa-chip.aa-warn{color:#e9b45b}
 .aa-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}.aa-kpis article,.aa-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;min-width:0}.aa-kpis small,.aa-kpis span{display:block;color:var(--muted);font-size:11px}.aa-kpis strong{display:block;font-size:clamp(22px,3vw,30px);margin:7px 0}
@@ -322,7 +322,7 @@ body:not(.scroll-locked) {
 @media(max-width:850px){.aa-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.aa-filters{grid-template-columns:1fr 1fr}.aa-filters input{grid-column:1/-1}}@media(max-width:600px){.aa-grid{grid-template-columns:1fr}.aa-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.aa-head-actions{width:100%}.aa-head-actions button{flex:1}.aa-filters{grid-template-columns:1fr 1fr}.aa-actions{width:100%}.aa-actions button{flex:1}.aa-inline{max-width:100%;width:100%}.aa-card-title{align-items:flex-start}.aa-quick{grid-template-columns:1fr 1fr}}
 
 
-/* ===== EduTube Ethiopia: premium long-scroll homepage additions ===== */
+
 #page-home{--home-glow:rgba(115,78,255,.22)}
 #page-home .hero{min-height:340px;border-color:rgba(91,115,255,.32);background:radial-gradient(ellipse at 78% 18%,rgba(0,174,255,.27),transparent 34%),radial-gradient(ellipse at 92% 100%,rgba(137,54,255,.24),transparent 35%),linear-gradient(112deg,#10152f 0%,#111a3a 48%,#21133c 100%);box-shadow:0 18px 60px rgba(30,60,190,.14);}
 #page-home .hero:after{content:"";position:absolute;width:310px;height:310px;right:8%;top:10px;border:1px solid rgba(101,181,255,.28);border-radius:50%;box-shadow:0 0 0 24px rgba(89,130,255,.035),0 0 0 54px rgba(89,130,255,.025),inset 0 0 55px rgba(57,153,255,.12);pointer-events:none}
@@ -341,7 +341,7 @@ body:not(.scroll-locked) {
 @media(max-width:650px){#page-home .hero{min-height:300px;padding:28px 23px}#page-home .hero:after{width:190px;height:190px;right:-35px;top:100px}#page-home .hero:before{right:-4%;top:35%;font-size:20px}.home-feature-section,.home-pathway-section,.home-subject-section{padding:20px 15px;margin-top:34px;border-radius:18px}.home-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.home-feature-card{min-height:151px;padding:14px}.home-feature-card b{font-size:12px}.home-feature-card small{font-size:10px}.home-feature-icon{width:37px;height:37px}.home-path-grid{gap:9px}.home-path-card{min-height:150px;padding:15px}.home-path-card strong{font-size:14px}.home-study-banner{padding:24px 20px;gap:8px}.home-study-orbit{flex-basis:104px;width:104px;height:104px}.home-study-orbit span{font-size:20px}.home-study-orbit small{font-size:7px}.home-study-orbit:before{inset:7px}.home-study-orbit:after{inset:-9px}.home-study-orbit i,.home-study-orbit b{font-size:15px}.home-final-cta{display:block;padding:24px 20px}.home-cta-actions{margin-top:16px;align-items:stretch;flex-direction:column}.home-cta-actions button{justify-content:center}.home-subject-chips button{font-size:11px;padding:9px 12px}}
 @media(max-width:390px){.home-feature-grid{grid-template-columns:1fr}.home-feature-card{min-height:125px}.home-study-orbit{display:none}}
 
-/* EduTube Ethiopia — PDF Notes & Contact pages */
+
 .pdf-viewer{display:block;width:100%;height:min(78vh,920px);min-height:520px;border:1px solid var(--border-color,rgba(255,255,255,.12));border-radius:16px;background:#fff;margin:16px 0;}
 .pdf-viewer-status{font-size:.88rem;color:var(--muted,#9aa0aa);margin:12px 0;}
 .pdf-view-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
@@ -355,7 +355,7 @@ body:not(.scroll-locked) {
 .contact-disclaimer{padding:16px 18px;border-left:3px solid #f59b35;background:rgba(245,155,53,.07);border-radius:8px;color:var(--muted,#9aa0aa);line-height:1.7;}
 @media(max-width:700px){.contact-grid{grid-template-columns:1fr;}.contact-form-card{grid-column:auto;}.contact-card{padding:19px;}.pdf-viewer{min-height:420px;height:70vh;}}
 
-/* EduTube reader + management improvements */
+
 .eu-pdf-reader{border:1px solid var(--border-color,rgba(255,255,255,.14));border-radius:16px;overflow:hidden;background:#171a24;margin:14px 0;color:#fff}
 .eu-pdf-toolbar,.eu-pdf-search,.eu-pdf-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;background:#202432;border-bottom:1px solid rgba(255,255,255,.1)}
 .eu-pdf-toolbar button,.eu-pdf-search button,.eu-pdf-footer button{border:1px solid rgba(255,255,255,.16);background:#30384b;color:#fff;border-radius:8px;padding:7px 11px;cursor:pointer}
@@ -363,7 +363,7 @@ body:not(.scroll-locked) {
 .eu-pdf-toolbar i{flex:1}.eu-pdf-toolbar label{display:flex;align-items:center;gap:6px;font-size:12px}.eu-pdf-toolbar input{width:54px;padding:6px;border-radius:7px;border:1px solid #566078;background:#111722;color:#fff}.eu-pdf-stage{height:min(76vh,900px);min-height:430px;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:16px;background:#353b49}.eu-pdf-stage canvas{display:block;max-width:none;box-shadow:0 5px 24px rgba(0,0,0,.4);background:#fff}.eu-pdf-search input{flex:1;min-width:130px;padding:8px 10px;border:1px solid #566078;border-radius:8px;background:#111722;color:#fff}.eu-pdf-search span,.eu-pdf-footer span{font-size:12px;color:#c5ccda}.eu-pdf-footer{justify-content:space-between;border:0}.eu-pdf-reader:fullscreen{height:100vh;border-radius:0;display:flex;flex-direction:column}.eu-pdf-reader:fullscreen .eu-pdf-stage{flex:1;height:auto}
 @media(max-width:600px){.eu-pdf-toolbar{gap:5px;padding:8px}.eu-pdf-toolbar button{padding:7px 8px;font-size:12px}.eu-pdf-stage{min-height:360px;height:68vh;padding:8px}.eu-pdf-search{padding:8px}.eu-pdf-footer{gap:8px}}
 
-/* Imported exam bank simulation UI */
+
 .exam-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0 22px}
 .exam-review-list{display:grid;gap:12px;margin-top:24px;text-align:left}
 .exam-review-item{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
@@ -372,7 +372,7 @@ body:not(.scroll-locked) {
 .exam-review-item.review-correct{border-inline-start:4px solid #16a34a}
 .exam-review-item.review-incorrect{border-inline-start:4px solid #dc2626}
 
-/* Imported exam bank simulation UI */
+
 .exam-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0 22px}
 .exam-review-list{display:grid;gap:12px;margin-top:24px;text-align:left}
 .exam-review-item{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
@@ -390,7 +390,7 @@ body:not(.scroll-locked) {
 .exam-passage{white-space:pre-wrap;line-height:1.7;max-height:55vh;overflow:auto;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);margin:0 0 16px}
 .exam-review-passage{white-space:pre-wrap;max-height:300px;overflow:auto;padding:10px;border-radius:10px;background:var(--surface2);font-size:.9rem;line-height:1.6}
 
-/* Exam Center guided category navigation */
+
 .exam-wizard{margin:0 0 1.25rem;padding:clamp(1rem,3vw,1.5rem);border:1px solid var(--border,#34343b);border-radius:1.25rem;background:var(--panel,#19191f)}
 .exam-wizard-breadcrumb{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.2rem}
 .exam-wizard-breadcrumb button{border:1px solid var(--border,#34343b);border-radius:999px;background:transparent;color:inherit;padding:.5rem .8rem;font-size:.88rem}
