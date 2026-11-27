@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="upgrade.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js" defer></script>
-  <script src="exam-center-pro.js" defer></script>
+  
   <script src="admin-advanced.js" defer></script>
   <script src="upgrade.js" defer></script>
   <!-- Legacy YouTube-specific player controller disabled -->
@@ -206,8 +206,8 @@
       </section>
 
       <section class="page" id="page-exams">
-        <div class="page-heading"><div><span class="eyebrow" data-i18n="testYourself">TEST YOURSELF</span><h1 data-i18n="navExams">Exam center</h1><p data-i18n="examIntro">Choose a category, grade, subject and unit. Take a timed simulation and review your answers after submission.</p></div></div>
-        <div class="filter-bar exam-filters"><select id="examType"><option value="all">All exam types</option><option value="UEE">UEE</option><option value="Weekly">Weekly</option></select><select id="examGrade"><option value="all">All grades</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select><select id="examSubject"><option value="all">All subjects</option></select><select id="examTopic"><option value="all">All units / topics</option></select><select id="examQuestionCount"><option value="20">20 questions</option><option value="40" selected>40 questions</option><option value="60">60 questions</option><option value="all">All questions in file</option></select></div>
+        <div class="page-heading"><div><span class="eyebrow">PRACTICE & PREPARE</span><h1 data-i18n="navExams">Exam Center</h1><p>Choose exam type, grade, subject and unit to start your practice.</p></div></div>
+        <div class="filter-bar exam-filters" hidden><select id="examType"><option value="all">All exam types</option><option value="UEE">UEE</option><option value="Weekly">Weekly</option></select><select id="examGrade"><option value="all">All grades</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select><select id="examSubject"><option value="all">All subjects</option></select><select id="examTopic"><option value="all">All units / topics</option></select><select id="examQuestionCount"><option value="20">20 questions</option><option value="40" selected>40 questions</option><option value="60">60 questions</option><option value="all">All questions in file</option></select></div>
         <div id="examGrid" class="exam-grid"></div>
       </section>
 
@@ -240,14 +240,14 @@
         <p class="contact-disclaimer">ZSecret For Free provides educational materials for learning support. Content may require review and may be updated. Students should follow their school curriculum and teachers’ guidance.</p>
       </section>
       <section class="page" id="page-admin">
-        <div class="page-heading"><div><span class="eyebrow">SECURE ADMIN WORKSPACE</span><h1>Content Manager</h1><p>Publish lessons directly to the ZSecret For Free database.</p></div><span class="admin-status" id="adminStatus">● Signed out</span></div>
-        <div class="admin-warning" id="adminNotice">Admin access is protected by Supabase Authentication and Row Level Security. Students can continue watching published lessons without signing in.</div>
+        <div class="page-heading"><div><h1>Content Manager</h1></div><span class="admin-status" id="adminStatus"></span></div>
+        <div class="admin-warning" id="adminNotice" aria-live="polite"></div>
         <form id="adminLoginForm" class="admin-form admin-login"><h2> Admin sign in</h2>
           <label>Email address<input id="adminEmail" type="email" autocomplete="username" required placeholder="admin@example.com"></label>
           <label>Password<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Your admin password"></label>
           <button class="primary-button" type="submit">Sign in securely</button>
           
-          <p class="admin-hint">Only trusted Supabase admin or super_admin accounts can enter. Five failed attempts lock this browser for 15 minutes; Supabase also enforces its own auth limits.</p>
+          
         </form>
                 <div id="adminWorkspace" class="hidden">
           <section class="dashboard-panel" id="adminPasswordPanel">
