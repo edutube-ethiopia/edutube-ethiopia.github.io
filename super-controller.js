@@ -1,5 +1,4 @@
-/* EduTube super-controller.js — Super Advanced Controller below the player.
-   Load AFTER script.js and player-pro.js. Uses globals: yt, currentVideo, speed, language, notify. */
+
 (() => {
 'use strict';
 const g = id => document.getElementById(id);
@@ -35,7 +34,7 @@ const parseTime = v => {
   return p.reduce((a, n) => a * 60 + n, 0);
 };
 
-/* ---------- state ---------- */
+
 const S = { vid: null, a: null, b: null, ab: false, loop: false, step: +ls.get(LS.step, 10) || 10, sleepMode: 0, sleepAt: 0, awake: false, lock: null, lastLang: null };
 const now = () => native()?native().currentTime:safe(() => yt.getCurrentTime(), 0), dur = () => native()?native().duration:safe(() => yt.getDuration(), 0);
 const seekTo = t => { if (ready()) { const v=native();if(v)v.currentTime=Math.max(0,Math.min(t||0,v.duration||t||0));else safe(() => yt.seekTo(Math.max(0, t), true)); if (typeof showControls === 'function') showControls(); } };
@@ -44,7 +43,7 @@ const pauseMedia = () => {const v=native();if(v)v.pause();else safe(()=>yt.pause
 const readMarks = () => safe(() => JSON.parse(ls.get(LS.marks, '{}')), {});
 const writeMarks = o => ls.set(LS.marks, JSON.stringify(o));
 
-/* ---------- markup ---------- */
+
 host.innerHTML = `
 <div class="sc-head"><div><h3 data-k="title"></h3><small data-k="sub"></small></div><span class="sc-live"><i></i><span id="scLive"></span></span></div>
 <div class="sc-grid">
@@ -99,7 +98,7 @@ function applyLang() {
   renderMarks(); paint();
 }
 
-/* ---------- actions ---------- */
+
 function setSpeed(s) { const b = document.querySelector(`.speed-btn[data-speed="${s}"]`); if (b) b.click(); else if(native()){native().playbackRate=s;if(typeof speed!=='undefined')speed=s;} setTimeout(paint, 30); }
 function stepSpeed(d) { let i = SPEEDS.findIndex(s => s >= curSpeed() - 1e-6); if (i < 0) i = 3; setSpeed(SPEEDS[Math.max(0, Math.min(SPEEDS.length - 1, i + d))]); }
 function skip(d) { if (!ready()) return; seekTo(Math.min(Math.max(0, now() + d), Math.max(0, dur() - 0.5))); const f = g('skipFx'); if (f) { f.textContent = (d < 0 ? '⏪ ' : '⏩ ') + Math.abs(d) + 's'; f.className = 'skip-fx ' + (d < 0 ? 'l' : 'r'); void f.offsetWidth; f.classList.add('go'); } }
@@ -147,7 +146,7 @@ async function setAwake(v) {
   paint();
 }
 
-/* ---------- painting ---------- */
+
 const setTxt = (el, v) => { if (el.textContent !== v) el.textContent = v; };
 function paint() {
   const sp = curSpeed();
@@ -194,7 +193,7 @@ new MutationObserver(() => {
   else if (!timer) { timer = setInterval(tick, 250); tick(); }
 }).observe(modal, { attributes: true, attributeFilter: ['class'] });
 
-/* ---------- wiring ---------- */
+
 build();
 $('scSlow').onclick = () => stepSpeed(-1);
 $('scFast').onclick = () => stepSpeed(1);
