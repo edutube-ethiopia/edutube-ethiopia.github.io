@@ -188,7 +188,7 @@ function loadExamBank(){
   .then(data=>{
    if(!Array.isArray(data))throw new Error("Exam bank format is invalid");
    exams=data.map(e=>({...e,minutes:e.questions?.length||0}));
-   examBankLoaded=true;refreshExamFilters();renderExams();setTimeout(()=>$("examSubject")?.dispatchEvent(new Event("change")),0);
+   examBankLoaded=true;refreshExamFilters();renderExams();setTimeout(()=>$("examSubject")?.dispatchEvent(new Event("change")),0);setTimeout(()=>$("examSubject")?.dispatchEvent(new Event("change")),0);
   })
   .catch(err=>{
    examBankLoaded=false;const grid=$("examGrid");if(grid){grid.replaceChildren();const msg=document.createElement("div");msg.className="empty-state";msg.textContent="Exam bank is not installed yet. Upload exam-bank.json to the website repository, then refresh.";grid.append(msg);}
@@ -201,7 +201,8 @@ function refreshExamFilters(){
  const keep={type:type.value,grade:grade.value,subject:subject.value,topic:topic.value};
  const opts=(el,values,label)=>{el.replaceChildren();const all=document.createElement("option");all.value="all";all.textContent=label;el.append(all);values.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;el.append(o});};
  opts(type,["UEE","Weekly"],"All exam types");
- const typeVal=keep.type==="all"?"all":keep.type;
+ if([...type.options].some(o=>o.value===keep.type))type.value=keep.type;
+ const typeVal=type.value;
  const base=exams.filter(e=>(typeVal==="all"||e.category===typeVal)&&(keep.grade==="all"||e.grade===keep.grade));
  opts(grade,[...new Set(base.map(e=>e.grade))].sort((a,b)=>Number(a)-Number(b)),"All grades");
  if([...grade.options].some(o=>o.value===keep.grade))grade.value=keep.grade;
