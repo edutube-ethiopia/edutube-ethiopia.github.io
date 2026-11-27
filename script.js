@@ -244,7 +244,8 @@ function startExam(id){
 function renderQuestion(){
  const q=currentExam.questions[questionIndex];
  $("questionCount").textContent="QUESTION "+(questionIndex+1)+" / "+currentExam.questions.length;
- $("questionText").textContent=q.q;\n const passage=$("examPassage");if(passage){passage.textContent=q.passage||"";passage.classList.toggle("hidden",!q.passage);}
+ $("questionText").textContent=q.q;
+ const passage=$("examPassage");if(passage){passage.textContent=q.passage||"";passage.classList.toggle("hidden",!q.passage);}
  $("quizProgress").style.width=((questionIndex/currentExam.questions.length)*100)+"%";
  $("answerList").replaceChildren();$("quizFeedback").textContent="";
  const labels=["A","B","C","D"];
