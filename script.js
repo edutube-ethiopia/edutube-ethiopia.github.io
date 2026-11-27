@@ -721,7 +721,7 @@ async function initEdutubeAdmin(){
     if(error){
       const didLock=failed();
       $('adminPassword').value='';
-      adminMsg(didLock?'Sign-in temporarily unavailable. Please try again later.':'Sign-in failed. Please check your credentials.'),true);
+      adminMsg(didLock?'Sign-in temporarily unavailable. Please try again later.':'Sign-in failed. Please check your credentials.',true);
       return;
     }
     if(!isEdutubeAdmin(data.user)){await supabaseClient.auth.signOut();failed();$('adminPassword').value='';adminMsg('Unable to sign in with this account.',true);return;}
