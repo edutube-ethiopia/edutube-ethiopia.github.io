@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://edutube-ethiopia.github.io/sitemap.xml
