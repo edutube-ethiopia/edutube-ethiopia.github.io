@@ -1,6 +1,4 @@
-/* EduTube player-pro.js — UI layer for the existing YouTube-API player.
-   Reuses script.js state/functions (yt, currentVideo, videos, openVideo, toggleFavorite,
-   showControls, toggleFull, speed buttons). Load AFTER script.js. */
+
 (() => {
 'use strict';
 const g = id => document.getElementById(id);
@@ -30,7 +28,7 @@ let view = 'main', panelOpen = false, menuOpen = false;
 let layout = ls.get(LS.layout, 'fit'), ccLang = null, ccTracks = [], ccPending = false;
 let lastId = null, timer = null, volFor = null, volDrag = false;
 
-/* ---------- panel building ---------- */
+
 function btn(cls, html, onClick) { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.innerHTML = html; if (onClick) b.addEventListener('click', onClick); return b; }
 function row(icon, label, value, onClick, disabled) {
   const b = btn('pp-item', `<span class="pp-ii">${ico(icon)}</span><span class="pp-lab"></span><span class="pp-val"></span>${ico('chev')}`, onClick);
@@ -102,7 +100,7 @@ function togglePanel(open, v) {
 function closeMenu() { menuOpen = false; menu.classList.add('hidden'); g('ppMore').setAttribute('aria-expanded', 'false'); frame.classList.toggle('pp-keep', panelOpen); }
 function closeAll() { if (panelOpen) togglePanel(false); closeMenu(); }
 
-/* ---------- actions on the real player ---------- */
+
 function setSpeed(s) { const b = document.querySelector(`.speed-btn[data-speed="${s}"]`); if (b) b.click(); else if (native()) { native().playbackRate=s; if(typeof speed!=='undefined') speed=s; g('ppSpeed').textContent=s+'×'; } }
 function stepSpeed(d) { let i = SPEEDS.findIndex(s => s >= curSpeed() - 1e-6); if (i < 0) i = 3; setSpeed(SPEEDS[Math.max(0, Math.min(SPEEDS.length - 1, i + d))]); }
 function setQuality(q) { if (!ready()) return; safe(() => yt.setPlaybackQuality(q)); safe(() => yt.setPlaybackQualityRange && yt.setPlaybackQualityRange(q === 'default' ? 'auto' : q, q === 'default' ? 'auto' : q)); setTimeout(() => panelOpen && render(), 600); }
@@ -131,7 +129,7 @@ function ccOn(lang) {
 function ccOff() { const v=native();if(v&&v.textTracks){for(let i=0;i<v.textTracks.length;i++)v.textTracks[i].mode='disabled';}else if(ready()) safe(() => yt.unloadModule('captions')); ccLang = null; ls.set(LS.cc, '0'); syncCC(); }
 function stepVol(d) { const v = g('avVolume'); v.value = Math.max(0, Math.min(100, +v.value + d)); v.dispatchEvent(new Event('input')); }
 
-/* ---------- per-tick sync with the real player ---------- */
+
 function onNewVideo(v) {
   g('ppTitle').textContent = v.title || '';
   g('ppMeta').textContent = `${v.subject || ''} • Grade ${v.grade || ''}`;
@@ -173,7 +171,7 @@ new MutationObserver(() => {
   else if (!timer) { timer = setInterval(sync, 500); sync(); }
 }).observe(modal, { attributes: true, attributeFilter: ['class'] });
 
-/* ---------- wiring ---------- */
+
 const on = (id, ev, fn) => g(id).addEventListener(ev, fn);
 on('ppPlay2', 'click', () => g('btnPlay').click());
 on('ppClose', 'click', () => g('closePlayer').click());
@@ -215,7 +213,7 @@ on('avVolume', 'input', () => {
 });
 document.addEventListener('click', e => { if ((panelOpen || menuOpen) && !e.target.closest('#ppPanel,#ppMenu,#ppSettings,#ppSpeed,#ppMore')) closeAll(); });
 frame.addEventListener('pointermove', () => { if (typeof showControls === 'function') showControls(); }, { passive: true });
-/* mouse double-click = fullscreen (touch double-tap keeps ±10s / play from script.js) */
+
 g('tapLayer').addEventListener('click', e => {
   if (e.detail >= 2 && e.pointerType === 'mouse') { e.stopImmediatePropagation(); lastTap = 0; if (typeof toggleFull === 'function') toggleFull(); }
 }, true);
