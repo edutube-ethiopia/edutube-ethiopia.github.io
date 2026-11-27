@@ -1,4 +1,4 @@
-// EDUTUBE ERROR DETECTOR
+
 
 window.addEventListener("error", function(event) {
     console.error("JavaScript Error:", event.message);
@@ -40,7 +40,7 @@ window.addEventListener("unhandledrejection", function(event) {
 
 
 
-// Supabase connection: use your own Project URL and Publishable Key here.
+
 const SUPABASE_URL = "https://gmqrkerbwgojcsrkrixw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_7-vykSxfOVju01fXo7ze2Q_i5f3CtzY";
 
@@ -50,7 +50,7 @@ const supabaseClient = window.supabase?.createClient
 
 const $ = (id) => document.getElementById(id);
 
-// Centralized page-scroll handling: prevents stale overflow locks on mobile.
+
 let pageScrollY = 0;
 function lockPageScroll() {
   pageScrollY = window.scrollY || document.documentElement.scrollTop || 0;
@@ -422,12 +422,12 @@ document.addEventListener("click",e=>{if(!e.target.closest(".speed-menu-wrap")){
 $("tapLayer").addEventListener("click",e=>{const now=Date.now(),r=e.currentTarget.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;if(now-lastTap<300){lastTap=0;if(x<.4)skip(-10);else if(x>.6)skip(10);else togglePlay();return;}lastTap=now;setTimeout(()=>{if(lastTap===now){lastTap=0;togglePlay();}},300);});
 document.addEventListener("keydown",e=>{if($("videoModal").classList.contains("hidden")||(!vm&&!nativeVideo()))return;const k=String(e.key||"").toLowerCase();if(k===" "||k==="k"){e.preventDefault();togglePlay();}else if(k==="arrowleft"||k==="j")skip(-10);else if(k==="arrowright"||k==="l")skip(10);else if(k==="f")toggleFull();else if(k==="m")toggleMute();});
 document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&screen.orientation&&screen.orientation.unlock)screen.orientation.unlock();});
-// Vimeo API is loaded only when a lesson is opened.
+
 function ensureUpNext(){if($("upNext"))return;const wrap=document.createElement("div");wrap.innerHTML='<div class="upnext-head"><h3>⏭ Up next</h3><label class="autoplay"><input type="checkbox" id="autoNext"> Autoplay</label></div><div id="upNext" class="upnext"></div>';document.querySelector("#videoModal .modal-footer").before(wrap);const cb=$("autoNext");cb.checked=localStorage.getItem("edutube_v4_auto")!=="0";cb.addEventListener("change",()=>localStorage.setItem("edutube_v4_auto",cb.checked?"1":"0"));}
 function renderUpNext(){const box=$("upNext");if(!box)return;box.replaceChildren();if(!currentVideo)return;const i=videos.findIndex(v=>v.id===currentVideo.id),list=[...videos.slice(i+1),...videos.slice(0,i)].filter(v=>getVimeoEmbedUrl(v.url));if(!list.length){box.textContent="ሌላ ትምህርት የለም";return;}const pct=read(PCT,{});list.forEach(v=>{const row=document.createElement("button");row.type="button";row.className="up-item";const img=document.createElement("span");img.className="up-thumb";img.style.backgroundImage=v.thumbnail_url?"url("+v.thumbnail_url+")":"linear-gradient(135deg,#153f77,#071426)";if(pct[v.id]){const bar=document.createElement("i");bar.className="thumb-bar";const fill=document.createElement("b");fill.style.width=Math.min(pct[v.id],100)+"%";bar.append(fill);img.append(bar);}const txt=document.createElement("span");txt.className="up-text";const title=document.createElement("b");title.textContent=v.title;const meta=document.createElement("small");meta.textContent="Grade "+v.grade+" · "+v.subject+(completed.includes(v.id)?" · ✓":"");txt.append(title,meta);row.append(img,txt);row.addEventListener("click",()=>{saveProgress();openVideo(v.id);});box.append(row);});}
 async function openVideo(id){const video=videos.find(v=>v.id===id);if(!video)return;if(!getVimeoId(video.url)){notify("This lesson requires a Vimeo link.");return;}ensureUpNext();currentVideo=video;const dlb=$("videoDownload");if(dlb){dlb.href="#";dlb.onclick=e=>{e.preventDefault();notify("Vimeo download is not available from the embed.");};}$("modalTitle").textContent=video.title;const start=read(PROG,{})[video.id]||0,frame=$("videoFrame");frame.classList.add("loading");frame.classList.remove("fallback","playing","hosted-player");frame.style.setProperty("--poster",video.thumbnail_url?"url("+video.thumbnail_url+")":"none");const fb=$("fbPlayer");if(fb)fb.src="";const nv=$("hostVideo"),ex=$("externalVideo");if(nv){nv.pause();nv.removeAttribute("src");nv.load();nv.hidden=true;nv.style.display="none";}if(ex){ex.src="";ex.hidden=true;ex.style.display="none";}showPoster(getVimeoId(video.url),video.title);$("videoModal").classList.remove("hidden");lockPageScroll();const mc=document.querySelector("#videoModal .modal-content");if(mc)mc.scrollTop=0;renderUpNext();const host=$("ytHost");host.style.display="";host.innerHTML="";if(vm){vm.destroy().catch(()=>{});vm=null;}yt=null;try{await buildPlayer(video.url,start);}catch(e){frame.classList.remove("loading");notify("Vimeo playback failed. Check Vimeo link and embed permissions.");}clearInterval(tick);tick=setInterval(update,500);}
 function closeVideo(){saveProgress();clearInterval(tick);if(vm){vm.pause().catch(()=>{});vm.destroy().catch(()=>{});vm=null;}yt=null;const fb=$("fbPlayer");if(fb)fb.src="";const hv=$("hostVideo");if(hv){hv.pause();hv.removeAttribute("src");hv.load();hv.hidden=true;hv.style.display="none";}const ex=$("externalVideo");if(ex){ex.src="";ex.hidden=true;ex.style.display="none";}$("ytHost").style.display="";$("ytHost").innerHTML="";$("videoFrame").classList.remove("loading","fallback","hosted-player","playing");if(document.fullscreenElement)document.exitFullscreen();$("videoModal").classList.add("hidden");unlockPageScroll();currentVideo=null;renderVideos();}
-/* ============ PLAYER PRO PATCH & SURPRISES ============ */
+
 const poster=$("poster"),posterImg=$("posterImg"),posterTitle=$("posterTitle");
 function showPoster(vid,title){if(currentVideo&&currentVideo.thumbnail_url)posterImg.src=currentVideo.thumbnail_url;else posterImg.removeAttribute("src");posterTitle.textContent=title;poster.classList.remove("hidden");$("videoFrame").classList.remove("playing");}
 poster.addEventListener("click",()=>{if(vm){poster.classList.add("hidden");vm.play().catch(()=>{});}else notify("Vimeo player loading…");});
@@ -435,13 +435,13 @@ function showSpeedChip(txt){const c=$("speedChip");if(!c)return;c.textContent=tx
 document.querySelectorAll(".speed-btn").forEach(b=>b.addEventListener("click",()=>showSpeedChip(Number(b.dataset.speed)+"×")));
 document.addEventListener("DOMContentLoaded",()=>{$("speedMenu").classList.add("hidden")});
 
-/* Surprise 1: Long-press = 2× speed */
+
 let holdT=null,holdOn=false,justHeld=false;
 $("tapLayer").addEventListener("pointerdown",()=>{holdT=setTimeout(()=>{holdOn=true;justHeld=true;if(vm)vm.setPlaybackRate(2).catch(()=>{});$("holdFx").classList.add("show")},450)});
 ["pointerup","pointercancel","pointerleave"].forEach(ev=>$("tapLayer").addEventListener(ev,()=>{clearTimeout(holdT);if(holdOn){holdOn=false;if(vm)vm.setPlaybackRate(speed).catch(()=>{});$("holdFx").classList.remove("show")}}));
 $("videoFrame").addEventListener("click",e=>{if(justHeld){justHeld=false;e.stopPropagation()}},true);
 
-/* Surprise 2: Visibility pause */
+
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&currentVideo&&vm)vm.pause().catch(()=>{});});
 
 if($("fbFull"))$("fbFull").addEventListener("click",()=>toggleFull());
@@ -457,7 +457,7 @@ document.addEventListener("fullscreenchange",()=>{
 });
 
 async function toggleFull(){
-  // Fullscreen the complete watch page, not just the video rectangle.
+
   const el=$("videoModal")?.querySelector(".watch-content");
   if(!el)return;
   if(document.fullscreenElement||document.webkitFullscreenElement||el.classList.contains("fake-full-page")){
@@ -474,7 +474,7 @@ async function toggleFull(){
       const result=req.call(el);if(result&&result.then)await result;
       el.classList.add("watch-fullscreen");
       return;
-    }catch(e){/* use the in-page fullscreen fallback below */}
+    }catch(e){}
   }
   el.classList.add("fake-full-page","watch-fullscreen");
   document.body.classList.add("fake-lock");
@@ -482,7 +482,7 @@ async function toggleFull(){
 
 function onState(){}
 
-/* ============ WATCH PAGE v2 PATCH ============ */
+
 (function(){
 const M=$("videoModal");if(!M)return;
 const wb=$("watchBack");
@@ -552,7 +552,7 @@ if(nc)nc.addEventListener("click",hideNextOverlay);
 if(nn)nn.addEventListener("click",()=>{hideNextOverlay();playNext()});
 })();
 
-/* Secure Supabase Admin: Auth + CRUD */
+
 let edutubeAdminUser = null;
 renderAdmin = function() {}; 
 const adminMsg = (message, isError=false) => { const box=$('adminNotice'); if(box){box.textContent=message;box.classList.toggle('admin-error',isError);} };
@@ -562,7 +562,7 @@ function updateAdminView(user){
   edutubeAdminUser=isEdutubeAdmin(user)?user:null;
   $('adminLoginForm')?.classList.toggle('hidden',!!edutubeAdminUser);
   $('adminWorkspace')?.classList.toggle('hidden',!edutubeAdminUser);
-  if($('adminStatus'))$('adminStatus').textContent=edutubeAdminUser?(isEdutubeSuperAdmin(user)?'● Super Admin':'● Admin'):'● Signed out';
+  if($('adminStatus'))$('adminStatus').textContent=edutubeAdminUser?(isEdutubeSuperAdmin(user)?'● Super Admin':'● Admin') :'';
   if(edutubeAdminUser){loadAdminLessons();loadSuperAdminOverview();}
 }
 
@@ -651,7 +651,7 @@ async function addAdminLesson(event){
     const manualDl=$('lessonDownload')?.value.trim()||'';
     if(manualDl){let dl;try{dl=new URL(manualDl);}catch{}if(!dl||!/^https?:$/.test(dl.protocol)){show('Download override must be a valid HTTP(S) URL.',true);return;}payload.download_url=manualDl;}
     if(button){button.disabled=true;button.textContent='Saving lesson…';}
-    // Download extraction is optional; it must never block lesson publishing.
+
     let downloadWarning='';
     if(vimeoId&&!manualDl){
       show('Saving lesson. Vimeo download-link lookup is optional…');
@@ -748,7 +748,7 @@ document.addEventListener("DOMContentLoaded", () => {
   iconObserver.observe(document.body, { childList: true, subtree: true });
 });
 
-/* ===== SCROLL FREEZE & LOCK FIX ===== */
+
 (function () {
   const modalOpen = () => {
     const m = document.getElementById("videoModal");
@@ -797,11 +797,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 
 
-/* ============================================================
-   EDUTUBE FEATURE PACK: student auth, cloud progress, exams,
-   notifications, leaderboard, certificates and study helper.
-   Supabase schema is provided in supabase_setup.sql.
-   ============================================================ */
+
 (function initEduTubeFeatures(){
   const FKEY={notifications:'edutube_notifications_v1',authMode:'edutube_auth_mode'};
   let authMode='login';
@@ -852,7 +848,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderDashboard=function(){originalRenderDashboard();if(el('accountSignedIn')&&!el('accountSignedIn').classList.contains('hidden')){el('accountCompleted').textContent=completed.length;el('accountAttempts').textContent=attempts.length}};
   }
   document.addEventListener('DOMContentLoaded',()=>{
-    // Student login/signup UI removed.
+
     
     el('clearNotifications')?.addEventListener('click',()=>{saveNotes([]);renderNotifications()});
     el('notificationShortcut')?.addEventListener('click',renderNotifications);
@@ -866,9 +862,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-/* ZSecret For Free — Secure PDF Notes module
-   Students: published read-only viewer. Admin: PDF upload and publication controls.
-   Storage bucket: edutube-notes (PRIVATE). */
+
 (function () {
   "use strict";
   const BUCKET = "edutube-notes";
