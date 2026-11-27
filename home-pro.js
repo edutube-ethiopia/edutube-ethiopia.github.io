@@ -1,4 +1,4 @@
-/* ZSecret For Free — Home Pro. Additive: icon sprite, nav icons, home page behaviour, English/Amharic text for the new home page. */
+
 (function () {
   "use strict";
   var P = {
@@ -85,7 +85,7 @@
   }
   function tr(k, fallback) { return lang() === "am" && T.am[k] ? T.am[k] : fallback; }
 
-  /* ---- sprite ---- */
+  
   function injectSprite() {
     if (document.getElementById("hpSprite")) return;
     var s = '<svg id="hpSprite" xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">';
@@ -93,7 +93,7 @@
     document.body.insertAdjacentHTML("afterbegin", s + "</svg>");
   }
 
-  /* ---- icons for existing navigation (added next to the existing labels; nothing removed) ---- */
+  
   var MAP = { home: "home", library: "video", exams: "exam", notes: "notes", contact: "chat", favorites: "heart", dashboard: "chart", studio: "timer", accounts: "user", notifications: "bell", leaderboard: "trophy", admin: "layers" };
   function addNavIcons() {
     document.querySelectorAll(".side-link[data-page]").forEach(function (b) {
@@ -112,7 +112,7 @@
     pairs.forEach(function (p) {
       var b = document.getElementById(p[0]);
       if (!b || b.querySelector(".hp-nav-ic")) return;
-      /* wrap any plain text so it can be hidden on phones while the icon stays */
+      
       Array.prototype.slice.call(b.childNodes).forEach(function (n) {
         if (n.nodeType === 3 && n.textContent.trim()) { var s = document.createElement("span"); s.className = "hp-label"; s.textContent = n.textContent; b.replaceChild(s, n); }
       });
@@ -120,7 +120,7 @@
     });
   }
 
-  /* ---- progress ring bound to the existing #homeProgress value ---- */
+  
   function syncRing() {
     var el = document.getElementById("homeProgress"), fg = document.getElementById("hpRingFg");
     if (!el || !fg) return;
@@ -128,7 +128,7 @@
     fg.style.strokeDashoffset = 326.7 * (1 - n / 100);
   }
 
-  /* ---- hero search -> existing library filter ---- */
+  
   function goLibrary() {
     if (typeof window.showPage === "function") window.showPage("library");
     else { var b = document.querySelector('[data-page="library"]'); if (b) b.click(); }
@@ -144,7 +144,7 @@
     });
   }
 
-  /* ---- focus timer ---- */
+  
   var total = 25 * 60, left = total, tick = null, CIRC = 565.5;
   function fmt(s) { var m = Math.floor(s / 60), r = s % 60; return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r; }
   function paint() {
@@ -185,7 +185,7 @@
     var hp = document.getElementById("homeProgress");
     if (hp) new MutationObserver(syncRing).observe(hp, { childList: true, characterData: true, subtree: true });
     new MutationObserver(applyText).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-    /* script.js re-renders after language changes; re-sync once things settle */
+    
     document.addEventListener("click", function (e) { if (e.target.closest("#languageButton")) setTimeout(function () { applyText(); syncRing(); }, 60); });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
