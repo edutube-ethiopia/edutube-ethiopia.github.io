@@ -371,3 +371,12 @@ body:not(.scroll-locked) {
 .exam-review-item p{margin:6px 0;line-height:1.55}
 .exam-review-item.review-correct{border-inline-start:4px solid #16a34a}
 .exam-review-item.review-incorrect{border-inline-start:4px solid #dc2626}
+
+/* Imported exam bank simulation UI */
+.exam-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0 22px}
+.exam-review-list{display:grid;gap:12px;margin-top:24px;text-align:left}
+.exam-review-item{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.exam-review-item h3{font-size:1rem;line-height:1.5;margin:0 0 10px}
+.exam-review-item p{margin:6px 0;line-height:1.55}
+.exam-review-item.review-correct{border-inline-start:4px solid #16a34a}
+.exam-review-item.review-incorrect{border-inline-start:4px solid #dc2626}
