@@ -367,7 +367,7 @@ async function loadVideosFromSupabase() {
 
   if (error) {
     console.error(error);
-    notify("Database ስህተት፦ lessons table / RLS / network ያረጋግጡ");
+    notify("ስህተት ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።");
     return;
   }
 
