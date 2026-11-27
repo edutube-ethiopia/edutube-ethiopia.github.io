@@ -188,7 +188,7 @@ function loadExamBank(){
   .then(data=>{
    if(!Array.isArray(data))throw new Error("Exam bank format is invalid");
    exams=data.map(e=>({...e,minutes:e.questions?.length||0}));
-   examBankLoaded=true;refreshExamFilters();renderExams();setTimeout(()=>$("examSubject")?.dispatchEvent(new Event("change")),0);setTimeout(()=>$("examSubject")?.dispatchEvent(new Event("change")),0);
+   examBankLoaded=true;refreshExamFilters();renderExams();setTimeout(()=>$("examSubject")?.dispatchEvent(new Event("change")),0);
   })
   .catch(err=>{
    examBankLoaded=false;const grid=$("examGrid");if(grid){grid.replaceChildren();const msg=document.createElement("div");msg.className="empty-state";msg.textContent="Exam bank is not installed yet. Upload exam-bank.json to the website repository, then refresh.";grid.append(msg);}
@@ -254,7 +254,7 @@ function renderQuestion(){
   if(currentAnswers[questionIndex]===i)b.classList.add("selected");
   b.addEventListener("click",()=>chooseAnswer(i));$("answerList").append(b);
  });
- const next=$("nextQuestion");next.disabled=false;
+ const prev=$("prevQuestion");if(prev)prev.disabled=questionIndex===0;\n const next=$("nextQuestion");next.disabled=false;
  next.textContent=questionIndex===currentExam.questions.length-1?"Submit exam":"Next question →";
 }
 function chooseAnswer(index){
@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  document.querySelectorAll("[data-home-subject]").forEach(b=>b.addEventListener("click",()=>{$("videoSubject").value=b.dataset.homeSubject;showPage("library");renderVideos()}));
  $("languageButton").addEventListener("click",toggleLanguage);$("themeButton").addEventListener("click",toggleTheme);$("menuButton").addEventListener("click",toggleSidebar);
  $("videoSearch").addEventListener("input",renderVideos);$("videoGrade").addEventListener("change",renderVideos);$("videoSubject").addEventListener("change",renderVideos);$("examGrade").addEventListener("change",renderExams);$("examSubject").addEventListener("change",renderExams);
- $("closePlayer").addEventListener("click",closeVideo);document.querySelector("[data-close-modal]").addEventListener("click",closeVideo);$("completeLesson").addEventListener("click",markComplete);$("nextQuestion").addEventListener("click",nextQuestion);
+ $("closePlayer").addEventListener("click",closeVideo);document.querySelector("[data-close-modal]").addEventListener("click",closeVideo);$("completeLesson").addEventListener("click",markComplete);$("nextQuestion").addEventListener("click",nextQuestion);$("prevQuestion")?.addEventListener("click",previousQuestion);
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("videoModal").classList.contains("hidden"))closeVideo()});
  window.addEventListener("pagehide",()=>{stopTimer()});
  applyLanguage();
