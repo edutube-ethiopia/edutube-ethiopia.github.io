@@ -1,4 +1,4 @@
-/* ZSecret For Free — Security, Admin UX and reader upgrades */
+
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
@@ -45,7 +45,7 @@
       resetAdminIdle();
     } else startStudentTimer();
   }
-  /* Header account button: "Admin" / name ONLY while a real, valid session exists; otherwise always "Sign in". */
+  
   let sessionKnown=false;
   function paintAccountLabel(user){
     const el=$("accountLabel"); if(!el)return;
@@ -73,7 +73,7 @@
   function initAccountLabel(){
     const el=$("accountLabel"); if(!el)return;
     el.textContent="Sign in";
-    /* if any other script writes a signed-in name while nobody is signed in, put "Sign in" back */
+    
     new MutationObserver(()=>{ if(sessionKnown&&!window.__edutubeSessionUser&&el.textContent!=="Sign in")el.textContent="Sign in"; })
       .observe(el,{childList:true,characterData:true,subtree:true});
     if(sb()?.auth)sb().auth.onAuthStateChange((_e,session)=>{sessionKnown=true;paintAccountLabel(session?.user||null);});
@@ -206,7 +206,7 @@
     roundLogo();initSecurity();
     const run=()=>{addAdminNotificationStudio();makeAdminTables();};
     run();new MutationObserver(run).observe(document.body,{childList:true,subtree:true});
-    // Refresh data-driven table filters after the original scripts finish rendering.
+
     setTimeout(run,500);
   });
 })();
