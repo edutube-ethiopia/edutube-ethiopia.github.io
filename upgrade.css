@@ -1,4 +1,4 @@
-/* EduTube Ethiopia admin table presentation */
+
 .eu-table-tools{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0}.eu-table-tools input,.eu-table-tools select{min-height:40px;padding:9px 12px;border:1px solid var(--border-color,rgba(255,255,255,.16));border-radius:10px;background:var(--card-bg,rgba(255,255,255,.04));color:var(--text)}.eu-table-tools input{flex:1;min-width:180px}.eu-table-tools span{font-size:12px;color:var(--muted)}.eu-pager{display:flex;align-items:center;justify-content:center;gap:14px;padding:12px}.eu-pager span{font-size:12px;color:var(--muted)}.admin-lesson-row[hidden]{display:none!important}
 .eu-notify-studio{margin-top:22px}.eu-live{font-size:11px;color:#35c995;font-weight:800}.eu-notice-preview{display:grid;gap:7px;padding:15px;border:1px solid var(--border-color,rgba(255,255,255,.15));border-radius:14px;background:rgba(100,130,255,.07)}.eu-notice-preview span,.eu-notice-actions span{color:var(--muted,#9aa0aa);font-size:12px}.eu-notice-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .brand-logo{border-radius:50%!important;object-fit:cover;aspect-ratio:1/1;overflow:hidden;border:1px solid rgba(255,255,255,.18);box-shadow:0 2px 12px rgba(0,0,0,.16)}
@@ -6,7 +6,7 @@
 .eu-admin-table{width:100%;border-collapse:separate;border-spacing:0;min-width:680px;font-size:13px}.eu-admin-table th,.eu-admin-table td{padding:13px 12px;text-align:left;border-bottom:1px solid var(--border-color,rgba(255,255,255,.1));vertical-align:middle}.eu-admin-table th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:rgba(120,140,180,.08);position:sticky;top:0}.eu-admin-table td:nth-child(2){color:var(--muted);max-width:360px}.eu-admin-table tbody tr:hover{background:rgba(120,140,255,.055)}.eu-admin-table .eu-table-actions{display:flex;gap:6px;flex-wrap:wrap}.eu-status-pill{display:inline-block;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:800;background:rgba(54,195,145,.13);color:#42d7a5}.eu-admin-table tr:has(.eu-status-pill){}.eu-admin-table tbody tr[hidden]{display:none!important}#adminLessonList,#adminNoteList{overflow-x:auto}
 
 
-/* Fixed site chrome: the page content scrolls independently beneath the header. */
+
 @media (min-width:761px){
   .topbar{position:fixed!important;inset:0 0 auto 0;height:76px;z-index:100}
   .app-layout{padding-top:76px;min-height:100vh}
@@ -47,8 +47,7 @@ body.notes-reading-mode .eu-pdf-stage canvas{max-width:100%;height:auto!importan
 body.notes-reading-mode .eu-pdf-footer{flex:0 0 auto}
 @media(max-width:600px){.exam-pro{padding:12px}.exam-pro-welcome{align-items:flex-start}.exam-pro-welcome h2{font-size:16px}.exam-pro-stats{grid-template-columns:repeat(2,1fr)}.exam-pro-clock{min-width:92px;padding:7px}.exam-pro-tools input{min-width:100%}.exam-pro-tools select{flex:1}.exam-grid.exam-list-view .exam-card{grid-template-columns:1fr}.exam-grid.exam-list-view .exam-card .primary-button,.exam-grid.exam-list-view .exam-card .ep-save{grid-column:1;grid-row:auto}}
 
-/* FIX: the sidebar is position:fixed, so the old 2-column grid squeezed the page into the 230px sidebar column.
-   Use a plain block layout so every page fills the whole area to the right of the menu. */
+
 @media (min-width:761px){
   .app-layout{display:block!important;grid-template-columns:none!important}
   .main-content{margin-left:230px!important;width:auto!important;max-width:none!important;padding-left:clamp(18px,3vw,44px);padding-right:clamp(18px,3vw,44px)}
@@ -58,7 +57,7 @@ body.notes-reading-mode .eu-pdf-footer{flex:0 0 auto}
 .account-shortcut,.account-shortcut #accountLabel{white-space:nowrap}
 
 
-/* ZSecret For Free - download buttons */
+
 .zs-download{display:inline-flex;align-items:center;gap:6px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap}
 .zs-download:disabled{opacity:.6;cursor:wait}
 .zs-download.zs-unavailable{opacity:.55}
