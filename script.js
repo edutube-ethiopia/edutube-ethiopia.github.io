@@ -254,7 +254,8 @@ function renderQuestion(){
   if(currentAnswers[questionIndex]===i)b.classList.add("selected");
   b.addEventListener("click",()=>chooseAnswer(i));$("answerList").append(b);
  });
- const prev=$("prevQuestion");if(prev)prev.disabled=questionIndex===0;\n const next=$("nextQuestion");next.disabled=false;
+ const prev=$("prevQuestion");if(prev)prev.disabled=questionIndex===0;\n const prev=$("prevQuestion");if(prev)prev.disabled=questionIndex===0;
+ const next=$("nextQuestion");next.disabled=false;
  next.textContent=questionIndex===currentExam.questions.length-1?"Submit exam":"Next question →";
 }
 function chooseAnswer(index){
@@ -262,6 +263,7 @@ function chooseAnswer(index){
  document.querySelectorAll(".answer-option").forEach((b,i)=>{b.classList.toggle("selected",i===index);b.disabled=false;});
  $("quizFeedback").textContent="Answer saved. You can change it before moving to the next question.";
 }
+function previousQuestion(){if(questionIndex<=0)return;questionIndex--;selectedAnswer=currentAnswers[questionIndex];renderQuestion();}
 function nextQuestion(){
  if(questionIndex===currentExam.questions.length-1){finishExam();return;}
  questionIndex++;selectedAnswer=currentAnswers[questionIndex];renderQuestion();
