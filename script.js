@@ -845,7 +845,7 @@ document.addEventListener("DOMContentLoaded", () => {
 (function () {
   "use strict";
   const BUCKET = "edutube-notes";
-  const MAX_PDF_BYTES = 20 * 1024 * 1024;
+  const MAX_PDF_BYTES = 100 * 1024 * 1024;
   const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Biology", "English", "Geography", "History", "Economics", "Computer Science", "SAT"];
   const GRADES = ["9", "10", "11", "12"];
   let notes = [];
@@ -935,7 +935,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadPublicNotes(){const c=client();if(!c)return;const {data,error}=await c.from("notes").select("id,note_type,grade,subject,unit,title,video_url,is_published,pdf_path,pdf_bucket,allow_download").eq("is_published",true).not("pdf_path","is",null).order("created_at",{ascending:false});if(error){console.warn("PDF notes could not load",error.message);return;}notes=(data||[]);render();}
   async function requireAdmin(){const c=client();if(!c?.auth)return null;const {data}=await c.auth.getSession();const user=data?.session?.user;return user&&typeof isEdutubeAdmin==="function"&&isEdutubeAdmin(user)?user:null;}
   async function savePdf(event){event.preventDefault();const c=client();if(!c){msg("Supabase is unavailable.",true);return;}const user=await requireAdmin();if(!user){msg("Admin sign-in required. Students cannot upload or edit notes.",true);return;}
-    const file=$("notePdfFile")?.files?.[0];if(!file){msg("Choose a PDF file first.",true);return;}if(file.type!=="application/pdf"&&!file.name.toLowerCase().endsWith(".pdf")){msg("Only PDF files are accepted.",true);return;}if(file.size>MAX_PDF_BYTES){msg("PDF is larger than the 20 MB limit.",true);return;}
+    const file=$("notePdfFile")?.files?.[0];if(!file){msg("Choose a PDF file first.",true);return;}if(file.type!=="application/pdf"&&!file.name.toLowerCase().endsWith(".pdf")){msg("Only PDF files are accepted.",true);return;}if(file.size>MAX_PDF_BYTES){msg("PDF is larger than the 100 MB limit.",true);return;}
     const title=$("noteTitle").value.trim(),unit=$("noteUnit").value.trim();if(!title||!unit){msg("Enter the PDF title and unit.",true);return;}
     const btn=event.submitter;if(btn){btn.disabled=true;btn.textContent="Uploading PDF…";}
     const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");const path=`${user.id}/${Date.now()}-${safeName}`;
