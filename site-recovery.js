@@ -1,4 +1,4 @@
-/* Site interaction recovery shim for delegated controls. */
+
 (function () {
   "use strict";
   function page(name) {
