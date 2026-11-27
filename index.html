@@ -22,8 +22,8 @@
   
   <script src="admin-advanced.js" defer></script>
   <script src="upgrade.js" defer></script>
-  <!-- Legacy YouTube-specific player controller disabled -->
-  <!-- Legacy controller disabled for Vimeo migration -->
+  
+  
   <script src="home-pro.js" defer></script>
 </head>
 <body>
@@ -67,7 +67,7 @@
 
     <main class="main-content">
       <section class="page active" id="page-home">
-        <!-- EduTube Home Pro: new home page. Hooks kept for existing scripts: data-page, data-grade, data-home-subject, #homeLessons #homeQuizzes #homeFavorites #homeProgress -->
+        
         <div class="hp">
           <header class="hp-hero">
             <div class="hp-hero-copy">
@@ -342,12 +342,12 @@
   <nav class="mobile-nav"><button data-page="home"><small data-i18n="navHome">Home</small></button><button data-page="library"><small data-i18n="navLibrary">Videos</small></button><button data-page="exams"><small data-i18n="navExams">Exams</small></button><button data-page="notes"><small data-i18n="navNotes">Notes</small></button><button data-page="dashboard"><small data-i18n="navDashboard">Progress</small></button><button data-page="studio"><small>🚀 Studio</small></button></nav>
 
 
-    <!-- ===== Vimeo WATCH PAGE (አሮጌውን #videoModal ብክ ሙሉ ተካው) ===== -->
+    
 <div class="modal hidden" id="videoModal">
   <div class="modal-backdrop" data-close-modal></div>
   <div class="modal-content watch-content">
 
-    <!-- 1) Player: ላይኛው ጥ ላይ የተጣበቀ -->
+    
     <div class="watch-top">
       <div class="player advanced-player" id="videoFrame" aria-label="Advanced video player">
         <div id="ytHost"></div><video id="hostVideo" playsinline controls preload="metadata" hidden></video><iframe id="externalVideo" title="Hosted lesson video" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen hidden></iframe>
@@ -421,7 +421,7 @@
       </div>
     </div>
 
-    <!-- 3) ከplayer በታች የሚሸረተት ቦታ -->
+    
     <div class="watch-scroll">
       <div class="watch-head">
         <h2 id="modalTitle">Lesson</h2>
