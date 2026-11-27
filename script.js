@@ -254,7 +254,7 @@ function renderQuestion(){
   if(currentAnswers[questionIndex]===i)b.classList.add("selected");
   b.addEventListener("click",()=>chooseAnswer(i));$("answerList").append(b);
  });
- const prev=$("prevQuestion");if(prev)prev.disabled=questionIndex===0;\n const prev=$("prevQuestion");if(prev)prev.disabled=questionIndex===0;
+ const prev=$("prevQuestion");if(prev)prev.disabled=questionIndex===0;
  const next=$("nextQuestion");next.disabled=false;
  next.textContent=questionIndex===currentExam.questions.length-1?"Submit exam":"Next question →";
 }
