@@ -220,7 +220,7 @@ function renderExams(){
  const cards=document.createElement("div");cards.className="exam-wizard-cards";
  function card(title,sub,action,disabled=false){const b=document.createElement("button");b.type="button";b.className="exam-wizard-card"+(disabled?" unavailable":"");b.disabled=disabled;b.innerHTML="<strong>"+title+"</strong><span>"+sub+"</span>";if(action)b.onclick=action;cards.append(b);}
  if(!examFlow.category){
-  categories.forEach(c=>card(c.title,c.available?c.desc:"Not available yet · Coming soon",()=>{examFlow={category:c.id,grade:null,subject:null,unit:null};renderExams()},!c.available));
+  categories.forEach(c=>card(c.title,c.available?c.desc:"Not available yet · Coming soon",()=>{examFlow={category:c.id,grade:null,subject:null,unit:null};renderExams()}));
   panel.append(cards);grid.append(panel);return;
  }
  if(!categories.find(c=>c.id===examFlow.category)?.available){
