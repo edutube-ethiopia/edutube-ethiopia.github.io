@@ -199,7 +199,7 @@ function refreshExamFilters(){
  const type=$("examType"),grade=$("examGrade"),subject=$("examSubject"),topic=$("examTopic");
  if(!type||!grade||!subject||!topic)return;
  const keep={type:type.value,grade:grade.value,subject:subject.value,topic:topic.value};
- const opts=(el,values,label)=>{el.replaceChildren();const all=document.createElement("option");all.value="all";all.textContent=label;el.append(all);values.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;el.append(o});};
+ const opts=(el,values,label)=>{el.replaceChildren();const all=document.createElement("option");all.value="all";all.textContent=label;el.append(all);values.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;el.append(o);});};
  opts(type,["UEE","Weekly"],"All exam types");
  if([...type.options].some(o=>o.value===keep.type))type.value=keep.type;
  const typeVal=type.value;
