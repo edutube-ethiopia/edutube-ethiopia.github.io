@@ -383,3 +383,9 @@ body:not(.scroll-locked) {
 
 .exam-passage{white-space:pre-wrap;line-height:1.7;max-height:55vh;overflow:auto;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);margin:0 0 16px}
 .exam-review-passage{white-space:pre-wrap;max-height:300px;overflow:auto;padding:10px;border-radius:10px;background:var(--surface2);font-size:.9rem;line-height:1.6}
+
+.quiz-actions{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:18px;flex-wrap:wrap}
+.quiz-actions .primary-button{margin-top:0}
+.quiz-actions .small-button{padding:11px 15px}
+.exam-passage{white-space:pre-wrap;line-height:1.7;max-height:55vh;overflow:auto;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);margin:0 0 16px}
+.exam-review-passage{white-space:pre-wrap;max-height:300px;overflow:auto;padding:10px;border-radius:10px;background:var(--surface2);font-size:.9rem;line-height:1.6}
