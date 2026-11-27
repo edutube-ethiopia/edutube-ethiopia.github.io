@@ -188,7 +188,7 @@ function loadExamBank(){
   .then(data=>{
    if(!Array.isArray(data))throw new Error("Exam bank format is invalid");
    exams=data.map(e=>({...e,minutes:e.questions?.length||0}));
-   examBankLoaded=true;refreshExamFilters();renderExams();
+   examBankLoaded=true;refreshExamFilters();renderExams();setTimeout(()=>$("examSubject")?.dispatchEvent(new Event("change")),0);
   })
   .catch(err=>{
    examBankLoaded=false;const grid=$("examGrid");if(grid){grid.replaceChildren();const msg=document.createElement("div");msg.className="empty-state";msg.textContent="Exam bank is not installed yet. Upload exam-bank.json to the website repository, then refresh.";grid.append(msg);}
