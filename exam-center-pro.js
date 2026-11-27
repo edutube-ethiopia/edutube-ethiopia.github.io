@@ -17,7 +17,7 @@
     if(!page||!grid||$('examProTools'))return;
     const panel=document.createElement('section');panel.id='examProTools';panel.className='exam-pro';
     panel.innerHTML=`
-      <div class="exam-pro-welcome"><div><span class="eyebrow">EXAM CENTER · PRO</span><h2>Your personal exam command center</h2><p>Find, organize and practice with the quizzes already published on ZSecret For Free.</p></div><div class="exam-pro-clock"><small>FOCUS TIMER</small><b id="epTimer">25:00</b><button type="button" id="epTimerToggle">Start focus</button></div></div>
+      <div class="exam-pro-welcome"><div><span class="eyebrow">EXAM CENTER · PRO</span><h2>Your personal exam command center</h2><p>Browse the imported UEE and Weekly question banks by category, grade, subject and unit.</p></div><div class="exam-pro-clock"><small>FOCUS TIMER</small><b id="epTimer">25:00</b><button type="button" id="epTimerToggle">Start focus</button></div></div>
       <div class="exam-pro-stats"><article><b id="epTotal">0</b><small>Available exams</small></article><article><b id="epShown">0</b><small>Showing now</small></article><article><b id="epSaved">0</b><small>Saved exams</small></article><article><b id="epAttempts">0</b><small>Recorded attempts</small></article></div>
       <div class="exam-pro-tools">
         <input id="epSearch" type="search" placeholder="Search exam title or subject…" aria-label="Search exams">
@@ -35,7 +35,7 @@
       </div>
       <div id="epScratchPanel" class="exam-pro-widget hidden"><div><b>Personal scratchpad</b><button type="button" class="small-button" id="epScratchClose">Close</button></div><textarea id="epScratchText" rows="4" placeholder="Write formulas, reminders or revision notes. Saved on this device."></textarea><small>Private to this browser · Auto-saved locally</small></div>
       <div id="epCalcPanel" class="exam-pro-widget hidden"><b>Quick calculator</b><div class="ep-calc-row"><input id="epCalcInput" inputmode="decimal" placeholder="Example: (25*4)/5"><button type="button" class="small-button" id="epCalcRun">Calculate</button></div><strong id="epCalcResult" aria-live="polite">Result appears here</strong><small>Basic arithmetic only. Do not enter personal information.</small></div>
-      <div id="epGuidePanel" class="exam-pro-widget hidden"><b>Keyboard & study tips</b><p>Use Tab to move between controls, Enter or Space to activate a button, and Escape to leave an active quiz if your browser/app supports it. Read each question carefully and review feedback before moving on.</p></div>
+      <div id="epGuidePanel" class="exam-pro-widget hidden"><b>Keyboard & study tips</b><p>Use Tab to move between controls, Enter or Space to activate a button, and Escape to leave an active quiz if your browser/app supports it. Read carefully, save your answer, and review the answer key after submission.</p></div>
       <p class="exam-pro-hint" id="epHint" aria-live="polite">Tip: save an exam to build your personal revision list.</p>`;
     grid.parentNode.insertBefore(panel,grid);
     $('epSearch').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();apply()});
