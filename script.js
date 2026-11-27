@@ -233,7 +233,8 @@ function renderExams(){
  const allInCategory=exams.filter(e=>e.category===examFlow.category&&String(e.grade)===examFlow.grade);
  const allowed=examFlow.category==="UEE"?(examFlow.grade==="12"?["English","Mathematics","SAT","Physics","Chemistry","Biology"]:["Mathematics","Physics","Chemistry","Biology"]):[...new Set(allInCategory.map(e=>e.subject))];
  if(!examFlow.subject){
-  allowed.forEach(sub=>{const exists=allInCategory.some(e=>e.subject===sub);card(sub,exists?"Choose subject":"Not available yet",exists?()=>{examFlow.subject=sub;renderExams();}:null,!exists);});
+  allowed.forEach(sub=>{const exists=allInCategory.some(e=>e.subject===sub);card(sub,exists?"Choose subject":"Not available yet · Coming soon",()=>{examFlow.subject=sub;renderExams();});});
+  if(!allowed.length){const msg=document.createElement("p");msg.className="exam-coming-soon";msg.textContent="No exams are available for this grade yet. Coming soon.";panel.append(msg);}
   panel.append(cards);grid.append(panel);return;
  }
  const inSubject=allInCategory.filter(e=>e.subject===examFlow.subject);
