@@ -1,4 +1,4 @@
-/* EduTube Super Advanced Controller */
+
 .sc{margin:6px 0 16px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,var(--surface),var(--bg));padding:14px;position:relative;overflow:hidden}
 .sc:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#6c5ce7,#38bdf8,var(--accent))}
 .sc *{box-sizing:border-box}
