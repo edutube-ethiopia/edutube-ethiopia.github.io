@@ -138,7 +138,7 @@
         }
         status.textContent=`✓ Sent ${sent} notification${sent===1?"":"s"} successfully.`;
         $("euBroadcastForm").reset();preview();
-      }catch(err){status.textContent="Could not send: "+(err.message||"Check profiles/notifications RLS policies.");}
+      }catch(err){status.textContent="Could not send: "+(err.message||"Check notification settings and try again.");}
       finally{btn.disabled=false;}
     });
   }
