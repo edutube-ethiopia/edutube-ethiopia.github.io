@@ -1,4 +1,4 @@
-/* EduTube Exam Center Pro — additive UI layer; preserves the existing quiz engine. */
+
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
