@@ -91,16 +91,10 @@ let completed = read(STORAGE.completed, []);
 let attempts = read(STORAGE.attempts, []);
 let currentVideo = null, currentExam = null, questionIndex = 0, score = 0, selectedAnswer = null, secondsLeft = 300, timerId = null, toastTimer = null;
 
-const exams = [
- {id:"math10",title:"Algebra basics",grade:"10",subject:"Mathematics",minutes:5,questions:[
-  {q:"Solve: 2x + 4 = 12",a:["2","4","6","8"],correct:1},
-  {q:"What is 5²?",a:["10","15","20","25"],correct:3},
-  {q:"Simplify: 3a + 2a",a:["5","6a","5a","a"],correct:2}]},
- {id:"physics10",title:"Motion and forces",grade:"10",subject:"Physics",minutes:5,questions:[
-  {q:"What is the SI unit of force?",a:["Joule","Newton","Watt","Pascal"],correct:1},
-  {q:"Which law is written as F = ma?",a:["Newton's first law","Newton's second law","Newton's third law","Law of gravitation"],correct:1},
-  {q:"Speed is calculated by:",a:["Distance ÷ time","Time ÷ distance","Mass × acceleration","Force ÷ area"],correct:0}]}
-];
+let exams = [];
+let examBankLoaded = false;
+let currentAnswers = [];
+
 
 function read(key, fallback){try{const value=JSON.parse(localStorage.getItem(key));return value??fallback}catch{return fallback}}
 function write(key,value){localStorage.setItem(key,JSON.stringify(value))}
@@ -183,24 +177,106 @@ function renderFavorites(){const grid=$("favoriteGrid");grid.replaceChildren();c
 function toggleFavorite(id){favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];write(STORAGE.favorites,favorites);renderAll();notify(favorites.includes(id)?t("savedNotice"):t("removedNotice"))}
 
 function markComplete(){if(!currentVideo)return;if(!completed.includes(currentVideo.id)){completed.push(currentVideo.id);write(STORAGE.completed,completed)}closeVideo();renderAll();notify(t("completedNotice"))}
-function renderExams(){const grid=$("examGrid");grid.replaceChildren();const grade=$("examGrade").value,subject=$("examSubject").value;exams.filter(e=>(grade==="all"||e.grade===grade)&&(subject==="all"||e.subject===subject)).forEach(exam=>{const card=document.createElement("article");card.className="exam-card";const meta=document.createElement("div");meta.className="video-meta";meta.textContent=`GRADE ${exam.grade} · ${exam.subject}`;const h=document.createElement("h3");h.textContent=exam.title;const p=document.createElement("p");p.textContent=`${exam.questions.length} questions · ${exam.minutes} ${t("minutes")}`;const b=document.createElement("button");b.className="primary-button";b.textContent=t("startExam");b.addEventListener("click",()=>startExam(exam.id));card.append(meta,h,p,b);grid.append(card)})}
-function startExam(id){currentExam=exams.find(e=>e.id===id);if(!currentExam)return;questionIndex=0;score=0;selectedAnswer=null;secondsLeft=currentExam.minutes*60;showPage("quiz");renderQuestion();startTimer()}
-function renderQuestion(){const q=currentExam.questions[questionIndex];$("questionCount").textContent=`${t("questionLabel")} ${questionIndex+1} / ${currentExam.questions.length}`;$("questionText").textContent=q.q;$("quizProgress").style.width=`${questionIndex/currentExam.questions.length*100}%`;$("answerList").replaceChildren();$("quizFeedback").textContent="";$("nextQuestion").disabled=true;$("nextQuestion").textContent=questionIndex===currentExam.questions.length-1?(language==="am"?"ውጤት አሳይ":"Show result"):t("nextQuestion");q.a.forEach((answer,i)=>{const b=document.createElement("button");b.className="answer-option";b.textContent=answer;b.addEventListener("click",()=>chooseAnswer(i));$("answerList").append(b)})}
-function chooseAnswer(index){if(selectedAnswer!==null)return;selectedAnswer=index;const q=currentExam.questions[questionIndex];document.querySelectorAll(".answer-option").forEach((b,i)=>{b.disabled=true;if(i===index)b.classList.add("selected")});const correct=index===q.correct;if(correct)score++;$("quizFeedback").textContent=correct?t("correct"):`${t("incorrect")} ${q.a[q.correct]}`;$("nextQuestion").disabled=false}
-function nextQuestion(){if(selectedAnswer===null)return;questionIndex++;selectedAnswer=null;if(questionIndex>=currentExam.questions.length){finishExam();return}renderQuestion()}
+function loadExamBank(){
+ fetch("exam-bank.json",{cache:"no-store"})
+  .then(r=>{if(!r.ok)throw new Error("exam-bank.json not found");return r.json()})
+  .then(data=>{
+   if(!Array.isArray(data))throw new Error("Exam bank format is invalid");
+   exams=data.map(e=>({...e,minutes:e.questions?.length||0}));
+   examBankLoaded=true;refreshExamFilters();renderExams();
+  })
+  .catch(err=>{
+   examBankLoaded=false;const grid=$("examGrid");if(grid){grid.replaceChildren();const msg=document.createElement("div");msg.className="empty-state";msg.textContent="Exam bank is not installed yet. Upload exam-bank.json to the website repository, then refresh.";grid.append(msg);}
+   console.warn("Exam bank load:",err.message);
+  });
+}
+function refreshExamFilters(){
+ const type=$("examType"),grade=$("examGrade"),subject=$("examSubject"),topic=$("examTopic");
+ if(!type||!grade||!subject||!topic)return;
+ const keep={type:type.value,grade:grade.value,subject:subject.value,topic:topic.value};
+ const opts=(el,values,label)=>{el.replaceChildren();const all=document.createElement("option");all.value="all";all.textContent=label;el.append(all);values.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;el.append(o});};
+ opts(type,["UEE","Weekly"],"All exam types");
+ const typeVal=keep.type==="all"?"all":keep.type;
+ const base=exams.filter(e=>(typeVal==="all"||e.category===typeVal)&&(keep.grade==="all"||e.grade===keep.grade));
+ opts(grade,[...new Set(base.map(e=>e.grade))].sort((a,b)=>Number(a)-Number(b)),"All grades");
+ if([...grade.options].some(o=>o.value===keep.grade))grade.value=keep.grade;
+ const filtered=exams.filter(e=>(type.value==="all"||e.category===type.value)&&(grade.value==="all"||e.grade===grade.value));
+ opts(subject,[...new Set(filtered.map(e=>e.subject))].sort(),"All subjects");
+ if([...subject.options].some(o=>o.value===keep.subject))subject.value=keep.subject;
+ const filtered2=filtered.filter(e=>subject.value==="all"||e.subject===subject.value);
+ opts(topic,[...new Set(filtered2.map(e=>e.topic))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),"All units / topics");
+ if([...topic.options].some(o=>o.value===keep.topic))topic.value=keep.topic;
+}
+function renderExams(){
+ const grid=$("examGrid");if(!grid)return;grid.replaceChildren();
+ if(!examBankLoaded){grid.textContent="Loading exam bank…";return;}
+ const type=$("examType")?.value||"all",grade=$("examGrade").value,subject=$("examSubject").value,topic=$("examTopic")?.value||"all";
+ const selected=exams.filter(e=>(type==="all"||e.category===type)&&(grade==="all"||e.grade===grade)&&(subject==="all"||e.subject===subject)&&(topic==="all"||e.topic===topic));
+ if(!selected.length){const msg=document.createElement("p");msg.className="empty-state";msg.textContent="No exam files match these filters.";grid.append(msg);return;}
+ selected.forEach(exam=>{
+  const card=document.createElement("article");card.className="exam-card";
+  const meta=document.createElement("div");meta.className="video-meta";meta.textContent=exam.path.join(" › ");
+  const h=document.createElement("h3");h.textContent=exam.title;
+  const p=document.createElement("p");p.textContent=exam.questions.length+" questions in bank · 1 minute per question";
+  const b=document.createElement("button");b.className="primary-button";b.textContent="Start simulation";b.addEventListener("click",()=>startExam(exam.id));
+  card.append(meta,h,p,b);grid.append(card);
+ });
+}
+function shuffleArray(arr){const copy=arr.slice();for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;}
+function startExam(id){
+ const source=exams.find(e=>e.id===id);if(!source)return;
+ const setting=$("examQuestionCount")?.value||"40";
+ const take=setting==="all"?source.questions.length:Math.min(Number(setting)||40,source.questions.length);
+ const selected=shuffleArray(source.questions).slice(0,take).map(q=>{
+  const order=shuffleArray(q.a.map((text,i)=>({text,correct:i===q.correct})));
+  return {...q,a:order.map(x=>x.text),correct:order.findIndex(x=>x.correct)};
+ });
+ currentExam={...source,questions:selected,minutes:selected.length};
+ questionIndex=0;score=0;selectedAnswer=null;currentAnswers=Array(selected.length).fill(null);secondsLeft=selected.length*60;
+ showPage("quiz");renderQuestion();startTimer();
+}
+function renderQuestion(){
+ const q=currentExam.questions[questionIndex];
+ $("questionCount").textContent="QUESTION "+(questionIndex+1)+" / "+currentExam.questions.length;
+ $("questionText").textContent=q.q;
+ $("quizProgress").style.width=((questionIndex/currentExam.questions.length)*100)+"%";
+ $("answerList").replaceChildren();$("quizFeedback").textContent="";
+ const labels=["A","B","C","D"];
+ q.a.forEach((answer,i)=>{
+  const b=document.createElement("button");b.className="answer-option";b.textContent=labels[i]+". "+answer;
+  if(currentAnswers[questionIndex]===i)b.classList.add("selected");
+  b.addEventListener("click",()=>chooseAnswer(i));$("answerList").append(b);
+ });
+ const next=$("nextQuestion");next.disabled=false;
+ next.textContent=questionIndex===currentExam.questions.length-1?"Submit exam":"Next question →";
+}
+function chooseAnswer(index){
+ selectedAnswer=index;currentAnswers[questionIndex]=index;
+ document.querySelectorAll(".answer-option").forEach((b,i)=>{b.classList.toggle("selected",i===index);b.disabled=false;});
+ $("quizFeedback").textContent="Answer saved. You can change it before moving to the next question.";
+}
+function nextQuestion(){
+ if(questionIndex===currentExam.questions.length-1){finishExam();return;}
+ questionIndex++;selectedAnswer=currentAnswers[questionIndex];renderQuestion();
+}
 function startTimer(){stopTimer();updateTimer();timerId=setInterval(()=>{secondsLeft--;updateTimer();if(secondsLeft<=0){stopTimer();finishExam(true)}},1000)}
 function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
 function updateTimer(){$("quizTimer").textContent=`${String(Math.floor(secondsLeft/60)).padStart(2,"0")}:${String(secondsLeft%60).padStart(2,"0")}`}
 function finishExam(timeUp=false){
-  stopTimer();
-  const total=currentExam.questions.length;
-  const percent=Math.round(score/total*100);
-  attempts.unshift({title:currentExam.title,score,total,percent,date:new Date().toLocaleDateString()});
-  write(STORAGE.attempts,attempts);
-  $("resultScore").textContent=`${percent}%`;
-  $("resultMessage").textContent=timeUp?t("timeUp")+" "+t("scoreMessage",{score,total}):t("scoreMessage",{score,total});
-  showPage("results");
-  renderDashboard();
+ stopTimer();score=currentExam.questions.reduce((n,q,i)=>n+(currentAnswers[i]===q.correct?1:0),0);
+ const total=currentExam.questions.length,percent=Math.round(score/total*100);
+ attempts.unshift({title:currentExam.path.join(" › "),score,total,percent,date:new Date().toLocaleDateString()});write(STORAGE.attempts,attempts);
+ $("resultScore").textContent=percent+"%";
+ $("resultMessage").textContent=(timeUp?"Time is up. ":"")+score+" correct out of "+total+" · "+currentExam.path.join(" › ");
+ const review=$("examReview");if(review){review.replaceChildren();currentExam.questions.forEach((q,i)=>{
+  const item=document.createElement("article");item.className="exam-review-item";
+  const stem=document.createElement("h3");stem.textContent=(i+1)+". "+q.q;
+  const chosen=document.createElement("p");chosen.textContent="Your answer: "+(currentAnswers[i]===null?"Not answered":q.a[currentAnswers[i]]);
+  const correct=document.createElement("p");correct.textContent="Correct answer: "+q.a[q.correct];
+  item.classList.add(currentAnswers[i]===q.correct?"review-correct":"review-incorrect");
+  item.append(stem,chosen,correct);review.append(item);
+ });}
+ showPage("results");renderDashboard();
 }
 function renderDashboard(){const percent=videos.length?Math.round(completed.length/videos.length*100):0;[["dashLessons",completed.length],["homeLessons",completed.length],["dashQuizzes",attempts.length],["homeQuizzes",attempts.length],["dashFavorites",favorites.length],["homeFavorites",favorites.length],["dashProgress",percent+"%"],["homeProgress",percent+"%"]].forEach(([id,val])=>{if($(id))$(id).textContent=val});const list=$("recentActivity");list.replaceChildren();const entries=[...completed.map(id=>({label:videos.find(v=>v.id===id)?.title||t("recentLesson"),kind:t("recentLesson")})),...attempts.slice(0,5).map(a=>({label:a.title,kind:`${t("quizResult")}: ${a.percent}%`}))].slice(0,8);if(!entries.length){list.textContent=t("noActivity");return}entries.forEach(e=>{const row=document.createElement("div");row.className="activity-item";const a=document.createElement("span");a.textContent=e.label;const b=document.createElement("small");b.textContent=e.kind;row.append(a,b);list.append(row)})}
 function renderAdmin(){const list=$("adminLessonList");list.replaceChildren();if(!videos.length){list.textContent=t("noAdminLessons");return}videos.forEach(v=>{const row=document.createElement("div");row.className="activity-item";const name=document.createElement("span");name.textContent=`${v.title} · Grade ${v.grade}`;const del=document.createElement("button");del.className="small-button delete-button";del.textContent=language==="am"?"ሰርዝ":"Delete";del.addEventListener("click",()=>{if(!confirm(t("confirmDelete")))return;videos=videos.filter(x=>x.id!==v.id);favorites=favorites.filter(x=>x!==v.id);completed=completed.filter(x=>x!==v.id);saveAll();renderAll();notify(t("lessonDeleted"))});row.append(name,del);list.append(row)})}
@@ -229,6 +305,9 @@ window.addEventListener("pageshow", () => {
 
 document.addEventListener("DOMContentLoaded",()=>{
  $("year").textContent=new Date().getFullYear();
+ loadExamBank();
+ ["examType","examGrade","examSubject","examTopic"].forEach(id=>$(id)?.addEventListener("change",()=>{refreshExamFilters();renderExams()}));
+
  if(localStorage.getItem(STORAGE.theme)==="light")document.body.classList.add("light");
  document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
  document.querySelectorAll("[data-grade]").forEach(b=>b.addEventListener("click",()=>{$("videoGrade").value=b.dataset.grade;showPage("library");renderVideos()}));
