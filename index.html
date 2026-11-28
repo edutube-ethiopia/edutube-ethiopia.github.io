@@ -160,7 +160,6 @@
               <button type="button" data-home-subject="Geography" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg>Geography</button>
               <button type="button" data-home-subject="History" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-landmark"/></svg>History</button>
               <button type="button" data-home-subject="Economics" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-trend"/></svg>Economics</button>
-              <button type="button" data-home-subject="Computer Science" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-code"/></svg>Computer Science</button>
               <button type="button" data-home-subject="SAT" data-page="library"><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg>SAT</button>
             </div>
           </section>
@@ -190,7 +189,7 @@
         <div class="filter-bar">
           <label class="search-box"><input id="videoSearch" type="search" data-i18n-placeholder="searchLessons" placeholder="Search lessons..."></label>
           <select id="videoGrade" aria-label="Grade"><option value="all" data-i18n="allGrades">All grades</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select>
-          <select id="videoSubject" aria-label="Subject"><option value="all" data-i18n="allSubjects">All subjects</option><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select>
+          <select id="videoSubject" aria-label="Subject"><option value="all" data-i18n="allSubjects">All subjects</option><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>SAT</option></select>
         </div>
         <div id="videoGrid" class="video-grid"></div><div id="videoEmpty" class="empty-state hidden" data-i18n="noLessons">No lessons found. Try another search or filter.</div>
       </section>
@@ -288,7 +287,7 @@
           <div class="admin-toolbar"><div><h2> Lesson publishing studio</h2><p>Create, publish, unpublish, and remove lessons.</p></div><button class="small-button" id="adminSignOut" type="button">Sign out</button></div>
           <form id="lessonForm" class="admin-form">
             <label>Lesson title<input id="lessonTitle" required maxlength="100" placeholder="e.g. Introduction to algebra"></label>
-            <div class="form-row"><label>Grade<select id="lessonGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label><label>Subject<select id="lessonSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label></div>
+            <div class="form-row"><label>Grade<select id="lessonGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label><label>Subject<select id="lessonSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>SAT</option></select></label></div>
             <label>Vimeo video link<input id="lessonUrl" type="url" required placeholder="https://your-video-host.com/video-or-embed-link"></label>
             <label>Download URL override (optional — Vimeo API auto-fetches)<input id="lessonDownload" type="url" placeholder="https://.../lesson.mp4"></label>
             <label>Thumbnail URL (optional)<input id="lessonThumbnail" type="url" placeholder="https://.../thumbnail.jpg"></label>
@@ -301,7 +300,7 @@
           <div class="admin-toolbar"><div><h2>PDF Notes Publishing Studio</h2><p>Upload official PDF learning materials. Students can view published notes only.</p></div></div>
           <form id="noteForm" class="admin-form" enctype="multipart/form-data">
             <div class="form-row"><label>Note type<select id="noteType" required><option value="video">Video Notes</option><option value="competency">Competency Based Notes</option></select></label><label>Grade<select id="noteGrade" required><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></label></div>
-            <div class="form-row"><label>Subject<select id="noteSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>Computer Science</option><option>SAT</option></select></label><label>Unit<input id="noteUnit" required maxlength="60" placeholder="e.g. Unit 1"></label></div>
+            <div class="form-row"><label>Subject<select id="noteSubject" required><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Geography</option><option>History</option><option>Economics</option><option>SAT</option></select></label><label>Unit<input id="noteUnit" required maxlength="60" placeholder="e.g. Unit 1"></label></div>
             <label>PDF title<input id="noteTitle" required maxlength="120" placeholder="e.g. Physical Quantities and Measurement"></label>
             <label>Related Vimeo video URL (optional)<input id="noteVideoUrl" type="url" placeholder="https://.../video-or-embed-link"></label>
             <label class="pdf-file-label">PDF file<input id="notePdfFile" type="file" accept="application/pdf,.pdf" required><small>PDF only · maximum 100 MB</small></label>
