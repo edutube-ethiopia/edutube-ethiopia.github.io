@@ -416,3 +416,6 @@ button:not(:disabled):hover{filter:brightness(1.06)}
 .notes-search-results{display:grid;gap:10px;margin:8px 0 18px}.notes-search-results.hidden{display:none}
 .empty-state{animation:zsFadeUp .25s ease both}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Fully hide removed Student account and Leaderboard menu items */
+.sidebar [data-page="accounts"], .mobile-nav [data-page="accounts"], [data-page="leaderboard"] { display: none !important; }
