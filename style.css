@@ -403,3 +403,16 @@ body:not(.scroll-locked) {
 @media(max-width:600px){.exam-wizard-breadcrumb{gap:.35rem}.exam-wizard-breadcrumb button{padding:.45rem .65rem;font-size:.8rem}.exam-wizard{padding:1rem}.exam-wizard-card{min-height:88px}}
 
 .exam-filters[hidden]{display:none!important}
+
+/* Subtle, student-friendly motion system */
+html{scroll-behavior:smooth}
+@keyframes zsFadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.page:not(.hidden),.hp section,.page-heading,.notes-card,.video-card,.hp-feat,.notes-grid,.video-grid{animation:zsFadeUp .42s cubic-bezier(.2,.7,.2,1) both}
+.notes-card,.video-card,.hp-feat,.small-button,button{transition:transform .18s ease,box-shadow .2s ease,background-color .2s ease,border-color .2s ease,filter .2s ease}
+.notes-card:hover,.video-card:hover,.hp-feat:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.22)}
+button:not(:disabled):hover{filter:brightness(1.06)}
+.notes-search{width:100%;margin:12px 0;padding:13px 15px;border-radius:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);outline:none}
+.notes-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.notes-search-results{display:grid;gap:10px;margin:8px 0 18px}.notes-search-results.hidden{display:none}
+.empty-state{animation:zsFadeUp .25s ease both}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
