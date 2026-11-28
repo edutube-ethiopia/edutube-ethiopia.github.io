@@ -175,7 +175,7 @@ function renderVideos(){
  list.forEach(v=>grid.append(videoCard(v)));
  const empty=$("videoEmpty");empty.classList.toggle("hidden",list.length>0);
  if(!list.length){
-  empty.textContent=(!query&&subject!=="all"&&!categoryList.length)?"Not Available Now — Coming Soon":"No lessons found. Try another search or filter.";
+  empty.textContent=(subject!=="all"&&!categoryList.length)?"Coming Soon 🚀 — We are preparing lessons for this subject.":"No matching lessons found. Try a different keyword or filter.";
  }
 }
 function renderFavorites(){const grid=$("favoriteGrid");grid.replaceChildren();const list=videos.filter(v=>favorites.includes(v.id));list.forEach(v=>grid.append(videoCard(v)));$("favoriteEmpty").classList.toggle("hidden",list.length>0)}
@@ -869,7 +869,7 @@ document.addEventListener("DOMContentLoaded", () => {
   "use strict";
   const BUCKET = "edutube-notes";
   const MAX_PDF_BYTES = 100 * 1024 * 1024;
-  const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Biology", "English", "Geography", "History", "Economics", "Computer Science", "SAT"];
+  const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Biology", "English", "Geography", "History", "Economics", "SAT"];
   const GRADES = ["9", "10", "11", "12"];
   let notes = [];
   const state = { type: null, grade: null, subject: null, unit: null, note: null };
@@ -897,9 +897,9 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if(!state.type){root.append(h("h2","notes-step-title","Choose note collection"));const g=h("div","notes-grid wide");[["video","Video Notes","Notes linked to video lessons"],["competency","Competency Based Notes","Curriculum-aligned competency notes"]].forEach(([v,a,b])=>g.append(makeCard(a,b,()=>{state.type=v;render();})));root.append(g);
     } else if(!state.grade){root.append(h("h2","notes-step-title","Choose grade"));const g=h("div","notes-grid");GRADES.forEach(v=>g.append(makeCard("Grade "+v,"",()=>{state.grade=v;render();})));root.append(g);
     } else if(!state.subject){root.append(h("h2","notes-step-title","Choose subject"));const g=h("div","notes-grid");SUBJECTS.forEach(v=>{const count=new Set(notes.filter(n=>n.note_type===state.type&&String(n.grade)===state.grade&&n.subject===v).map(n=>n.unit)).size;g.append(makeCard(v,count+" unit(s)",()=>{state.subject=v;render();}));});root.append(g);
-    } else if(!state.unit){root.append(h("h2","notes-step-title","Choose unit"));const units=[...new Set(filtered().map(n=>n.unit))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));if(!units.length)root.append(h("div","empty-state","No published PDF notes are available in this section yet."));const g=h("div","notes-grid");units.forEach(v=>g.append(makeCard(v,"",()=>{state.unit=v;render();})));root.append(g);
+    } else if(!state.unit){root.append(h("h2","notes-step-title","Choose unit"));const units=[...new Set(filtered().map(n=>n.unit))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));if(!units.length)root.append(h("div","empty-state","Coming Soon 🚀 — We are preparing PDF notes for this subject."));const g=h("div","notes-grid");units.forEach(v=>g.append(makeCard(v,"",()=>{state.unit=v;render();})));root.append(g);
     } else {root.append(h("h2","notes-step-title","Available PDF notes"));const g=h("div","notes-grid wide");filtered().filter(n=>n.unit===state.unit).forEach(n=>{const w=h("div","zs-note-item");w.append(makeCard("▤  "+n.title,"PDF learning material",()=>{state.note=n;render();}));if(n.allow_download){const d=h("button","small-button zs-download","⬇ Download PDF");d.type="button";d.onclick=()=>downloadNote(n,d);w.append(d);}g.append(w);});root.append(g);}
-    if(state.type){const back=h("button","small-button notes-back","← Back");back.type="button";back.onclick=()=>{if(state.note)state.note=null;else if(state.unit)state.unit=null;else if(state.subject)state.subject=null;else if(state.grade)state.grade=null;else state.type=null;render();};root.append(back);}
+    if(state.type&&state.grade&&!state.note){const search=h("input","notes-search");search.type="search";search.placeholder="Search notes by title, subject or unit…";search.setAttribute("aria-label","Search notes");const results=h("div","notes-search-results");search.addEventListener("input",()=>{const q=search.value.trim().toLowerCase();results.replaceChildren();if(!q){results.classList.add("hidden");return;}results.classList.remove("hidden");const matches=notes.filter(n=>n.note_type===state.type&&String(n.grade)===state.grade&&`${n.title} ${n.subject} ${n.unit}`.toLowerCase().includes(q));if(!matches.length){results.append(h("div","empty-state","Coming Soon 🚀 — We could not find notes for this search yet."));return;}matches.forEach(n=>{const b=makeCard(n.title,`${n.subject} · ${n.unit}`,()=>{state.subject=n.subject;state.unit=n.unit;state.note=n;render();});results.append(b);});});root.append(search,results);}if(state.type){const back=h("button","small-button notes-back","← Back");back.type="button";back.onclick=()=>{if(state.note)state.note=null;else if(state.unit)state.unit=null;else if(state.subject)state.subject=null;else if(state.grade)state.grade=null;else state.type=null;render();};root.append(back);}
   }
   async function downloadNote(note,btn){
     const c=client();if(!c){alert("Download service is not configured.");return;}
